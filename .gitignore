@@ -1,0 +1,18 @@
+imag*/
+
+
+# Editors
+__pycache__/
+.vscode
+.pylintrc
+.spyderproject
+.spyproject
+
+# Environments
+.env
+.venv
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
