@@ -50,16 +50,18 @@ class HOGDescriptor:
 
         if visualize:
             self.fd, self.hog_image = hog(image, orientations=self.orientations,
-                                            pixels_per_cell=self.pixels_per_cell,
-                                            cells_per_block=self.cells_per_block,
-                                            visualize=visualize,
-                                            block_norm=block_norm,
-                                            feature_vector=feature_vector, channel_axis=channel_axis)
+                                          pixels_per_cell=self.pixels_per_cell,
+                                          cells_per_block=self.cells_per_block,
+                                          visualize=visualize,
+                                          block_norm=block_norm,
+                                          feature_vector=feature_vector,
+                                          channel_axis=channel_axis)
         else:
-            self.fd  = hog(image, orientations=self.orientations, pixels_per_cell=self.pixels_per_cell,
-                        cells_per_block=self.cells_per_block, visualize=False,\
-                        block_norm=block_norm, feature_vector=feature_vector,
-                        channel_axis=channel_axis)
+            self.fd  = hog(image, orientations=self.orientations,
+                           pixels_per_cell=self.pixels_per_cell,
+                           cells_per_block=self.cells_per_block, visualize=False,
+                           block_norm=block_norm, feature_vector=feature_vector,
+                           channel_axis=channel_axis)
             self.hog_image = None
 
         # return fd, hog_image
@@ -159,14 +161,13 @@ def correction_of_round_angles(fd_data):
         return fd_data
 
 
-
-def cell_signal_strengths(fd_data):
+def cell_signal_strengths(fd_data, norm_ord=1):
 
     strengths = np.zeros_like(fd_data[:,:,0]) # ignore last axis (n_orientations)
 
     for i in range(fd_data.shape[0]):
         for j in range(fd_data.shape[1]):
-            strengths[i,j] = np.linalg.norm(fd_data[i,j])
+            strengths[i,j] = np.linalg.norm(fd_data[i,j], ord=norm_ord)
 
     return strengths
 
