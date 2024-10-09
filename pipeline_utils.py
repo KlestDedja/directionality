@@ -149,16 +149,26 @@ def average_directions_over_cells(fd, orientations, N=None, M=None, fd_data_as_a
 
 
 
-def correction_of_round_angles(fd_data):
-        fd_data[0] = 0.5*(fd_data[1] + fd_data[-1]) #correction at 0*
-        # # correction at 90 degrees:
-        fd_data[round(len(fd_data)/2)] = 0.5*(fd_data[round(len(fd_data)/2)+1] +\
-                                                          fd_data[round(len(fd_data)/2)-1])
-        # # correction at 45* degrees:
-        # fd_data[round(len(fd_data)/4)] = 0.5*(fd_data[round(len(fd_data)/4)+1] +\
-        #                                                   fd_data[round(len(fd_data)/4)-1])
+def correction_of_round_angles(orientations_180_deg, histog_data, corr90=True, corr45=False):
 
-        return fd_data
+        # correction at 0*: normally speaking the index should be always = 0 but
+        # we compute the argmin here just in case there were previous manipulations
+        index_0 = np.argmin(np.abs(orientations_180_deg))
+        histog_data[index_0] = 0.5*(histog_data[index_0+1] + histog_data[index_0-1])
+
+        if corr90:         # make correction at 90 degrees:
+            index_90 = np.argmin(np.abs(orientations_180_deg-90))
+            # smooth with neighbours
+            histog_data[index_90] = 0.5*(histog_data[index_90+1] + histog_data[index_90-1])
+        # # correction at 45 and 135 degrees:
+        if corr45:
+            index_45 =  np.argmin(np.abs(orientations_180_deg-45 ))
+            index_135 = np.argmin(np.abs(orientations_180_deg-135))
+
+            histog_data[index_45 ] = 0.5*(histog_data[index_45 +1] + histog_data[index_45 -1])
+            histog_data[index_135] = 0.5*(histog_data[index_135+1] + histog_data[index_135-1])
+
+        return histog_data
 
 
 def cell_signal_strengths(fd_data, norm_ord=1):
@@ -186,8 +196,8 @@ def compute_average_direction(global_histogram, orientations_deg):
     y = np.sum(global_histogram * np.sin(bin_angles_rad))
 
     # Calculate the resultant vector's angle (avg direction) in range (-90, 90)
-    mean_angle_rad = np.arctan2(y, x)
-    mean_angle_deg = np.rad2deg(mean_angle_rad)
+    mean_angle_rad = np.arctan2(y, x) # output in [-pi, pi]
+    mean_angle_deg = np.rad2deg(mean_angle_rad) # now output in [-90, 90]
 
     # Adjust the mean angle to be within the range (0, 180)
     if mean_angle_deg < 0:
