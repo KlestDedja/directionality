@@ -1,6 +1,6 @@
 # all image data
 imag*/
-
+HOG_plot_analysis/*
 
 # Editors
 __pycache__/

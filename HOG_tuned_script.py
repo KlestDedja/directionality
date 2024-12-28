@@ -6,6 +6,8 @@ import pandas as pd
 import re
 import warnings
 from skimage import exposure  # , filters, feature
+import warnings
+from skimage import exposure  # , filters, feature
 import matplotlib
 
 # import opencv # STILL NOT WORKING DAMNNN
