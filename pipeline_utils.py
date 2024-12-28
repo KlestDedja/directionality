@@ -4,7 +4,6 @@ import numpy as np
 from skimage import io
 from skimage.color import rgb2gray
 from skimage import color
-
 from skimage.feature import hog
 
 
@@ -80,22 +79,6 @@ def reshape_hog_array(array, len_axis1):
     reshaped_array = array.reshape(new_shape)
     return reshaped_array
 
-# def polar_histogram(fd, ax, n_orientations=30, ytick_format="%.2g", y_lim=None):
-
-#     # Sum the histograms across all cells/blocks
-#     global_histogram = np.sum(fd, axis=0)
-
-#     bin_angles = np.linspace(0, 360, n_orientations, endpoint=False)
-#     bin_angles_rad = np.deg2rad(bin_angles)
-
-#     # Find the bin with the maximum value
-#     max_index = np.argmax(global_histogram)
-#     max_value = global_histogram[max_index]
-
-#     n_bins = len(global_histogram)
-#     # Generate bin angles
-#     bin_edges = np.linspace(0, 2 * np.pi, n_bins + 1)  # +1 to close the circle
-#     bin_centers = (bin_edges[:-1] + bin_edges[1:]) / 2  # Middle of each bin
 
 
 def plot_polar_histogram(ax, global_histogram, orientations_deg):
@@ -147,18 +130,113 @@ def average_directions_over_cells(fd, orientations, N=None, M=None, fd_data_as_a
         fd_data = np.array(vectors)
     return fd_data
 
+def correction_of_round_angles(histog_dict, corr90=True, corr45=False):
+    # let's build a helper function to smooth the histogram values at the given indices
+    def smooth_indices(histog_dict, keys_sorted, indices):
+        """
+        Smooth the histogram values at the given indices based on their neighbors.
+        At most two indices can be minimal. If there's only one index, just smooth that one.
+        If there are two indices, ensure they are either contiguous or wrap around the start/end.
+        """
+        n = len(keys_sorted)
+
+        if len(indices) == 1: # one argmin
+            i = indices[0]
+            left = (i - 1) % n
+            right = (i + 1) % n
+            histog_dict[keys_sorted[i]] = 0.5 * (histog_dict[keys_sorted[left]] + histog_dict[keys_sorted[right]])
+
+        elif len(indices) == 2: # more argmins (centered around 0)
+            i1, i2 = sorted(indices)
+            # Check if contiguous or wrap-around
+            if not ((i2 - i1 == 1) or (i1 == 0 and i2 == n - 1)):
+                raise ValueError("Tied minimal indices are not contiguous or wrap-around.")
+
+            # Smooth both indices
+            for i in indices:
+                left = (i - 1) % n # modulo n helps to wrap around
+                right = (i + 1) % n # modulo n helps to wrap around
+                histog_dict[keys_sorted[i]] = 0.5 * (histog_dict[keys_sorted[left]] + histog_dict[keys_sorted[right]])
+        else:
+            # Should not happen as we assume at most two minimal indices
+            raise ValueError(f"More than two ({len(indices)}) minimal indices found: {indices}.")
+
+    keys_sorted = np.array(sorted(histog_dict.keys()))
+
+    # Correction at 0 degrees
+    d_0 = np.abs(keys_sorted - 0)
+    indices_0 = np.where(d_0 == d_0.min())[0]
+    smooth_indices(histog_dict, keys_sorted, indices_0)
+
+    if corr90:
+        # Correction at 90 degrees
+        d_90 = np.abs(keys_sorted - 90)
+        indices_90 = np.where(d_90 == d_90.min())[0]
+        smooth_indices(histog_dict, keys_sorted, indices_90)
+
+    if corr45:
+        # Correction at 45 degrees
+        d_45 = np.abs(keys_sorted - 45)
+        indices_45 = np.where(d_45 == d_45.min())[0]
+        smooth_indices(histog_dict, keys_sorted, indices_45)
+
+        # Correction at 135 degrees
+        d_135 = np.abs(keys_sorted - 135)
+        indices_135 = np.where(d_135 == d_135.min())[0]
+        smooth_indices(histog_dict, keys_sorted, indices_135)
+
+    return histog_dict
 
 
-def correction_of_round_angles(fd_data):
-        fd_data[0] = 0.5*(fd_data[1] + fd_data[-1]) #correction at 0*
-        # # correction at 90 degrees:
-        fd_data[round(len(fd_data)/2)] = 0.5*(fd_data[round(len(fd_data)/2)+1] +\
-                                                          fd_data[round(len(fd_data)/2)-1])
-        # # correction at 45* degrees:
-        # fd_data[round(len(fd_data)/4)] = 0.5*(fd_data[round(len(fd_data)/4)+1] +\
-        #                                                   fd_data[round(len(fd_data)/4)-1])
+def correction_of_round_angles_old(histog_dict, corr90=True, corr45=False):
+    # Sort the keys (angles) for proper indexing (in case they are not sorted)
+    keys_sorted = np.array(sorted(histog_dict.keys()))
 
-        return fd_data
+    # correction at 0 degrees
+    index_0 = np.argmin(np.abs(keys_sorted))
+    histog_dict[keys_sorted[index_0]] = 0.5 * (
+        histog_dict[keys_sorted[index_0 - 1]] + histog_dict[keys_sorted[index_0 + 1]]
+    )
+
+    if corr90: # correction at 90 degrees (smoothing)
+        index_90 = np.argmin(np.abs(keys_sorted - 90))
+        histog_dict[keys_sorted[index_90]] = 0.5 * (
+            histog_dict[keys_sorted[index_90 - 1]] + histog_dict[keys_sorted[index_90 + 1]]
+        )
+
+    if corr45: # smoothing at 45 and 135 degrees
+        index_45 = np.argmin(np.abs(keys_sorted - 45))
+        index_135 = np.argmin(np.abs(keys_sorted - 135))
+
+        histog_dict[keys_sorted[index_45]] = 0.5 * (
+            histog_dict[keys_sorted[index_45 - 1]] + histog_dict[keys_sorted[index_45 + 1]]
+        )
+        histog_dict[keys_sorted[index_135]] = 0.5 * (
+            histog_dict[keys_sorted[index_135 - 1]] + histog_dict[keys_sorted[index_135 + 1]]
+        )
+
+    return histog_dict
+
+def correction_of_round_angles_older(orientations_180_deg, histog_data, corr90=True, corr45=False):
+
+        # correction at 0*: normally speaking the index should be always = 0 but
+        # we compute the argmin here just in case there were previous manipulations
+        index_0 = np.argmin(np.abs(orientations_180_deg))
+        histog_data[index_0] = 0.5*(histog_data[index_0+1] + histog_data[index_0-1])
+
+        if corr90:         # make correction at 90 degrees:
+            index_90 = np.argmin(np.abs(orientations_180_deg-90))
+            # smooth with neighbours
+            histog_data[index_90] = 0.5*(histog_data[index_90+1] + histog_data[index_90-1])
+        # # correction at 45 and 135 degrees:
+        if corr45:
+            index_45 =  np.argmin(np.abs(orientations_180_deg-45 ))
+            index_135 = np.argmin(np.abs(orientations_180_deg-135))
+
+            histog_data[index_45 ] = 0.5*(histog_data[index_45 +1] + histog_data[index_45 -1])
+            histog_data[index_135] = 0.5*(histog_data[index_135+1] + histog_data[index_135-1])
+
+        return histog_data
 
 
 def cell_signal_strengths(fd_data, norm_ord=1):
@@ -173,21 +251,25 @@ def cell_signal_strengths(fd_data, norm_ord=1):
 
 
 
-def compute_average_direction(global_histogram, orientations_deg):
+def compute_average_direction(global_histogram, orientations_deg): # can be improved now that we input dict!
 
-    if global_histogram.ndim > 2:
-        raise ValueError(f'Input should be 2D, got shape {global_histogram.shape} instead ')
+    if isinstance(global_histogram, dict):
+        global_hist_vals = np.array(list(global_histogram.values())) # retrocompatibility
+        orientations_deg = np.array(list(global_histogram.keys())) # retrocompatibility
+
+    if global_hist_vals.ndim > 2:
+        raise ValueError(f'Input should be 2D, got shape {global_hist_vals.shape} instead.')
 
 
     # Convert histogram values to vectors
     bin_angles_rad = np.deg2rad(orientations_deg)
 
-    x = np.sum(global_histogram * np.cos(bin_angles_rad))
-    y = np.sum(global_histogram * np.sin(bin_angles_rad))
+    x = np.sum(global_hist_vals * np.cos(bin_angles_rad))
+    y = np.sum(global_hist_vals * np.sin(bin_angles_rad))
 
     # Calculate the resultant vector's angle (avg direction) in range (-90, 90)
-    mean_angle_rad = np.arctan2(y, x)
-    mean_angle_deg = np.rad2deg(mean_angle_rad)
+    mean_angle_rad = np.arctan2(y, x) # output in [-pi, pi]
+    mean_angle_deg = np.rad2deg(mean_angle_rad) # now output in [-90, 90]
 
     # Adjust the mean angle to be within the range (0, 180)
     if mean_angle_deg < 0:
@@ -201,10 +283,10 @@ def compute_average_direction(global_histogram, orientations_deg):
 
     # Calculate the standard deviation (sqrt of the average squared residuals)
     # weighted by histogram height, and normalised.
-    std_dev_deg = np.sqrt(np.sum(global_histogram * angle_diffs**2) / np.sum(global_histogram))
+    std_dev_deg = np.sqrt(np.sum(global_hist_vals * angle_diffs**2) / np.sum(global_hist_vals))
 
     # Calculate average of absolute residuals)
     # weighted by histogram height, and normalised.
-    abs_dev_deg = np.sum(np.abs(global_histogram * angle_diffs) / np.sum(global_histogram))
+    abs_dev_deg = np.sum(np.abs(global_hist_vals * angle_diffs) / np.sum(global_hist_vals))
 
     return mean_angle_deg, std_dev_deg, abs_dev_deg
