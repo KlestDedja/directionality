@@ -4,7 +4,7 @@ import os
 import pandas as pd
 
 
-def get_folder_threshold(image_folder):
+def get_folder_threshold(image_folder) -> float:
 
     if "images-3D-lightsheet-20240928_BAM_fkt20_P3_fkt21_P3_PEMFS" in image_folder:
         threshold = 1.5  # approved
@@ -125,14 +125,16 @@ def set_sample_condition(filename, suppress_warnings=False, verbose=False):
 
     if condition == "Unknown":  # if still Unknown, raise a warning
         if suppress_warnings is False:
-            warnings.warn(f"Condition unknown. Double check filename:\n{filename}")
+            warnings.warn(f"Condition unknown. Double check file:\n{filename}")
 
     if verbose is True:
         print("condition:", condition)
     return condition
 
 
-def update_conditions_to_csv(input_csv, output_csv, suppress_warnings=False):
+def update_conditions_to_csv(
+    input_csv, output_csv, suppress_warnings=False, print_process=False
+):
     """
     Reads a CSV file, extracts conditions from the filenames in the first column,
     and adds a 'condition' column with the extracted conditions.
@@ -161,7 +163,8 @@ def update_conditions_to_csv(input_csv, output_csv, suppress_warnings=False):
 
     # Save the updated DataFrame to a new CSV file
     df.to_csv(os.path.join(io_dir, output_csv), index=False)
-    print(f"Conditions added and saved to {output_csv}")
+    if print_process is True:
+        print(f"Conditions added and saved to {output_csv}")
 
 
 def calculate_and_print_percentiles(

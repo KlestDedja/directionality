@@ -33,7 +33,7 @@ df_statistics = pd.DataFrame()
 
 # block_normalize = [None] # only possible normalization method (for now)
 block_norm = None
-DRAFT = True
+DRAFT = False
 # for block_norm in block_normalize:
 
 image_folder_case = []
@@ -55,17 +55,17 @@ for group in group_folders:
         group,
     )
 
-    image_folder = os.path.join(
-        root_folder,
-        "images-confocal-20241022-fusion-bMyoB-BAMS-TM-6w",
-        group,
-    )
+    # image_folder = os.path.join(
+    #     root_folder,
+    #     "images-confocal-20241022-fusion-bMyoB-BAMS-TM-6w",
+    #     group,
+    # )
 
-    image_folder = os.path.join(
-        root_folder,
-        "images-confocal-20241116-fusion-bMyoB-PEMFS-TM-12w",
-        group,
-    )
+    # image_folder = os.path.join(
+    #     root_folder,
+    #     "images-confocal-20241116-fusion-bMyoB-PEMFS-TM-12w",
+    #     group,
+    # )
 
     threshold = get_folder_threshold(image_folder)
     print(f"Using threshold={threshold}")
@@ -88,8 +88,10 @@ for group in group_folders:
 
     print("after filtering", image_file_list)
 
-    if DRAFT is True:
-        js = min(5, len(image_file_list) // 12)
+    if (
+        DRAFT is True
+    ):  # run ~12 images only (approx. uniformly spread over entire list of images)
+        js = min(2, len(image_file_list) // 12)
         image_file_list_run = image_file_list[::js][:12]  # reduce size for Draft
     else:
         image_file_list_run = image_file_list
@@ -373,13 +375,7 @@ for group in group_folders:
 # stacked_arrs = np.stack(df_statistics['signal_stats'].values)
 # print("Decile analysis:", np.mean(stacked_arrs, axis=0))
 
-filename = (
-    "HOG_stats_"
-    # + str(block_norm)
-    # + "_"
-    + str(hog_descriptor.pixels_per_cell[0])
-    + "pixels"
-)
+filename = "HOG_stats_" + str(hog_descriptor.pixels_per_cell[0]) + "pixels"
 
 pattern = r"-(\d{6,10})_"
 match = re.search(pattern, filename)
@@ -390,11 +386,11 @@ if match:
 if DRAFT is True:
     filename = filename + "_draft"
 
-# filename = filename + "_p2"
-
 df_statistics.to_csv(os.path.join(experiments_folder, filename + ".csv"))
 
-filename_in = "HOG_stats_None_64pixels"
+# fill in manually for post-processing, or use same value as filename... ?
+filename_in = filename
+# filename_in = "HOG_stats_64pixels"
 
 filename_out = filename_in
 
@@ -408,10 +404,10 @@ elif "confocal-20241022" in experiments_folder:
     filename_out += "-confocal-20241022"
 
 input_csv_path = os.path.join(experiments_folder, filename_in + ".csv")
-output_csv_path = os.path.join(experiments_folder, filename_out + "_v2.csv")
+output_csv_path = os.path.join(experiments_folder, filename_out + "_clean.csv")
 
 
-## TRY THIS FEATURE: DOES IT WORK?
+# post-processing: correct columns names
 from utils_other import update_conditions_to_csv
 
 update_conditions_to_csv(input_csv_path, output_csv_path, suppress_warnings=False)
