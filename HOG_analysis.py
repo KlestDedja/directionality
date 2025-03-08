@@ -26,7 +26,6 @@ from utils_other import (
     clean_filename,
 )
 
-
 root_folder = os.getcwd()
 
 DRAFT = False
@@ -57,8 +56,8 @@ class HOGAnalysis:
             self.root_folder,
             # "images-3D-lightsheet-20241115_BAM_fkt20-P3-fkt21-P3-PEMFS-12w",
             # "images-3D-lightsheet-20240928_BAM_fkt20_P3_fkt21_P3_PEMFS",
-            "images-confocal-20241022-fusion-bMyoB-BAMS-TM-6w",
-            # "images-confocal-20241116-fusion-bMyoB-PEMFS-TM-12w",
+            # "images-confocal-20241022-fusion-bMyoB-BAMS-TM-6w",
+            "images-confocal-20241116-fusion-bMyoB-PEMFS-TM-12w",
         )
         for group in self.group_folders:
             self.process_group(self.image_folder, group)
@@ -99,7 +98,7 @@ class HOGAnalysis:
             # If not in Draft mode, process all images
             for img_idx, image_file in enumerate(image_files):
 
-                if img_idx % 50 == 0:
+                if img_idx % 25 == 0:
                     print("Processing img n*", img_idx)
                 self.process_image(sub_group_folder, image_file, threshold)
 

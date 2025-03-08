@@ -95,7 +95,7 @@ def set_sample_condition(filename, suppress_warnings=False, verbose=False):
 
     condition = "Unknown"  # default case, this is kept if no condition is found
 
-    if "CTR" in filename or "CRT" in filename or "NO" in filename[:10]:
+    if "CTR" in filename.upper() or "CRT" in filename or "NO" in filename[:10]:
         condition = "CTR"
 
     if "14h_" in filename or "14hStim_" in filename or "140h_14h" in filename:
@@ -139,6 +139,7 @@ def set_sample_condition(filename, suppress_warnings=False, verbose=False):
         or "1.5m0.5m" in filename
         or "1_5 0_5" in filename
         or "1_5'0_5'" in filename
+        or "1_5_0_5_" in filename
     ):
         condition = "90s-30s"
 
