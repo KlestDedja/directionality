@@ -1,4 +1,5 @@
 import os
+from typing import Dict, Tuple
 import numpy as np
 from skimage import io
 from skimage.color import rgb2gray
@@ -6,7 +7,9 @@ from skimage import color
 from skimage.feature import hog
 
 
-def load_and_prepare_image(path, name, to_grayscale=False, channel=None):
+def load_and_prepare_image(
+    path, name, to_grayscale: bool = False, channel: int | None = None
+):
     """Load an image and proivde option to convert it to grayscale."""
     image = io.imread(os.path.join(path, name))
 
@@ -158,6 +161,29 @@ def average_directions_over_cells(
 
 def correction_of_round_angles(histog_dict, corr90=True, corr45=False):
     # let's build a helper function to smooth the histogram values at the given indices
+    transfer_fraction = 0.5
+
+    def transfer_delta(histog_dict, keys_sorted, min_idx, transfer_fraction=0.5):
+        """
+        Transfer a fraction of the excess value from the central index to its neighbors.
+        If the central value is higher than both its neighbors, compute a delta,
+        subtract it from the central value, and add half of it to each neighbor.
+        """
+        n = len(keys_sorted)
+        left = (min_idx - 1) % n
+        right = (min_idx + 1) % n
+        central_val = histog_dict[keys_sorted[min_idx]]
+        left_val = histog_dict[keys_sorted[left]]
+        right_val = histog_dict[keys_sorted[right]]
+        # neighbor_avg = (left_val + right_val) / 2.0
+        max_neighbor = max(left_val, right_val)
+
+        if central_val > max_neighbor:
+            delta = (central_val - max_neighbor) * transfer_fraction
+            histog_dict[keys_sorted[min_idx]] = central_val - delta
+            histog_dict[keys_sorted[left]] = left_val + delta / 2.0
+            histog_dict[keys_sorted[right]] = right_val + delta / 2.0
+
     def smooth_indices(histog_dict, keys_sorted, indices):
         """
         Smooth the histogram values at the given indices based on their neighbors.
@@ -167,19 +193,15 @@ def correction_of_round_angles(histog_dict, corr90=True, corr45=False):
         n = len(keys_sorted)
 
         if len(indices) == 1:  # one argmin
-            i = indices[0]
-            left = (i - 1) % n
-            right = (i + 1) % n
-            histog_dict[keys_sorted[i]] = 0.5 * (
-                histog_dict[keys_sorted[left]] + histog_dict[keys_sorted[right]]
-            )
+            transfer_delta(histog_dict, keys_sorted, indices[0], transfer_fraction)
 
         elif len(indices) == 2:  # more argmins (centered around 0)
+            # transfer delta does't work well in this case. Keep the usual approach
             i1, i2 = sorted(indices)
             # Check if contiguous or wrap-around
             if not ((i2 - i1 == 1) or (i1 == 0 and i2 == n - 1)):
                 raise ValueError(
-                    "Tied minimal indices are not contiguous or wrap-around."
+                    "Tied minimal indices are not contiguous (not even in polar coordinates)."
                 )
 
             # Smooth both indices
@@ -283,7 +305,6 @@ def correction_of_round_angles_older(
         )
 
     return histog_data
-    return histog_data
 
 
 def cell_signal_strengths(fd_data, norm_ord=1):
@@ -297,24 +318,9 @@ def cell_signal_strengths(fd_data, norm_ord=1):
     return strengths
 
 
-def compute_average_direction(
-    global_histogram, orientations_deg
-):  # can be improved now that we input dict!
-
-    if isinstance(global_histogram, dict):
-        global_hist_vals = np.array(
-            list(global_histogram.values())
-        )  # retrocompatibility
-        orientations_deg = np.array(list(global_histogram.keys()))  # retrocompatibility
-
-    if global_hist_vals.ndim > 2:
-        raise ValueError(
-            f"Input should be 2D, got shape {global_hist_vals.shape} instead."
-        )
-
-    # Convert histogram values to vectors
+def compute_vector_mean(global_hist_vals, orientations_deg):
+    """Compute the mean direction using vector summation."""
     bin_angles_rad = np.deg2rad(orientations_deg)
-
     x = np.sum(global_hist_vals * np.cos(bin_angles_rad))
     y = np.sum(global_hist_vals * np.sin(bin_angles_rad))
 
@@ -325,23 +331,127 @@ def compute_average_direction(
     # Adjust the mean angle to be within the range (0, 180)
     if mean_angle_deg < 0:
         mean_angle_deg += 180
-        mean_angle_rad += np.pi
 
+    return mean_angle_deg
+
+
+def compute_deviations(global_hist_vals, orientations_deg, reference_angle_deg):
+    """Compute standard deviation and absolute deviation w.r.t. a reference angle."""
     # Calculate angle residuals (in degs)
-    # take minimum abolute difference between diff angle and its complementary angle
-    angle_diffs = np.abs(orientations_deg - mean_angle_deg)
+    angle_diffs = np.abs(orientations_deg - reference_angle_deg)
     angle_diffs = np.abs(np.minimum(angle_diffs, 90 - angle_diffs))
 
     # Calculate the standard deviation (sqrt of the average squared residuals)
-    # weighted by histogram height, and normalised.
     std_dev_deg = np.sqrt(
         np.sum(global_hist_vals * angle_diffs**2) / np.sum(global_hist_vals)
     )
 
-    # Calculate average of absolute residuals)
-    # weighted by histogram height, and normalised.
+    # Calculate average of absolute residuals
     abs_dev_deg = np.sum(
         np.abs(global_hist_vals * angle_diffs) / np.sum(global_hist_vals)
     )
 
-    return mean_angle_deg, std_dev_deg, abs_dev_deg
+    return std_dev_deg, abs_dev_deg
+
+
+def compute_distribution_direction(
+    global_histogram: Dict | np.ndarray,
+    orientations_deg: (
+        np.ndarray | None
+    ) = None,  # consider @overload for typing (2 cases)
+) -> Tuple[Dict, Dict]:
+    """Compute mean, mode, and deviations (w.r.t. mean and mode)."""
+
+    # Handle retro-compatibility and convert dict input to numpy arrays
+    if isinstance(global_histogram, dict):
+        global_hist_vals = np.array(list(global_histogram.values()))
+        orientations_deg = np.array(list(global_histogram.keys()))
+    else:
+        global_hist_vals = global_histogram  # Assume already in numpy array form
+
+    if global_hist_vals.ndim > 2:
+        raise ValueError(
+            f"Input should be 2D, got shape {global_hist_vals.shape} instead."
+        )
+
+    # Compute mean direction and deviations
+    mean_angle_deg = compute_vector_mean(global_hist_vals, orientations_deg)
+    std_dev_mean, abs_dev_mean = compute_deviations(
+        global_hist_vals, orientations_deg, mean_angle_deg
+    )
+
+    # Grouped dictionary for mean-related metrics
+    mean_stats = {
+        "angle": mean_angle_deg,
+        "std_dev": std_dev_mean,
+        "abs_dev": abs_dev_mean,
+    }
+
+    # Compute mode direction and deviations
+    main_dir_idx = np.argmax(global_hist_vals)
+    mode_angle_deg = orientations_deg[main_dir_idx]
+    std_dev_mode, abs_dev_mode = compute_deviations(
+        global_hist_vals, orientations_deg, mode_angle_deg
+    )
+
+    # Grouped dictionary for mode-related metrics
+    mode_stats = {
+        "angle": mode_angle_deg,
+        "std_dev": std_dev_mode,
+        "abs_dev": abs_dev_mode,
+    }
+
+    return mean_stats, mode_stats
+
+
+# def compute_distribution_direction(
+#     global_histogram, orientations_deg
+# ):  # can be improved now that we input dict!
+
+#     if isinstance(global_histogram, dict):
+#         global_hist_vals = np.array(
+#             list(global_histogram.values())
+#         )  # retrocompatibility
+#         orientations_deg = np.array(list(global_histogram.keys()))  # retrocompatibility
+
+#     if global_hist_vals.ndim > 2:
+#         raise ValueError(
+#             f"Input should be 2D, got shape {global_hist_vals.shape} instead."
+#         )
+
+#     # Convert histogram values to vectors
+#     bin_angles_rad = np.deg2rad(orientations_deg)
+
+#     x = np.sum(global_hist_vals * np.cos(bin_angles_rad))
+#     y = np.sum(global_hist_vals * np.sin(bin_angles_rad))
+
+#     # Calculate the resultant vector's angle (avg direction) in range (-90, 90)
+#     mean_angle_rad = np.arctan2(y, x)  # output in [-pi, pi]
+#     mean_angle_deg = np.rad2deg(mean_angle_rad)  # now output in [-90, 90]
+#     # Compuite `main` direction in the sense of most frequent one (mode)
+#     main_dir_idx = np.argmax(global_hist_vals)
+#     mode_angle_deg = orientations_deg[main_dir_idx]
+
+#     # Adjust the mean angle to be within the range (0, 180)
+#     if mean_angle_deg < 0:
+#         mean_angle_deg += 180
+#         mean_angle_rad += np.pi
+
+#     # Calculate angle residuals (in degs)
+#     # take minimum abolute difference between diff angle and its complementary angle
+#     angle_diffs = np.abs(orientations_deg - mean_angle_deg)
+#     angle_diffs = np.abs(np.minimum(angle_diffs, 90 - angle_diffs))
+
+#     # Calculate the standard deviation (sqrt of the average squared residuals)
+#     # weighted by histogram height, and normalised.
+#     std_dev_deg = np.sqrt(
+#         np.sum(global_hist_vals * angle_diffs**2) / np.sum(global_hist_vals)
+#     )
+
+#     # Calculate average of absolute residuals)
+#     # weighted by histogram height, and normalised.
+#     abs_dev_deg = np.sum(
+#         np.abs(global_hist_vals * angle_diffs) / np.sum(global_hist_vals)
+#     )
+
+#     return mean_angle_deg, mode_angle_deg, std_dev_deg, abs_dev_deg

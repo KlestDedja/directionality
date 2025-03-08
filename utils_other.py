@@ -2,6 +2,18 @@ import numpy as np
 import warnings
 import os
 import pandas as pd
+import re
+
+
+def clean_filename(filename):
+    """Shorten the filename by removing initial date"""
+    pattern = r"(\d{6,10}) "  # match for 6-10 consecutive digits followed by a space,
+    match = re.search(pattern, filename[:12])  # search only among the first 12 chars
+    if match:
+        filename = filename.replace(match.group(0), "")
+
+    filename = filename.replace(" ", "_")
+    return filename
 
 
 def get_folder_threshold(image_folder) -> float:
@@ -11,14 +23,14 @@ def get_folder_threshold(image_folder) -> float:
     if "images-3D-lighsheet-20241115_BAM_fkt20-P3-fkt21-P3-PEMFS-12w" in image_folder:
         threshold = 4  # seems goood. Directionality is very pronounced as the signal is mostly near the walls
 
-    elif "confocal-20241022-fusion" in image_folder:
-        threshold = 2  # probably doesnt work anyway
-    elif "confocal-20241116-fusion":
-        threshold = 2
+    # elif "confocal-20241022-fusion" in image_folder:
+    #     threshold = 2  # probably doesnt work anyway
+    # elif "confocal-20241116-fusion":
+    #     threshold = 2
     elif "20241116-fusion-bMyoB-PEMFS-TM-12w" in image_folder:
         threshold = 6  # Some images have no signal to show, but no worries: We drop them later in the pipeline.
-    elif "confocal-20241022-fusion-bMyoB" in image_folder:
-        threshold = 2  # doesn't really work anyway, contrast needs to be enhanced
+    elif "confocal-20241022-fusion-bMyoB-BAMS" in image_folder:
+        threshold = 6  # doesn't really work anyway, contrast needs to be enhanced
         warnings.warn(
             "As of now, the method does not work with this folder. Consider enhancing contrast."
         )
@@ -79,21 +91,28 @@ def set_sample_condition(filename, suppress_warnings=False, verbose=False):
     if verbose is True:
         print(str(filename))
 
+    filename = clean_filename(filename)
+
     condition = "Unknown"  # default case, this is kept if no condition is found
 
-    if "CTR" in filename or "CRT" in filename or "NO" in filename[:8]:
+    if "CTR" in filename or "CRT" in filename or "NO" in filename[:10]:
         condition = "CTR"
 
     if "14h_" in filename or "14hStim_" in filename or "140h_14h" in filename:
         condition = "14h"
 
-    if "2h_" in filename or "2hStim_" in filename or " 2h " in filename:
+    if (
+        "2h_" in filename
+        or "2hStim_" in filename
+        or " 2h " in filename
+        or "_2h " in filename
+    ):
         condition = "2h"
 
     if "10'_" in filename or "10'Stim_" in filename or "10m_" in filename:
         condition = "10m"
 
-    # use if instead of elif and go more and mpore specific to update the mathces in case
+    # use if instead of elif and go more and mpore specific to update the matches in case
 
     if (
         "10'-0.5'" in filename
@@ -134,7 +153,7 @@ def set_sample_condition(filename, suppress_warnings=False, verbose=False):
 
 def update_conditions_to_csv(
     input_csv, output_csv, suppress_warnings=False, print_process=False
-):
+) -> None:
     """
     Reads a CSV file, extracts conditions from the filenames in the first column,
     and adds a 'condition' column with the extracted conditions.
@@ -144,10 +163,7 @@ def update_conditions_to_csv(
         output_csv (str): Path where the output CSV with conditions will be saved.
         suppress_warnings (bool): If False, warnings are raised for unknown conditions.
     """
-    # Read the CSV file
     df = pd.read_csv(input_csv)
-
-    io_dir = os.path.dirname(input_csv)
 
     # Check if the DataFrame has at least one column
     if df.shape[1] < 1:
@@ -158,13 +174,29 @@ def update_conditions_to_csv(
 
     # Apply the set_sample_condition function to each filename
     df["condition"] = df[filename_column].apply(
-        lambda x: set_sample_condition(str(x), suppress_warnings, verbose=True)
+        lambda x: set_sample_condition(str(x), suppress_warnings, verbose=print_process)
     )
 
     # Save the updated DataFrame to a new CSV file
-    df.to_csv(os.path.join(io_dir, output_csv), index=False)
+    df.to_csv(output_csv, index=False)
     if print_process is True:
         print(f"Conditions added and saved to {output_csv}")
+
+
+def clean_csv_rows(input_csv, output_csv, missing_threshold=2) -> None:
+    """
+    Removes rows with more than 'missing_threshold' missing values,
+    Parameters:
+        input_csv (str): Path to the input Excel file.
+        output_csv (str): Path where the cleaned Excel file will be saved.
+        missing_threshold (int): Maximum allowed missing values per row.
+    """
+    df = pd.read_csv(input_csv)
+
+    # Keep only rows where the number of missing values is less than or equal to the threshold
+    df_clean = df[df.isnull().sum(axis=1) <= missing_threshold]
+
+    df_clean.to_csv(output_csv, index=False)
 
 
 def calculate_and_print_percentiles(
@@ -182,6 +214,14 @@ def calculate_and_print_percentiles(
         print(f"{p:3}th percentile: {format_str.format(v)}")
 
     return percentile_dict
+
+
+def print_top_values(my_dict, top_n=3):
+    # Sort dictionary by value descending
+    sorted_items = sorted(my_dict.items(), key=lambda x: x[1], reverse=True)
+    # Print the top_n pairs
+    for k, v in sorted_items[:top_n]:
+        print(f"{k}: {v:.4f}")
 
 
 if __name__ == "__main__":
