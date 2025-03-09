@@ -160,86 +160,86 @@ def average_directions_over_cells(
 
 
 def correction_of_round_angles(histog_dict, corr90=True, corr45=False):
-    # let's build a helper function to smooth the histogram values at the given indices
-    transfer_fraction = 0.5
-
-    def transfer_delta(histog_dict, keys_sorted, min_idx, transfer_fraction=0.5):
-        """
-        Transfer a fraction of the excess value from the central index to its neighbors.
-        If the central value is higher than both its neighbors, compute a delta,
-        subtract it from the central value, and add half of it to each neighbor.
-        """
-        n = len(keys_sorted)
-        left = (min_idx - 1) % n
-        right = (min_idx + 1) % n
-        central_val = histog_dict[keys_sorted[min_idx]]
-        left_val = histog_dict[keys_sorted[left]]
-        right_val = histog_dict[keys_sorted[right]]
-        # neighbor_avg = (left_val + right_val) / 2.0
-        max_neighbor = max(left_val, right_val)
-
-        if central_val > max_neighbor:
-            delta = (central_val - max_neighbor) * transfer_fraction
-            histog_dict[keys_sorted[min_idx]] = central_val - delta
-            histog_dict[keys_sorted[left]] = left_val + delta / 2.0
-            histog_dict[keys_sorted[right]] = right_val + delta / 2.0
-
-    def smooth_indices(histog_dict, keys_sorted, indices):
-        """
-        Smooth the histogram values at the given indices based on their neighbors.
-        At most two indices can be minimal. If there's only one index, just smooth that one.
-        If there are two indices, ensure they are either contiguous or wrap around the start/end.
-        """
-        n = len(keys_sorted)
-
-        if len(indices) == 1:  # one argmin
-            transfer_delta(histog_dict, keys_sorted, indices[0], transfer_fraction)
-
-        elif len(indices) == 2:  # more argmins (centered around 0)
-            # transfer delta does't work well in this case. Keep the usual approach
-            i1, i2 = sorted(indices)
-            # Check if contiguous or wrap-around
-            if not ((i2 - i1 == 1) or (i1 == 0 and i2 == n - 1)):
-                raise ValueError(
-                    "Tied minimal indices are not contiguous (not even in polar coordinates)."
-                )
-
-            # Smooth both indices
-            for i in indices:
-                left = (i - 1) % n  # modulo n helps to wrap around
-                right = (i + 1) % n  # modulo n helps to wrap around
-                histog_dict[keys_sorted[i]] = 0.5 * (
-                    histog_dict[keys_sorted[left]] + histog_dict[keys_sorted[right]]
-                )
-        else:
-            # Should not happen as we assume at most two minimal indices
-            raise ValueError(
-                f"More than two ({len(indices)}) minimal indices found: {indices}."
-            )
 
     keys_sorted = np.array(sorted(histog_dict.keys()))
+    n = len(keys_sorted)
+
+    # For a single minimal index: interpolate 5 indices (anchors set two indeces apart from minimal index)
+    def linear_interpolate_neighbors(histog_dict, keys_sorted, idx):
+        im2 = (idx - 2) % n
+        im1 = (idx - 1) % n
+        ip1 = (idx + 1) % n
+        ip2 = (idx + 2) % n
+
+        # Use the values at positions im2 and ip2 as anchors
+        a = histog_dict[keys_sorted[im2]]
+        b = histog_dict[keys_sorted[ip2]]
+        # Interpolate at positions -1, 0, +1 (using positions 1/4, 2/4, 3/4 between anchors)
+        new_im1 = a + (1 / 4) * (b - a)
+        new_i = a + (2 / 4) * (b - a)
+        new_ip1 = a + (3 / 4) * (b - a)
+
+        histog_dict[keys_sorted[im1]] = new_im1
+        histog_dict[keys_sorted[idx]] = new_i
+        histog_dict[keys_sorted[ip1]] = new_ip1
+
+    # For exactly two contiguous minimal indices: interpolate using 6 indices.
+    # Let L be the left minimal and R the right minimal (with R == (L+1) mod n).
+    # We define:
+    #   left_anchor1 = index at L-2, left_anchor2 = L-1,
+    #   right_anchor1 = index at R+1, right_anchor2 = R+2.
+    # Then we linearly interpolate the inner four positions (positions 1,2,3,4 in a 0–5 scale)
+    # between the anchors at positions 0 and 5.
+    def linear_interpolate_neighbors_double(histog_dict, keys_sorted, L, R):
+
+        assert R == (L + 1) % n
+
+        left_anchor1 = (L - 2) % n
+        left_anchor2 = (L - 1) % n
+        right_anchor1 = (R + 1) % n  # note: since R = L+1 (mod n)
+        right_anchor2 = (R + 2) % n
+
+        v0 = histog_dict[keys_sorted[left_anchor1]]
+        v5 = histog_dict[keys_sorted[right_anchor2]]
+
+        # Positions in a 0-to-5 scale; we update positions 1, 2, 3, 4.
+        new_val_1 = v0 + (1 / 5) * (v5 - v0)  # for left_anchor2 (position 1)
+        new_val_2 = v0 + (2 / 5) * (v5 - v0)  # for left minimal (position 2)
+        new_val_3 = v0 + (3 / 5) * (v5 - v0)  # for right minimal (position 3)
+        new_val_4 = v0 + (4 / 5) * (v5 - v0)  # for right_anchor1 (position 4)
+
+        histog_dict[keys_sorted[left_anchor2]] = new_val_1
+        histog_dict[keys_sorted[L]] = new_val_2
+        histog_dict[keys_sorted[R]] = new_val_3
+        histog_dict[keys_sorted[right_anchor1]] = new_val_4
+
+    # Process interpolation for a given target angle.
+    def process_interpolation(target_angle):
+        d_target = np.abs(keys_sorted - target_angle)
+        indices = np.where(d_target == d_target.min())[0]
+        if len(indices) > 2:
+            raise ValueError(
+                f"More than two minimal indices found for angle {target_angle}: {indices}."
+            )
+        elif len(indices) == 1:
+            linear_interpolate_neighbors(histog_dict, keys_sorted, indices[0])
+        elif len(indices) == 2:
+            i1, i2 = sorted(indices)
+            if not ((i2 - i1 == 1) or (i1 == 0 and i2 == n - 1)):
+                raise ValueError(
+                    f"Tied minimal indices for angle {target_angle} are not contiguous: {indices}."
+                )
+            linear_interpolate_neighbors_double(histog_dict, keys_sorted, i1, i2)
 
     # Correction at 0 degrees
-    d_0 = np.abs(keys_sorted - 0)
-    indices_0 = np.where(d_0 == d_0.min())[0]
-    smooth_indices(histog_dict, keys_sorted, indices_0)
+    process_interpolation(0)
 
     if corr90:
-        # Correction at 90 degrees
-        d_90 = np.abs(keys_sorted - 90)
-        indices_90 = np.where(d_90 == d_90.min())[0]
-        smooth_indices(histog_dict, keys_sorted, indices_90)
+        process_interpolation(90)
 
     if corr45:
-        # Correction at 45 degrees
-        d_45 = np.abs(keys_sorted - 45)
-        indices_45 = np.where(d_45 == d_45.min())[0]
-        smooth_indices(histog_dict, keys_sorted, indices_45)
-
-        # Correction at 135 degrees
-        d_135 = np.abs(keys_sorted - 135)
-        indices_135 = np.where(d_135 == d_135.min())[0]
-        smooth_indices(histog_dict, keys_sorted, indices_135)
+        process_interpolation(45)
+        process_interpolation(135)
 
     return histog_dict
 

@@ -54,7 +54,7 @@ def external_plot_hog_analysis(
     ax3.set_theta_zero_location("N")
     ax3.set_theta_direction(-1)
 
-    included_cells = cells_to_keep.reshape(strengths.shape)
+    # included_cells = cells_to_keep.reshape(strengths.shape)
     ax4.axis("off")
     heatmap = ax4.imshow(strengths, cmap="viridis", interpolation="nearest")
     cbar = fig.colorbar(heatmap, ax=ax4, shrink=0.6, pad=0.05, fraction=0.07)
@@ -95,106 +95,6 @@ def external_plot_hog_analysis(
                     )
 
     return plt
-
-
-# def plot_hog_analysis(
-#     image,
-#     hog_image,
-#     orientations_360_deg,
-#     gradient_hist,
-#     gradient_hist_360,
-#     cells_to_keep,
-#     strengths,
-#     n_pixels_cell,
-#     fd,
-#     img_idx,
-#     block_norm,
-#     image_filename,
-#     experiments_folder,
-# ):
-#     fig = plt.figure(figsize=(8, 10))
-#     ax1 = fig.add_subplot(2, 2, 1)
-#     ax2 = fig.add_subplot(2, 2, 2)
-#     ax3 = fig.add_subplot(2, 2, 3, projection="polar")
-#     ax4 = fig.add_subplot(2, 2, 4)
-
-#     ax1.axis("off")
-#     ax1.imshow(image)
-#     ax1.set_title("Original input image")
-
-#     ax2.axis("off")
-#     hog_image_rescaled = exposure.rescale_intensity(hog_image, in_range=(0, 1.7))
-#     ax2.imshow(hog_image_rescaled)
-#     ax2.set_title("Histogram of Oriented Gradients")
-
-#     ROTATE_FOR_GRADIENT = 0
-#     orientations_polar_deg = np.mod(orientations_360_deg + ROTATE_FOR_GRADIENT, 360)
-#     estim_ymax = np.array(list(gradient_hist.values())).max()
-
-#     bars = plot_polar_histogram(ax3, gradient_hist_360, orientations_polar_deg)
-#     ymax_lim = max(estim_ymax, 1e-3)
-#     ax3.set_yticks(np.linspace(0, ymax_lim, num=4))
-#     ax3.yaxis.set_major_formatter(FormatStrFormatter("%.1e"))
-#     ax3.yaxis.label.set_size(6)
-#     ax3.set_ylim(0, 1.1 * ymax_lim)
-#     ax3.set_title("Directionality plot")
-#     ax3.set_theta_zero_location("N")
-#     ax3.set_theta_direction(-1)
-
-#     included_cells = cells_to_keep.reshape(fd.shape[0], fd.shape[1])
-#     ax4.axis("off")
-#     im = ax4.imshow(included_cells)
-#     ax4.set_title("Visualisation of included blocks")
-#     heatmap = ax4.imshow(strengths, cmap="viridis", interpolation="nearest")
-#     cbar = fig.colorbar(heatmap, ax=ax4, shrink=0.6, pad=0.05, fraction=0.07)
-#     cbar.ax.tick_params(labelsize=8)
-#     ax4.set_title("Signal heatmap with mask in grey")
-
-#     rgb_color = (0.7, 0.7, 0.7)  # light gray
-#     cmap_gray = matplotlib.colors.ListedColormap([rgb_color])
-#     masked_im = ax4.imshow(
-#         np.ma.masked_where(cells_to_keep, strengths),
-#         cmap=cmap_gray,
-#         interpolation=None,
-#         alpha=1,
-#     )
-
-#     rows, cols = strengths.shape
-#     for i in range(rows):
-#         for j in range(cols):
-#             if not cells_to_keep[i, j]:
-#                 rect = Rectangle(
-#                     (j - 0.5, i - 0.5),
-#                     1,
-#                     1,
-#                     linewidth=0.2,
-#                     edgecolor="black",
-#                     facecolor="none",
-#                 )
-#                 ax4.add_patch(rect)
-#                 if i % 3 == 0 and j % 3 == 0 and n_pixels_cell[0] > 30:
-#                     ax4.text(
-#                         j,
-#                         i,
-#                         f"({i},{j})",
-#                         ha="center",
-#                         va="center",
-#                         fontsize=2,
-#                         color="black",
-#                     )
-
-#     plt.tight_layout()
-#     plt.suptitle(f"Image n*{img_idx}, block_norm: {block_norm}")
-#     plt.savefig(
-#         os.path.join(
-#             experiments_folder,
-#             "HOG_plot_analysis",
-#             image_filename + f"_{block_norm}_{n_pixels_cell[0]}.png",
-#         ),
-#         dpi=450,
-#     )
-#     return plt
-#     plt.close()
 
 
 def explanatory_plot_intro(image):

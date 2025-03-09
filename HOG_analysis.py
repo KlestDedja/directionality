@@ -3,7 +3,6 @@ import time
 import re
 import warnings
 import matplotlib.pyplot as plt
-from matplotlib.ticker import FormatStrFormatter
 
 import numpy as np
 import pandas as pd
@@ -30,13 +29,13 @@ root_folder = os.getcwd()
 
 DRAFT = False
 SHOW_PLOTS = False
-SAVE_PLOTS = False
+SAVE_PLOTS = True
 SAVE_STATS = True
 
 
 class HOGAnalysis:
     def __init__(
-        self, root_folder, group_folders=["ALL"], block_norm=None, draft=True
+        self, root_folder, group_folders=["ALL"], block_norm="L2-Hys", draft=True
     ):  # TODO: test block_norm = "L2-Hys" (change approach with threshold, as norm is always = 1)
         self.root_folder = root_folder
         self.group_folders = group_folders
@@ -110,20 +109,16 @@ class HOGAnalysis:
     def process_image(self, folder, filename, threshold: float):
         t1 = time.time()
         image = load_and_prepare_image(folder, filename, channel=1)
-        fd_raw, hog_image = self.hog_descriptor.compute_hog(
-            image, block_norm=self.block_norm, feature_vector=False
-        )
-        fd = np.squeeze(fd_raw)
-        strengths = (
-            cell_signal_strengths(fd, norm_ord=1)
-            if self.block_norm is None
-            else np.ones(fd.shape[:2])
-        )
-        fd_norm = (
-            fd / (1e-7 + strengths[:, :, np.newaxis]) if self.block_norm is None else fd
-        )
 
-        # Adjust threshold and check if computation should be skipped
+        #### Background processing: Compute HOG and signal strength
+        fd_raw_bg, hog_image_bg = self.hog_descriptor.compute_hog(
+            image, block_norm=None, feature_vector=False
+        )
+        fd_bg = np.squeeze(fd_raw_bg)
+        strengths = cell_signal_strengths(fd_bg, norm_ord=1)
+
+        # Given distribution of signal strenght, adjust threshold
+        # and check if computation should be skipped
         skip_computation, threshold, cells_to_keep = self.adjust_threshold(
             strengths, threshold, filename
         )
@@ -131,9 +126,14 @@ class HOGAnalysis:
             self.save_nan_stats(filename, image, threshold, t1)
             return
 
-        # Check signal coverage
-        self.check_signal_coverage(cells_to_keep, threshold)
+        #### Run normalized HOG on image
 
+        # self.check_signal_coverage(cells_to_keep, threshold)
+        fd_norm, hog_image = self.hog_descriptor.compute_hog(
+            image, block_norm=self.block_norm, feature_vector=False
+        )
+        fd_norm = np.squeeze(fd_norm)
+        # cells to keep has been computed with the raw HOG
         fd_norm[~cells_to_keep] = 0
         gradient_hist_180 = fd_norm[cells_to_keep].mean(axis=0)
         gradient_hist = dict(
@@ -144,7 +144,7 @@ class HOGAnalysis:
         )
 
         gradient_hist = correction_of_round_angles(
-            gradient_hist, corr90=True, corr45=True
+            gradient_hist, corr90=True, corr45=False
         )
         # print("Top values after smoothing:")
         # print(print_top_values(gradient_hist, n=3))
@@ -204,9 +204,9 @@ class HOGAnalysis:
                     warnings.warn(
                         f"Threshold became too low (< 1e-4) for image {filename}. Skipping computation."
                     )
-                    return True, threshold, cells_to_keep  # Skip computation
+                    return True, threshold, cells_to_keep  # Skip computation = True
 
-            return False, threshold, cells_to_keep
+            return False, threshold, cells_to_keep  # Skip computation = False
 
         if cells_to_keep.mean() >= 0.95:
             while cells_to_keep.mean() >= 0.95:
@@ -220,9 +220,9 @@ class HOGAnalysis:
                     warnings.warn(
                         f"Threshold became too high (> 1e2) for image {filename}. Skipping computation."
                     )
-                    return True, threshold, cells_to_keep  # Skip computation
+                    return True, threshold, cells_to_keep  # Skip computation = True
         # else: is the normal case where the threshold is good enough
-        return False, threshold, cells_to_keep
+        return False, threshold, cells_to_keep  # Skip computation = False
 
     def save_nan_stats(self, filename, image, threshold, t1):
         """Save NaN values for image statistics when computation is skipped."""
@@ -382,5 +382,5 @@ class HOGAnalysis:
 
 if __name__ == "__main__":
     root_folder = os.getcwd()
-    hog_analysis = HOGAnalysis(root_folder, draft=DRAFT)
+    hog_analysis = HOGAnalysis(root_folder, draft=DRAFT, block_norm="L2-Hys")
     hog_analysis.process_and_save()

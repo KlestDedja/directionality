@@ -90,7 +90,7 @@ def set_sample_condition(filename, suppress_warnings=False, verbose=False):
     """
     if verbose is True:
         print(str(filename))
-
+    # remove initial date and replace spaces with underscores
     filename = clean_filename(filename)
 
     condition = "Unknown"  # default case, this is kept if no condition is found
@@ -101,12 +101,7 @@ def set_sample_condition(filename, suppress_warnings=False, verbose=False):
     if "14h_" in filename or "14hStim_" in filename or "140h_14h" in filename:
         condition = "14h"
 
-    if (
-        "2h_" in filename
-        or "2hStim_" in filename
-        or " 2h " in filename
-        or "_2h " in filename
-    ):
+    if "2h_" in filename or "2hStim_" in filename or "_2h_" in filename:
         condition = "2h"
 
     if "10'_" in filename or "10'Stim_" in filename or "10m_" in filename:
@@ -133,11 +128,10 @@ def set_sample_condition(filename, suppress_warnings=False, verbose=False):
 
     if (
         "1.5'-0.5'" in filename
-        or "1.5 " in filename
+        or "1.5_" in filename
         or "1,5'0.5'" in filename
         or "1'30''Stim-30''Break" in filename
         or "1.5m0.5m" in filename
-        or "1_5 0_5" in filename
         or "1_5'0_5'" in filename
         or "1_5_0_5_" in filename
     ):
