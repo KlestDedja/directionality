@@ -29,7 +29,7 @@ root_folder = os.getcwd()
 
 DRAFT = False
 SHOW_PLOTS = False
-SAVE_PLOTS = True
+SAVE_PLOTS = False
 SAVE_STATS = True
 
 
@@ -55,8 +55,8 @@ class HOGAnalysis:
             self.root_folder,
             # "images-3D-lightsheet-20241115_BAM_fkt20-P3-fkt21-P3-PEMFS-12w",
             # "images-3D-lightsheet-20240928_BAM_fkt20_P3_fkt21_P3_PEMFS",
-            # "images-confocal-20241022-fusion-bMyoB-BAMS-TM-6w",
-            "images-confocal-20241116-fusion-bMyoB-PEMFS-TM-12w",
+            "images-confocal-20241022-fusion-bMyoB-BAMS-TM-6w",
+            # "images-confocal-20241116-fusion-bMyoB-PEMFS-TM-12w",
         )
         for group in self.group_folders:
             self.process_group(self.image_folder, group)
@@ -143,11 +143,13 @@ class HOGAnalysis:
             )  # bin centered around 0, etc.. ok?
         )
 
+        correct_45deg = False if "20240928" in folder else True
+        # correct_45deg = True
         gradient_hist = correction_of_round_angles(
-            gradient_hist, corr90=True, corr45=False
+            gradient_hist, corr90=True, corr45=correct_45deg
         )
         # print("Top values after smoothing:")
-        # print(print_top_values(gradient_hist, n=3))
+        # print(print_top_values(gradient_hist, top_n=3))
 
         # Compute distribution directions and grouped statistics
         mean_stats, mode_stats = compute_distribution_direction(
@@ -200,7 +202,7 @@ class HOGAnalysis:
                     f"No signal found in image {filename}. Decreasing threshold to {threshold:.2f}"
                 )
                 cells_to_keep = strengths > threshold
-                if threshold < 1e-4:
+                if threshold < 0.05:
                     warnings.warn(
                         f"Threshold became too low (< 1e-4) for image {filename}. Skipping computation."
                     )
@@ -216,7 +218,7 @@ class HOGAnalysis:
                     f"No background found in image {filename}. Increasing threshold to {threshold:.2f}"
                 )
                 cells_to_keep = strengths > threshold
-                if threshold > 1e2:
+                if threshold > 50:
                     warnings.warn(
                         f"Threshold became too high (> 1e2) for image {filename}. Skipping computation."
                     )

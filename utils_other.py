@@ -7,7 +7,7 @@ import re
 
 def clean_filename(filename):
     """Shorten the filename by removing initial date"""
-    pattern = r"(\d{6,10}) "  # match for 6-10 consecutive digits followed by a space,
+    pattern = r"(\d{6,10} {1,2})"  # match for 6-10 consecutive digits followed by one or two spaces
     match = re.search(pattern, filename[:12])  # search only among the first 12 chars
     if match:
         filename = filename.replace(match.group(0), "")

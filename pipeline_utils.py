@@ -231,7 +231,7 @@ def correction_of_round_angles(histog_dict, corr90=True, corr45=False):
                 )
             linear_interpolate_neighbors_double(histog_dict, keys_sorted, i1, i2)
 
-    # Correction at 0 degrees
+    # Correction at 0 degrees (always needed)
     process_interpolation(0)
 
     if corr90:
@@ -337,18 +337,29 @@ def compute_vector_mean(global_hist_vals, orientations_deg):
 
 def compute_deviations(global_hist_vals, orientations_deg, reference_angle_deg):
     """Compute standard deviation and absolute deviation w.r.t. a reference angle."""
-    # Calculate angle residuals (in degs)
+    # Calculate angle residuals (in degs). Remember we are only using the angles 0-180 (right side of the polar plot)
     angle_diffs = np.abs(orientations_deg - reference_angle_deg)
-    angle_diffs = np.abs(np.minimum(angle_diffs, 90 - angle_diffs))
+
+    # angle_diffs = np.abs(np.minimum(angle_diffs, 90 - angle_diffs))
+    # angle_diffs_real = np.minimum(
+    #     np.abs(angle_diffs), np.abs(180 - angle_diffs), np.abs(360 - angle_diffs)
+    # )
+    angle_diffs_real = np.min(
+        np.stack(
+            [np.abs(angle_diffs), np.abs(180 - angle_diffs), np.abs(360 - angle_diffs)]
+        ),
+        axis=0,
+    )
+    assert np.all(angle_diffs_real <= 90), "Not all values are less than or equal to 90"
 
     # Calculate the standard deviation (sqrt of the average squared residuals)
     std_dev_deg = np.sqrt(
-        np.sum(global_hist_vals * angle_diffs**2) / np.sum(global_hist_vals)
+        np.sum(global_hist_vals * angle_diffs_real**2) / np.sum(global_hist_vals)
     )
 
     # Calculate average of absolute residuals
     abs_dev_deg = np.sum(
-        np.abs(global_hist_vals * angle_diffs) / np.sum(global_hist_vals)
+        np.abs(global_hist_vals * angle_diffs_real) / np.sum(global_hist_vals)
     )
 
     return std_dev_deg, abs_dev_deg
@@ -402,56 +413,3 @@ def compute_distribution_direction(
     }
 
     return mean_stats, mode_stats
-
-
-# def compute_distribution_direction(
-#     global_histogram, orientations_deg
-# ):  # can be improved now that we input dict!
-
-#     if isinstance(global_histogram, dict):
-#         global_hist_vals = np.array(
-#             list(global_histogram.values())
-#         )  # retrocompatibility
-#         orientations_deg = np.array(list(global_histogram.keys()))  # retrocompatibility
-
-#     if global_hist_vals.ndim > 2:
-#         raise ValueError(
-#             f"Input should be 2D, got shape {global_hist_vals.shape} instead."
-#         )
-
-#     # Convert histogram values to vectors
-#     bin_angles_rad = np.deg2rad(orientations_deg)
-
-#     x = np.sum(global_hist_vals * np.cos(bin_angles_rad))
-#     y = np.sum(global_hist_vals * np.sin(bin_angles_rad))
-
-#     # Calculate the resultant vector's angle (avg direction) in range (-90, 90)
-#     mean_angle_rad = np.arctan2(y, x)  # output in [-pi, pi]
-#     mean_angle_deg = np.rad2deg(mean_angle_rad)  # now output in [-90, 90]
-#     # Compuite `main` direction in the sense of most frequent one (mode)
-#     main_dir_idx = np.argmax(global_hist_vals)
-#     mode_angle_deg = orientations_deg[main_dir_idx]
-
-#     # Adjust the mean angle to be within the range (0, 180)
-#     if mean_angle_deg < 0:
-#         mean_angle_deg += 180
-#         mean_angle_rad += np.pi
-
-#     # Calculate angle residuals (in degs)
-#     # take minimum abolute difference between diff angle and its complementary angle
-#     angle_diffs = np.abs(orientations_deg - mean_angle_deg)
-#     angle_diffs = np.abs(np.minimum(angle_diffs, 90 - angle_diffs))
-
-#     # Calculate the standard deviation (sqrt of the average squared residuals)
-#     # weighted by histogram height, and normalised.
-#     std_dev_deg = np.sqrt(
-#         np.sum(global_hist_vals * angle_diffs**2) / np.sum(global_hist_vals)
-#     )
-
-#     # Calculate average of absolute residuals)
-#     # weighted by histogram height, and normalised.
-#     abs_dev_deg = np.sum(
-#         np.abs(global_hist_vals * angle_diffs) / np.sum(global_hist_vals)
-#     )
-
-#     return mean_angle_deg, mode_angle_deg, std_dev_deg, abs_dev_deg
