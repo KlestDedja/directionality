@@ -8,6 +8,7 @@ __pycache__/
 .pylintrc
 .spyderproject
 .spyproject
+.idea
 
 # Environments
 .env

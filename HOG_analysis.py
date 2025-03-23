@@ -27,10 +27,11 @@ from utils_other import (
 
 root_folder = os.getcwd()
 
-DRAFT = False
+DRAFT = True
 SHOW_PLOTS = False
 SAVE_PLOTS = False
 SAVE_STATS = True
+CORRECT_ARTEFACTS = False
 
 
 class HOGAnalysis:
@@ -53,9 +54,9 @@ class HOGAnalysis:
     def process_and_save(self):
         self.image_folder = os.path.join(
             self.root_folder,
-            # "images-3D-lightsheet-20241115_BAM_fkt20-P3-fkt21-P3-PEMFS-12w",
-            # "images-3D-lightsheet-20240928_BAM_fkt20_P3_fkt21_P3_PEMFS",
-            "images-confocal-20241022-fusion-bMyoB-BAMS-TM-6w",
+            # "images-lightsheet-20241115_BAM_fkt20-P3-fkt21-P3-PEMFS-12w",
+            "images-lightsheet-20240928_BAM_fkt20_P3_fkt21_P3_PEMFS",
+            # "images-confocal-20241022-fusion-bMyoB-BAMS-TM-6w",
             # "images-confocal-20241116-fusion-bMyoB-PEMFS-TM-12w",
         )
         for group in self.group_folders:
@@ -142,14 +143,12 @@ class HOGAnalysis:
                 gradient_hist_180,
             )  # bin centered around 0, etc.. ok?
         )
-
-        correct_45deg = False if "20240928" in folder else True
-        # correct_45deg = True
-        gradient_hist = correction_of_round_angles(
-            gradient_hist, corr90=True, corr45=correct_45deg
-        )
-        # print("Top values after smoothing:")
-        # print(print_top_values(gradient_hist, top_n=3))
+        if CORRECT_ARTEFACTS:
+            correct_45deg = False if "20240928" in folder else True
+            # correct_45deg = True
+            gradient_hist = correction_of_round_angles(
+                gradient_hist, corr90=True, corr45=correct_45deg
+            )
 
         # Compute distribution directions and grouped statistics
         mean_stats, mode_stats = compute_distribution_direction(
@@ -368,10 +367,22 @@ class HOGAnalysis:
         # Create the directory if it doesn't exist
         output_dir = os.path.join(save_folder)
         os.makedirs(output_dir, exist_ok=True)
+        # add prefix with experiment type:
+        experiment_type = os.path.basename(os.path.normpath(self.image_folder))
+        experiment_type = experiment_type.replace("images-", "")
+        # Find a sequence of 8 to 10 digits and crop everything after it
+        match = re.search(r"(\d{7,10})", experiment_type)
+        if match:
+            experiment_type = experiment_type[: match.end()]
+
+        filename = f"{experiment_type}-{filename}"
+
+        if CORRECT_ARTEFACTS is False:
+            filename += "_no_correction"
 
         csv_path = os.path.join(output_dir, filename + ".csv")
         self.df_statistics.to_csv(csv_path)
-        csv_path_out = os.path.join(output_dir, filename + "_clean.csv")
+        csv_path_out = os.path.join(output_dir, filename + ".csv")
         verbose_condition = not self.draft
 
         update_conditions_to_csv(
