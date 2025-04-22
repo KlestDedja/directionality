@@ -17,7 +17,7 @@ from pipeline_utils import load_and_prepare_image
 from pipeline_utils import HOGDescriptor, plot_polar_histogram
 from pipeline_utils import average_directions_over_cells, compute_distribution_direction
 from pipeline_utils import correction_of_round_angles, cell_signal_strengths
-from plotting_utils import plot_hog_analysis
+from plotting_utils import external_plot_hog_analysis as plot_hog_analysis
 from utils_other import print_top_values
 from utils_other import calculate_and_print_percentiles, get_folder_threshold
 
@@ -25,7 +25,7 @@ root_folder = os.getcwd()
 print("current working directory:", root_folder)
 
 group_folders = ["CTR", "MS"]
-group_folders = ["ALL"]
+group_folders = ["ALL-old"]
 
 df_statistics = pd.DataFrame()
 
@@ -39,12 +39,12 @@ image_folder_case = []
 for group in group_folders:
 
     # image_folder = os.path.join(
-    #     root_folder, "images-3D-lightsheet-20240928_BAM_fkt20_P3_fkt21_P3_PEMFS", group
+    #     root_folder, "images-lightsheet-20240928_BAM_fkt20_P3_fkt21_P3_PEMFS", group
     # )
 
     image_folder = os.path.join(
         root_folder,
-        "images-3D-lightsheet-20241115_BAM_fkt20-P3-fkt21-P3-PEMFS-12w",
+        "images-lightsheet-20241115_BAM_fkt20-P3-fkt21-P3-PEMFS-12w",
         group,
     )
 

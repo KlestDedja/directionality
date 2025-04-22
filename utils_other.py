@@ -40,48 +40,6 @@ def get_folder_threshold(image_folder) -> float:
     return threshold
 
 
-# IF WE WANT IMAGES TO FORCELY GENERATE A SIGNAL, UNCOMMENT RUN THE FOLLOWING:
-# while True: # iterate until suitable threshold is found
-#     cells_to_keep = strengths > running_threshold
-#     subset = fd_norm[cells_to_keep]
-#     # if subset.size == 0: # If no elements match, halve the threshold and try again
-#     if cells_to_keep.mean() < 0.05: # less than 1% of the picture cells are kept
-#         running_threshold /= 2
-#         if running_threshold < 1e-6:
-#             raise ValueError("Threshold value became too low, unable to find non-empty slice.")
-#     else:
-#         gradient_hist_180 = subset.mean(axis=0)
-#         break
-
-# if "fluorescence-2D" in image_folder:
-#     threshold = 1.843 #for 2D images
-# elif "3D-lightsheet" in image_folder:
-#     threshold = 1 # for 3D images
-# elif "confocal-3D" in image_folder:
-#     threshold = 5 # for confocal 3D images
-# elif "test-params" in image_folder:
-#     threshold = 10 # for testing images
-# elif "20241115_BAM-fkt20" in image_folder:
-#     threshold = 5
-# # elif "lightsheet-20240928_BAM" in image_folder:
-# #     threshold = 1.5
-# elif "confocal-20241022-fusion" in image_folder:
-#     threshold = 2 # probably doesnt work anyway
-# elif "confocal-20241116-fusion":
-#     threshold = 2
-# elif "20241116-fusion-bMyoB-PEMFS-TM-12w" in image_folder:
-#     threshold = 1
-# elif "20241115_BAM_fkt20-P3-fkt21-P3-PEMFS-12w" in image_folder:
-#     threshold = 1
-# else:
-#     threshold = 3 # random value, in between
-
-# if "z057c1" in image_filename:
-#     plt.title("Kept cell, at the edge")
-#     plt.bar(orientations_180_deg, fd_norm[0, 10, :], width=3)
-#     plt.show()
-
-
 def set_sample_condition(filename, suppress_warnings=False, verbose=False):
     """
     Assuming the Image Fluorescence 2D images are given as an input, this function extracts the
@@ -176,6 +134,83 @@ def update_conditions_to_csv(
     df.to_csv(output_csv, index=False)
     if print_process is True:
         print(f"Conditions added and saved to {output_csv}")
+
+
+def set_sample_replicate(filename, suppress_warnings=False, verbose=False):
+    """
+    Assuming the Image Fluorescence 2D images are given as an input, this function extracts the
+    condition from the filename string. The checks are very manual due to inconsistent naming (different people)
+    output: condition (str)
+    """
+    if verbose is True:
+        print(str(filename))
+    # remove initial date and replace spaces with underscores
+    filename = clean_filename(filename)
+
+    replicate = "Unknown"  # default case, this is kept if no replicate is found
+
+    if "R1" in filename or "MS_1" in filename or "CTR_1" in filename:
+        replicate = "R1"
+
+    if "R2" in filename or "MS_2" in filename or "CTR_2" in filename:
+        replicate = "R2"
+
+    if "R3" in filename or "MS_3" in filename or "CTR_3" in filename:
+        replicate = "R3"
+
+    if replicate == "Unknown":
+        pattern = r"(\d)(?:_\d+)?(?=(?:_new-Image_Export|-Image_Export|-Image Export|_z\d{2,3}))"
+        # match a digit followed by optional underscore and digits, followed by specific patterns
+        m = re.search(pattern, filename)
+        if m:
+            replicate = m.group(1)
+
+    if replicate == "Unknown":  # if still Unknown, raise a warning
+        if suppress_warnings is False:
+            warnings.warn(f"Unknown replicate. Double check file:\n{filename}")
+
+    if verbose is True:
+        print("replicate:", replicate)
+    return replicate
+
+
+def update_replicates_to_csv(
+    input_csv, output_csv, suppress_warnings=False, print_process=False
+) -> None:
+    """
+    Reads a CSV file, extracts replicates from the filenames in the first column,
+    and adds a 'condition' column with the extracted replicates.
+
+    Parameters:
+        input_csv (str): Path to the input CSV file.
+        output_csv (str): Path where the output CSV with replicates will be saved.
+        suppress_warnings (bool): If False, warnings are raised for unknown replicates.
+    """
+    df = pd.read_csv(input_csv)
+
+    # Check if the DataFrame has at least one column
+    if df.shape[1] < 1:
+        raise ValueError("Input CSV must have at least one column with filenames.")
+
+    # Assume the first column contains the filenames
+    filename_column = df.columns[0]
+
+    # Apply the set_sample_replicate function to each filename, if df has some data:
+    if df.shape[0] > 0:
+        df["replicate"] = df[filename_column].apply(
+            lambda x: set_sample_replicate(
+                str(x), suppress_warnings, verbose=print_process
+            )
+        )
+
+        df["replicate"] = df.apply(
+            lambda row: str(row["donor"]) + "__" + str(row["replicate"]), axis=1
+        )
+
+    # Save the updated DataFrame to a new CSV file
+    df.to_csv(output_csv, index=False)
+    if print_process is True:
+        print(f"Replicates added and saved to {output_csv}")
 
 
 def clean_csv_rows(input_csv, output_csv, missing_threshold=2) -> None:

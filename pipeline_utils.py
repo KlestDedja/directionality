@@ -104,20 +104,56 @@ def reshape_hog_array(array, len_axis1):
     return reshaped_array
 
 
-def plot_polar_histogram(ax, global_histogram, orientations_deg):
+# def plot_polar_histogram(ax, global_histogram, orientations_deg):
 
+#     orientations_rad = np.deg2rad(orientations_deg)
+#     n_bins = len(orientations_deg)
+
+#     # Plot the histogram on the given axis
+#     bars = ax.bar(
+#         orientations_rad, global_histogram, width=(2 * np.pi / n_bins), bottom=0
+#     )
+
+#     max_idx = np.argwhere(global_histogram == global_histogram.max()).flatten()
+
+#     for idx in max_idx:  # it's always at least 2 maxima:
+#         bars[idx].set_color("red")
+
+#     return bars
+
+
+def plot_polar_histogram(ax, global_histogram, orientations_deg, plot_mean=True):
+    # bin centers in radians
     orientations_rad = np.deg2rad(orientations_deg)
     n_bins = len(orientations_deg)
 
-    # Plot the histogram on the given axis
+    # draw bars
     bars = ax.bar(
-        orientations_rad, global_histogram, width=(2 * np.pi / n_bins), bottom=0
+        orientations_rad,
+        global_histogram,
+        width=(2 * np.pi / n_bins),
+        bottom=0,
     )
 
-    max_idx = np.argwhere(global_histogram == global_histogram.max()).flatten()
+    # highlight all max bins in red
+    max_idxs = np.where(global_histogram == global_histogram.max())[0]
+    for i in max_idxs:
+        bars[i].set_color("red")
 
-    for idx in max_idx:  # it's always at least 2 maxima:
-        bars[idx].set_color("red")
+    if plot_mean:
+        # compute mean direction (in deg → rad) and plot as green line
+        mean_deg = compute_vector_mean(global_histogram, orientations_deg)
+        mean_rad = np.deg2rad(mean_deg)
+        r_max = ax.get_ylim()[1]  # current radial max
+
+        for angle in (mean_rad, mean_rad + np.pi):
+            ax.plot(
+                [angle, angle],  # theta
+                [0, r_max],  # radius
+                linestyle="-",
+                linewidth=3,
+                color="green",
+            )
 
     return bars
 
