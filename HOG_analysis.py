@@ -38,17 +38,17 @@ from utils_other import (
 
 root_folder = os.getcwd()
 
-DRAFT = True
-SHOW_PLOTS = True
-SAVE_PLOTS = False
+DRAFT = False
+SHOW_PLOTS = False
+SAVE_PLOTS = True
 SAVE_STATS = True
 CORRECT_ARTIFACTS = True
-EXTRA_PLOTS = True
+EXTRA_PLOTS = False
 
 
 class HOGAnalysis:
     def __init__(
-        self, root_folder, group_folders=["ALL-old"], block_norm="L2-Hys", draft=True
+        self, root_folder, group_folders=["ALL"], block_norm="L2-Hys", draft=True
     ):  # TODO: test block_norm = "L2-Hys" (change approach with threshold, as norm is always = 1)
         self.root_folder = root_folder
         self.group_folders = group_folders
@@ -58,7 +58,7 @@ class HOGAnalysis:
         self.df_statistics = pd.DataFrame()
         self.hog_descriptor = HOGDescriptor(
             orientations=45,
-            pixels_per_cell=(64, 64),
+            pixels_per_cell=(32, 32),
             cells_per_block=(1, 1),
             channel_axis=-1,
         )
@@ -68,7 +68,7 @@ class HOGAnalysis:
     def process_and_save(self):
         self.image_folder = os.path.join(
             self.root_folder,
-            "images-lightsheet-20241115_BAM_fkt20-P3-fkt21-P3-PEMFS-12w",
+            # "images-lightsheet-20241115_BAM_fkt20-P3-fkt21-P3-PEMFS-12w",
             # "images-lightsheet-20240928_BAM_fkt20_P3_fkt21_P3_PEMFS",
             # "images-confocal-20241022-fusion-bMyoB-BAMS-TM-6w",
             # "images-confocal-20241116-fusion-bMyoB-PEMFS-TM-12w",
@@ -82,6 +82,7 @@ class HOGAnalysis:
             # "20240206 TM bMyoB fkt4 P4 PEMS fusie",
             # "images-fotosalignement-tool2",
             # "images-fotosalignement-tool3",
+            "images-good-bad-validation",
         )
         for group in self.group_folders:
             self.process_group(self.image_folder, group)
@@ -327,8 +328,8 @@ class HOGAnalysis:
 
             return False, threshold, cells_to_keep  # Skip computation = False
 
-        if cells_to_keep.mean() >= 0.90:
-            while cells_to_keep.mean() >= 0.90:
+        if cells_to_keep.mean() >= 0.95:
+            while cells_to_keep.mean() >= 0.95:
 
                 threshold *= 1.25
                 # warnings.warn(
@@ -434,20 +435,48 @@ class HOGAnalysis:
         # If only one group folder (i.e. no grouping), add donor and condition
         if self.group_folders is not None and len(self.group_folders) == 1:
 
-            # Extract donor from filename using regex
-            donor_pattern = r"fkt\d{1,2}"
-            match = re.search(donor_pattern, filename)
-            if not match:
-                stats_df.insert(2, "donor", "Unknown")
-            else:
-                donor = match.group(0)
-                stats_df.insert(2, "donor", donor)
+            if "good-bad" in self.image_folder:
+                # Extract donor from filename using custom regex
+                donor_pattern = r"D(\d{1,2})"
+                match = re.search(donor_pattern, filename)
+                if not match:
+                    stats_df.insert(2, "donor", "Unknown")
+                else:
+                    donor = match.group(1)
 
-            # Extract condition using the helper function
-            condition = set_sample_condition(filename, suppress_warnings=True)
-            stats_df.insert(1, "condition", condition)
-            replicate = set_sample_replicate(filename, suppress_warnings=True)
-            stats_df.insert(3, "replicate", replicate)
+                condition_pattern = r"T(\d{1,2})"
+                match = re.search(condition_pattern, filename)
+                if not match:
+                    stats_df.insert(1, "condition", "Unknown")
+                else:
+                    condition = match.group(1)
+
+                replicate_pattern = r"\((\d{1,2})\)"
+                match = re.search(replicate_pattern, filename)
+                if not match:
+                    stats_df.insert(1, "replicate", "Unknown")
+                else:
+                    replicate = match.group(1)
+
+                stats_df.insert(1, "condition", condition)
+                stats_df.insert(2, "donor", donor)
+                stats_df.insert(3, "replicate", replicate)
+
+            else:
+                # Extract donor from filename using regex
+                donor_pattern = r"fkt\d{1,2}"
+                match = re.search(donor_pattern, filename)
+                if not match:
+                    stats_df.insert(2, "donor", "Unknown")
+                else:
+                    donor = match.group(0)
+                    stats_df.insert(2, "donor", donor)
+
+                # Extract condition using the helper function
+                condition = set_sample_condition(filename, suppress_warnings=True)
+                stats_df.insert(1, "condition", condition)
+                replicate = set_sample_replicate(filename, suppress_warnings=True)
+                stats_df.insert(3, "replicate", replicate)
 
         self.df_statistics = pd.concat([self.df_statistics, stats_df], axis=0)
 
@@ -491,19 +520,20 @@ class HOGAnalysis:
 
         csv_path_in = os.path.join(output_dir, filename + ".csv")
         self.df_statistics.to_csv(csv_path_in)
+
         csv_path_out = os.path.join(output_dir, filename + ".csv")
         verbose_condition = not self.draft
+        if "good-bad" not in self.image_folder:
+            update_conditions_to_csv(
+                csv_path_in, csv_path_out, print_process=verbose_condition
+            )
+            update_replicates_to_csv(
+                csv_path_out, csv_path_out, print_process=verbose_condition
+            )
 
-        update_conditions_to_csv(
-            csv_path_in, csv_path_out, print_process=verbose_condition
-        )
-        update_replicates_to_csv(
-            csv_path_out, csv_path_out, print_process=verbose_condition
-        )
+            clean_csv_rows(csv_path_in, csv_path_out, missing_threshold=2)
 
-        clean_csv_rows(csv_path_in, csv_path_out, missing_threshold=2)
-
-        print("Output file:\n", csv_path_out)
+            print("Output file:\n", csv_path_out)
 
 
 if __name__ == "__main__":
