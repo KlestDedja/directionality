@@ -40,7 +40,7 @@ root_folder = os.getcwd()
 
 DRAFT = False
 SHOW_PLOTS = False
-SAVE_PLOTS = True
+SAVE_PLOTS = False
 SAVE_STATS = True
 CORRECT_ARTIFACTS = True
 EXTRA_PLOTS = False
@@ -82,7 +82,8 @@ class HOGAnalysis:
             # "20240206 TM bMyoB fkt4 P4 PEMS fusie",
             # "images-fotosalignement-tool2",
             # "images-fotosalignement-tool3",
-            "images-good-bad-validation",
+            # "images-good-bad-validation",
+            # "images-longitudinal",
         )
         for group in self.group_folders:
             self.process_group(self.image_folder, group)
@@ -328,8 +329,8 @@ class HOGAnalysis:
 
             return False, threshold, cells_to_keep  # Skip computation = False
 
-        if cells_to_keep.mean() >= 0.95:
-            while cells_to_keep.mean() >= 0.95:
+        if cells_to_keep.mean() >= 0.995:
+            while cells_to_keep.mean() >= 0.995:
 
                 threshold *= 1.25
                 # warnings.warn(
@@ -435,7 +436,7 @@ class HOGAnalysis:
         # If only one group folder (i.e. no grouping), add donor and condition
         if self.group_folders is not None and len(self.group_folders) == 1:
 
-            if "good-bad" in self.image_folder:
+            if "good-bad" in self.image_folder or "longitudinal" in self.image_folder:
                 # Extract donor from filename using custom regex
                 donor_pattern = r"D(\d{1,2})"
                 match = re.search(donor_pattern, filename)

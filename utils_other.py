@@ -34,6 +34,9 @@ def get_folder_threshold(image_folder) -> float:
         warnings.warn(
             "As of now, the method does not work with this folder. Consider enhancing contrast."
         )
+    elif "images-longitudinal" in image_folder:
+        threshold = 10
+
     else:
         threshold = 3  # random value, in between
 
