@@ -8,7 +8,7 @@ import pandas as pd
 from pipeline_utils import (
     HOGDescriptor,
     cell_signal_strengths,
-    correction_of_round_angles,
+    correct_round_angles,
     plot_polar_histogram,
 )
 from utils_other import calculate_and_print_percentiles
@@ -32,12 +32,12 @@ def external_plot_hog_analysis(
 
     ax1.axis("off")
     ax1.imshow(image)
-    ax1.set_title("Original input image")
+    ax1.set_title("Original input image", fontsize=14)
 
     ax2.axis("off")
     hog_image_rescaled = exposure.rescale_intensity(hog_image, in_range=(0, 1.7))
     ax2.imshow(hog_image_rescaled)
-    ax2.set_title("Histogram of Oriented Gradients")
+    ax2.set_title("Histogram of Oriented Gradients", fontsize=14)
 
     ROTATE_FOR_GRADIENT = 0
     orientations_360_deg = np.linspace(0, 360, 90, endpoint=False)
@@ -52,7 +52,7 @@ def external_plot_hog_analysis(
     ax3.yaxis.set_major_formatter(FormatStrFormatter("%.1e"))
     ax3.yaxis.label.set_size(6)
     ax3.set_ylim(0, 1.1 * ymax_lim)
-    ax3.set_title("Directionality plot")
+    ax3.set_title("Directionality plot", fontsize=14)
     ax3.set_theta_zero_location("N")
     ax3.set_theta_direction(-1)
 
@@ -61,7 +61,7 @@ def external_plot_hog_analysis(
     heatmap = ax4.imshow(strengths, cmap="viridis", interpolation="nearest")
     cbar = fig.colorbar(heatmap, ax=ax4, shrink=0.6, pad=0.05, fraction=0.07)
     cbar.ax.tick_params(labelsize=8)
-    ax4.set_title("Signal heatmap with mask in grey")
+    ax4.set_title("Signal heatmap with mask in grey", fontsize=14)
 
     rgb_color = (0.7, 0.7, 0.7)  # light gray
     cmap_gray = matplotlib.colors.ListedColormap([rgb_color])
@@ -116,7 +116,7 @@ def explanatory_plot_intro(image):
     zoomed_height, zoomed_width = zoomed_image.shape[:2]
 
     # Limit the visible area to the zoomed part
-    ax2.set_title("Example image (zoomed)")
+    ax2.set_title("Input image (zoomed)", fontsize=14)
     ax2.imshow(zoomed_image)
     ax2.axis("off")
     # Note: we invert the y-limits because images in pyplot have y increasing downward
@@ -125,7 +125,7 @@ def explanatory_plot_intro(image):
 
     # --- Right plot: highlight a grid of windows 64×64 ---
     ax3.imshow(zoomed_image)
-    ax3.set_title("Image splitting")
+    ax3.set_title("Image windowing", fontsize=14)
     ax3.axis("off")
 
     # Draw grid lines at multiples of 64 pixels
@@ -153,7 +153,7 @@ def explanatory_plot_hog(image):
 
     # --- Left plot: highlight a grid of windows 64×64 ---
     ax3.imshow(zoomed_image)
-    ax3.set_title("Image splitting")
+    ax3.set_title("Image windowing", fontsize=14)
     ax3.axis("off")
 
     # Draw grid lines at multiples of 64 pixels
@@ -178,7 +178,7 @@ def explanatory_plot_hog(image):
     ax4.axis("off")
     hog_image_rescaled = exposure.rescale_intensity(hog_image, in_range=(0, 1.5))
     ax4.imshow(hog_image_rescaled)
-    ax4.set_title("Direction of the Oriented Gradients")
+    ax4.set_title("Direction of the Oriented Gradients", fontsize=14)
 
     plt.tight_layout()
     # plt.show()
@@ -194,9 +194,9 @@ def explanatory_normalized_hog(image):
     zoomed_height, zoomed_width = zoomed_image.shape[:2]
 
     # --- Left plot: highlight a grid of windows 64×64 ---
-    ax3.imshow(zoomed_image)
-    ax3.set_title("Image splitting")
-    ax3.axis("off")
+    # ax3.imshow(zoomed_image)
+    # ax3.set_title("Image splitting", fontsize=14)
+    # ax3.axis("off")
 
     # Draw grid lines at multiples of 64 pixels
     window_size = 64
@@ -212,6 +212,15 @@ def explanatory_normalized_hog(image):
         cells_per_block=(1, 1),
         channel_axis=-1,
     )
+
+    _, hog_image = hog_descriptor.compute_hog(
+        zoomed_image, block_norm=None, feature_vector=False
+    )
+
+    ax3.axis("off")
+    hog_image_rescaled = exposure.rescale_intensity(hog_image, in_range=(0, 1.5))
+    ax3.imshow(hog_image_rescaled)
+    ax3.set_title("Direction of the Oriented Gradients", fontsize=14)
 
     fd_raw_bg, hog_image = hog_descriptor.compute_hog(
         zoomed_image, block_norm=None, feature_vector=False
@@ -257,7 +266,7 @@ def explanatory_normalized_hog(image):
 
     ax4.axis("off")
     ax4.imshow(hog_image_norm)
-    ax4.set_title("Direction of Oriented Gradients, after filtering + normalizzation")
+    ax4.set_title("Oriented Gradients,\nafter filtering and normalization", fontsize=14)
 
     plt.tight_layout()
     # plt.show()
@@ -296,7 +305,7 @@ def explanatory_plot_filter(image):
     ax1.axis("off")
     hog_image_rescaled = exposure.rescale_intensity(hog_image, in_range=(0, 1.5))
     ax1.imshow(hog_image_rescaled)
-    ax1.set_title("Direction of the Oriented Gradients")
+    ax1.set_title("Direction of the Oriented Gradients", fontsize=14)
     # Draw grid lines at multiples of 64 pixels
     window_size = 64
     for x in range(0, zoomed_width, window_size):
@@ -306,10 +315,10 @@ def explanatory_plot_filter(image):
 
     included_cells = cells_to_keep.reshape(fd.shape[0], fd.shape[1])
 
-    ax2.set_title("Heatmap of the magnitude of Oriented Gradients")
+    ax2.set_title("Heatmap: magnitude of Oriented Gradients", fontsize=14)
     ax2.axis("off")
     # im = ax2.imshow(included_cells)
-    ax2.set_title("Visualisation of included blocks")
+    ax2.set_title("Background filtering", fontsize=14)
     heatmap = ax2.imshow(strengths, cmap="viridis", interpolation="nearest")
     cbar = fig.colorbar(heatmap, ax=ax2, shrink=0.6, pad=0.05, fraction=0.07)
     cbar.ax.tick_params(labelsize=8)
@@ -329,7 +338,7 @@ def explanatory_plot_filter(image):
     return plt
 
 
-def explanatory_plot_polar(image, plot_mean=False):
+def explanatory_plot_polar(image, plot_mean=False, correction_artifacts=True):
 
     fig = plt.figure(figsize=(13, 4))
     ax1 = fig.add_subplot(1, 3, 1)
@@ -344,7 +353,7 @@ def explanatory_plot_polar(image, plot_mean=False):
     image = zoomed_image
 
     ax1.imshow(image)
-    ax1.set_title("Image splitting")
+    ax1.set_title("Image windowing", fontsize=14)
     ax1.axis("off")
 
     # HOG image here (example)
@@ -396,7 +405,8 @@ def explanatory_plot_polar(image, plot_mean=False):
         gradient_hist[key] = hist
 
     # correct strong signal at 0 and 90 degrees (happens a lot with constant black backgound)
-    gradient_hist = correction_of_round_angles(gradient_hist, corr90=True, corr45=True)
+    if correction_artifacts:
+        gradient_hist = correct_round_angles(gradient_hist, corr90=True, corr45=True)
 
     # mean_angle_deg, std_dev_deg, abs_dev_deg = compute_average_direction(
     #     gradient_hist, orientations_180_deg
@@ -422,7 +432,7 @@ def explanatory_plot_polar(image, plot_mean=False):
     )
     # rest is the same…
     ax2.set_xticks(np.arange(min(angles) - 2, max(angles) + 3, 30))
-    ax2.set_title("Histogram of Oriented Gradients")
+    ax2.set_title("Histogram of Oriented Gradients", fontsize=14)
     # ax2.set_xticks([])
     ax2.set_yticks([])
     # ax2.set_xlabel("")
@@ -447,7 +457,7 @@ def explanatory_plot_polar(image, plot_mean=False):
     ax3.yaxis.set_major_formatter(FormatStrFormatter("%.1e"))
     ax3.yaxis.label.set_size(6)
     ax3.set_ylim(0, 1.1 * ymax_lim)
-    ax3.set_title("Directionality plot")
+    ax3.set_title("Directionality plot", fontsize=14)
     ax3.set_theta_zero_location("N")  # North,  West, or East?
     ax3.set_theta_direction(-1)  # -1 for Clockwise
 

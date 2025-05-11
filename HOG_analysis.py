@@ -12,7 +12,7 @@ from pipeline_utils import (
     HOGDescriptor,
     plot_polar_histogram,
     compute_distribution_direction,
-    correction_of_round_angles,
+    correct_round_angles,
     cell_signal_strengths,
 )
 from plotting_utils import (
@@ -40,9 +40,9 @@ root_folder = os.getcwd()
 
 DRAFT = True
 SHOW_PLOTS = True
-SAVE_PLOTS = True
+SAVE_PLOTS = False
 SAVE_STATS = True
-CORRECT_ARTEFACTS = True
+CORRECT_ARTIFACTS = True
 EXTRA_PLOTS = True
 
 
@@ -80,6 +80,8 @@ class HOGAnalysis:
             # "20230901 TM bMyoB fkt20-fkt21 P2 fusion assay PEMS",
             # "20240131 TM bMyoB fkt3 P4 PEMS fusie",
             # "20240206 TM bMyoB fkt4 P4 PEMS fusie",
+            # "images-fotosalignement-tool2",
+            # "images-fotosalignement-tool3",
         )
         for group in self.group_folders:
             self.process_group(self.image_folder, group)
@@ -180,10 +182,10 @@ class HOGAnalysis:
                 gradient_hist_180,
             )  # bin centered around 0, etc.. ok?
         )
-        if CORRECT_ARTEFACTS:
+        if CORRECT_ARTIFACTS:
             correct_45deg = False if "20240928" in folder else True
             # correct_45deg = True
-            gradient_hist = correction_of_round_angles(
+            gradient_hist = correct_round_angles(
                 gradient_hist, corr90=True, corr45=correct_45deg
             )
 
@@ -227,14 +229,20 @@ class HOGAnalysis:
             if SHOW_PLOTS:
                 plt.show()
                 # Show main plot + build and show extra plot for explanations in the manuscript:
-                plt = explanatory_plot_polar(image)
+                plt = explanatory_plot_polar(
+                    image, correction_artifacts=CORRECT_ARTIFACTS
+                )
                 self.expl_idx += 1
+
+                note = "" if CORRECT_ARTIFACTS else "-no-correct"
+
                 plt.savefig(
                     os.path.join(
                         os.path.dirname(self.image_folder),
-                        f"illustration-polar-histogram-explain-{self.expl_idx}.png",
+                        "manuscript-related-figures",
+                        f"illustration-polar-histogram-explain-{self.expl_idx}{note}.png",
                     ),
-                    dpi=200,
+                    dpi=300,
                 )
                 plt.show()
 
@@ -242,10 +250,13 @@ class HOGAnalysis:
 
             if EXTRA_PLOTS and DRAFT and self.expl_idx == 1:
 
-                plt5 = explanatory_plot_polar(image)
+                plt5 = explanatory_plot_polar(
+                    image, correction_artifacts=CORRECT_ARTIFACTS
+                )
                 plt5.savefig(
                     os.path.join(
                         root_folder,
+                        "manuscript-related-figures",
                         "Polar_histogram-new.png",
                     ),
                     dpi=300,
@@ -256,6 +267,7 @@ class HOGAnalysis:
                 plt2.savefig(
                     os.path.join(
                         root_folder,
+                        "manuscript-related-figures",
                         "Illustration_windowing-new.png",
                     ),
                     dpi=300,
@@ -266,6 +278,7 @@ class HOGAnalysis:
                 plt3.savefig(
                     os.path.join(
                         root_folder,
+                        "manuscript-related-figures",
                         "Illustration_HOG-new.png",
                     ),
                     dpi=300,
@@ -276,6 +289,7 @@ class HOGAnalysis:
                 plt4.savefig(
                     os.path.join(
                         root_folder,
+                        "manuscript-related-figures",
                         "Illustration_filter-new.png",
                     ),
                     dpi=300,
@@ -286,6 +300,7 @@ class HOGAnalysis:
                 plt5.savefig(
                     os.path.join(
                         root_folder,
+                        "manuscript-related-figures",
                         "Illustration_norm_HOG-new.png",
                     ),
                     dpi=300,
@@ -471,7 +486,7 @@ class HOGAnalysis:
 
         filename = f"{experiment_type}-{filename}"
 
-        if CORRECT_ARTEFACTS is False:
+        if CORRECT_ARTIFACTS is False:
             filename += "_no_correction"
 
         csv_path_in = os.path.join(output_dir, filename + ".csv")

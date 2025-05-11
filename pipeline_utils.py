@@ -195,7 +195,7 @@ def average_directions_over_cells(
     return fd_data
 
 
-def correction_of_round_angles(histog_dict, corr90=True, corr45=False):
+def correct_round_angles(histog_dict, corr90=True, corr45=False):
 
     keys_sorted = np.array(sorted(histog_dict.keys()))
     n = len(keys_sorted)
