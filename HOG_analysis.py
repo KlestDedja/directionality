@@ -81,7 +81,7 @@ class HOGAnalysis:
             # "20240131 TM bMyoB fkt3 P4 PEMS fusie",
             # "20240206 TM bMyoB fkt4 P4 PEMS fusie",
             # "images-fotosalignement-tool2",
-            # "images-fotosalignement-tool3",
+            "images-fotosalignement-tool3",
             # "images-good-bad-validation",
             # "images-longitudinal",
         )
@@ -436,7 +436,11 @@ class HOGAnalysis:
         # If only one group folder (i.e. no grouping), add donor and condition
         if self.group_folders is not None and len(self.group_folders) == 1:
 
-            if "good-bad" in self.image_folder or "longitudinal" in self.image_folder:
+            if (
+                "good-bad" in self.image_folder
+                or "longitudinal" in self.image_folder
+                or "fotosalignement-tool3" in self.image_folder
+            ):
                 # Extract donor from filename using custom regex
                 donor_pattern = r"D(\d{1,2})"
                 match = re.search(donor_pattern, filename)
@@ -444,6 +448,7 @@ class HOGAnalysis:
                     stats_df.insert(2, "donor", "Unknown")
                 else:
                     donor = match.group(1)
+                    stats_df.insert(2, "donor", donor)
 
                 condition_pattern = r"T(\d{1,2})"
                 match = re.search(condition_pattern, filename)
@@ -451,6 +456,7 @@ class HOGAnalysis:
                     stats_df.insert(1, "condition", "Unknown")
                 else:
                     condition = match.group(1)
+                    stats_df.insert(1, "condition", condition)
 
                 replicate_pattern = r"\((\d{1,2})\)"
                 match = re.search(replicate_pattern, filename)
@@ -458,10 +464,7 @@ class HOGAnalysis:
                     stats_df.insert(1, "replicate", "Unknown")
                 else:
                     replicate = match.group(1)
-
-                stats_df.insert(1, "condition", condition)
-                stats_df.insert(2, "donor", donor)
-                stats_df.insert(3, "replicate", replicate)
+                    stats_df.insert(3, "replicate", replicate)
 
             else:
                 # Extract donor from filename using regex
@@ -523,18 +526,21 @@ class HOGAnalysis:
         self.df_statistics.to_csv(csv_path_in)
 
         csv_path_out = os.path.join(output_dir, filename + ".csv")
-        verbose_condition = not self.draft
-        if "good-bad" not in self.image_folder:
-            update_conditions_to_csv(
-                csv_path_in, csv_path_out, print_process=verbose_condition
-            )
-            update_replicates_to_csv(
-                csv_path_out, csv_path_out, print_process=verbose_condition
-            )
+        # verbose_condition = not self.draft
+        # if (
+        #     "good-bad" not in self.image_folder
+        #     or "fotosalignement-tool3" not in self.image_folder
+        # ):
+        #     update_conditions_to_csv(
+        #         csv_path_in, csv_path_out, print_process=verbose_condition
+        #     )
+        #     update_replicates_to_csv(
+        #         csv_path_out, csv_path_out, print_process=verbose_condition
+        #     )
 
-            clean_csv_rows(csv_path_in, csv_path_out, missing_threshold=2)
+        #     clean_csv_rows(csv_path_in, csv_path_out, missing_threshold=2)
 
-            print("Output file:\n", csv_path_out)
+        #     print("Output file:\n", csv_path_out)
 
 
 if __name__ == "__main__":
