@@ -39,8 +39,10 @@ from utils_other import (
 root_folder = os.getcwd()
 
 DRAFT = False
+#
 SHOW_PLOTS = False
-SAVE_PLOTS = False
+
+SAVE_PLOTS = True
 SAVE_STATS = True
 CORRECT_ARTIFACTS = True
 EXTRA_PLOTS = False
@@ -81,8 +83,8 @@ class HOGAnalysis:
             # "20240131 TM bMyoB fkt3 P4 PEMS fusie",
             # "20240206 TM bMyoB fkt4 P4 PEMS fusie",
             # "images-fotosalignement-tool2",
-            "images-fotosalignement-tool3",
-            # "images-good-bad-validation",
+            # "images-fotosalignement-tool3",
+            "images-good-bad-validation",
             # "images-longitudinal",
         )
         for group in self.group_folders:
@@ -145,7 +147,8 @@ class HOGAnalysis:
 
     def process_image(self, folder, filename, threshold: float):
         t1 = time.time()
-        image = load_and_prepare_image(folder, filename, channel=1)
+        GRAY = True if "good-bad" in folder else False
+        image = load_and_prepare_image(folder, filename, channel=1, to_grayscale=GRAY)
 
         #### Background processing: Compute HOG and signal strength
         fd_raw_bg, hog_image_bg = self.hog_descriptor.compute_hog(
@@ -232,7 +235,7 @@ class HOGAnalysis:
                 plt.show()
                 # Show main plot + build and show extra plot for explanations in the manuscript:
                 plt = explanatory_plot_polar(
-                    image, correction_artifacts=CORRECT_ARTIFACTS
+                    image, threshold, correction_artifacts=CORRECT_ARTIFACTS
                 )
                 self.expl_idx += 1
 
@@ -253,7 +256,7 @@ class HOGAnalysis:
             if EXTRA_PLOTS and DRAFT and self.expl_idx == 1:
 
                 plt5 = explanatory_plot_polar(
-                    image, correction_artifacts=CORRECT_ARTIFACTS
+                    image, threshold, correction_artifacts=CORRECT_ARTIFACTS
                 )
                 plt5.savefig(
                     os.path.join(

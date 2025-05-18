@@ -34,8 +34,13 @@ def get_folder_threshold(image_folder) -> float:
         warnings.warn(
             "As of now, the method does not work with this folder. Consider enhancing contrast."
         )
-    elif "images-longitudinal" or "fotosalignement-tool3" in image_folder:
+    elif (
+        "images-longitudinal" in image_folder or "fotosalignement-tool3" in image_folder
+    ):
         threshold = 10
+
+    elif "good-bad-validation" in image_folder:
+        threshold = 0.025
 
     else:
         threshold = 3  # random value, in between

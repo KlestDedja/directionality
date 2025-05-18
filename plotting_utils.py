@@ -35,8 +35,18 @@ def external_plot_hog_analysis(
     ax1.set_title("Original input image", fontsize=14)
 
     ax2.axis("off")
-    hog_image_rescaled = exposure.rescale_intensity(hog_image, in_range=(0, 1.7))
-    ax2.imshow(hog_image_rescaled)
+    # hog_image_rescaled = exposure.rescale_intensity(hog_image, out_range=(0, 0.1))
+    hog_norm = exposure.rescale_intensity(
+        hog_image,
+        in_range="image",  # use the actual min/max of hog_image
+        out_range=(0, 1),  # map into 0–1 for matplotlib
+    )
+    ax2.imshow(
+        hog_norm,
+        cmap="viridis",
+        vmin=0.0,
+        vmax=0.1,  # ensure full span is used
+    )
     ax2.set_title("Histogram of Oriented Gradients", fontsize=14)
 
     ROTATE_FOR_GRADIENT = 0
@@ -338,7 +348,9 @@ def explanatory_plot_filter(image):
     return plt
 
 
-def explanatory_plot_polar(image, plot_mean=False, correction_artifacts=True):
+def explanatory_plot_polar(
+    image, threshold, plot_mean=False, correction_artifacts=True
+):
 
     fig = plt.figure(figsize=(13, 4))
     ax1 = fig.add_subplot(1, 3, 1)
@@ -383,7 +395,7 @@ def explanatory_plot_polar(image, plot_mean=False, correction_artifacts=True):
     )  # output shape is shape (N, M), we normalize by L1 norm.
     calculate_and_print_percentiles(strengths)
 
-    cells_to_keep = strengths > 2  # boolean (N,M) array?
+    cells_to_keep = strengths > threshold  # boolean (N,M) array?
 
     strengths = cell_signal_strengths(
         fd, norm_ord=1
