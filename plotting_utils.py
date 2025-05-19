@@ -69,9 +69,9 @@ def external_plot_hog_analysis(
     # included_cells = cells_to_keep.reshape(strengths.shape)
     ax4.axis("off")
     heatmap = ax4.imshow(strengths, cmap="viridis", interpolation="nearest")
-    cbar = fig.colorbar(heatmap, ax=ax4, shrink=0.6, pad=0.05, fraction=0.07)
+    cbar = fig.colorbar(heatmap, ax=ax4, shrink=0.4, pad=0.04, fraction=0.07)
     cbar.ax.tick_params(labelsize=8)
-    ax4.set_title("Signal heatmap with mask in grey", fontsize=14)
+    ax4.set_title("Signal heatmap, mask in grey", fontsize=14)
 
     rgb_color = (0.7, 0.7, 0.7)  # light gray
     cmap_gray = matplotlib.colors.ListedColormap([rgb_color])
@@ -95,16 +95,16 @@ def external_plot_hog_analysis(
                     facecolor="none",
                 )
                 ax4.add_patch(rect)
-                if i % 3 == 0 and j % 3 == 0:
-                    ax4.text(
-                        j,
-                        i,
-                        f"({i},{j})",
-                        ha="center",
-                        va="center",
-                        fontsize=2,
-                        color="black",
-                    )
+                # if i % 3 == 0 and j % 3 == 0:
+                #     ax4.text(
+                #         j,
+                #         i,
+                #         f"({i},{j})",
+                #         ha="center",
+                #         va="center",
+                #         fontsize=2,
+                #         color="black",
+                #     )
 
     return plt
 
