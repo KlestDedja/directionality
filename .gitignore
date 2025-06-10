@@ -1,9 +1,11 @@
 # all image data
-imag*/
-202*/
-HOG_plot_analysis/*
-quick-anal*/
-manuscript-related-figures/*
+data/*
+data-extra/*
+
+old_files/*
+
+# Manuscript files
+manuscript-related-figures/
 
 # Editors
 __pycache__/

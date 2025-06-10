@@ -1,0 +1,12 @@
+name: directionality
+channels:
+  - defaults
+  - conda-forge
+dependencies:
+  - numpy
+  - scikit-image
+  - pandas
+  - scikit-image
+  - matplotlib
+  - imagecodecs
+  - ipykernel

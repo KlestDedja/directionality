@@ -1,0 +1,9 @@
+dataset_name,threshold,channel,cell_size
+default,3.0,-1,64
+images-3D-lightsheet-20240928_BAM_fkt20_P3_fkt21_P3_PEMFS,1.5,,
+images-3D-lighsheet-20241115_BAM_fkt20-P3-fkt21-P3-PEMFS-12w,4.0,,
+20241116-fusion-bMyoB-PEMFS-TM-12w,6.0,,
+confocal-20241022-fusion-bMyoB-BAMS,6.0,,
+images-longitudinal,10.0,,
+fotosalignement-tool3,10.0,,
+good-bad-validation,0.025,1,
