@@ -1,28 +1,24 @@
-import os
-from typing import Dict, Tuple
+# from typing import Dict, Tuple
 import numpy as np
-from skimage import io
-from skimage.color import rgb2gray
-from skimage import color
 from skimage.feature import hog
 
 
-def load_and_prepare_image(
-    path, name, to_grayscale: bool = False, channel: int | None = None
-):
-    """Load an image and proivde option to convert it to grayscale."""
-    image = io.imread(os.path.join(path, name))
+# def load_and_prepare_image(
+#     path, name, to_grayscale: bool = False, channel: int | None = None
+# ):
+#     """Load an image and proivde option to convert it to grayscale."""
+#     image = io.imread(os.path.join(path, name))
 
-    # Check if the image has four channels (RGBA)
-    if image.ndim == 3 and image.shape[2] == 4:
-        image = image[:, :, :3]  # ignore the alpha channel
+#     # # Check if the image has four channels (RGBA)
+#     # if image.ndim == 3 and image.shape[2] == 4:
+#     #     image = image[:, :, :3]  # ignore the alpha channel
 
-    # Convert RGB to grayscale
-    if image.ndim == 3 and to_grayscale == True:
-        image = rgb2gray(image)
-    if image.ndim == 3 and to_grayscale == False and channel is not None:
-        image = image[:, :, channel]
-    return image
+#     # # Convert RGB to grayscale
+#     # if image.ndim == 3 and to_grayscale == True:
+#     #     image = rgb2gray(image)
+#     # if image.ndim == 3 and to_grayscale == False and channel is not None:
+#     #     image = image[:, :, channel]
+#     return image
 
 
 class HOGDescriptor:
@@ -49,17 +45,12 @@ class HOGDescriptor:
         visualize=True,
         block_norm=None,
         feature_vector=False,
-        channel_axis=-1,
     ):
         """Compute Histogram of Oriented Gradients (HOG) RGB or grayscale image."""
-        if channel_axis is None or str(channel_axis).lower() == "grayscale":
-            image = color.rgb2gray(image)
-            channel_axis = None
 
-        if (
-            image.ndim == 2
-        ):  # make sure we do not search for a channel axis that does not exist
-            channel_axis = None
+        # Assumes image channel has been selected already, and that
+        # the resulting image is therefore a 2D array (grayscale-style)
+        # for this reason we set channel_axis=None
 
         if visualize:
             self.fd, self.hog_image = hog(
@@ -70,7 +61,7 @@ class HOGDescriptor:
                 visualize=visualize,
                 block_norm=block_norm,
                 feature_vector=feature_vector,
-                channel_axis=channel_axis,
+                channel_axis=None,
             )
         else:
             self.fd = hog(
@@ -81,45 +72,11 @@ class HOGDescriptor:
                 visualize=False,
                 block_norm=block_norm,
                 feature_vector=feature_vector,
-                channel_axis=channel_axis,
+                channel_axis=None,
             )
             self.hog_image = None
 
-        # return fd, hog_image
         return self.fd, self.hog_image
-
-
-def reshape_hog_array(array, len_axis1):
-    # Calculate the total number of elements in the array
-    N = array.size
-    # Ensure that m is a divisor of N
-    if N % len_axis1 != 0:
-        raise ValueError(
-            f"The given len_axis1 ({len_axis1}) is not a divisor of the total number of elements ({N})."
-        )
-
-    new_shape = (N // len_axis1, len_axis1)
-    # Reshape the array
-    reshaped_array = array.reshape(new_shape)
-    return reshaped_array
-
-
-# def plot_polar_histogram(ax, global_histogram, orientations_deg):
-
-#     orientations_rad = np.deg2rad(orientations_deg)
-#     n_bins = len(orientations_deg)
-
-#     # Plot the histogram on the given axis
-#     bars = ax.bar(
-#         orientations_rad, global_histogram, width=(2 * np.pi / n_bins), bottom=0
-#     )
-
-#     max_idx = np.argwhere(global_histogram == global_histogram.max()).flatten()
-
-#     for idx in max_idx:  # it's always at least 2 maxima:
-#         bars[idx].set_color("red")
-
-#     return bars
 
 
 def plot_polar_histogram(ax, global_histogram, orientations_deg, plot_mean=True):
@@ -156,43 +113,6 @@ def plot_polar_histogram(ax, global_histogram, orientations_deg, plot_mean=True)
             )
 
     return bars
-
-
-def average_directions_over_cells(
-    fd, orientations, N=None, M=None, fd_data_as_array=True
-):
-    if N is None:
-        N = fd.shape[0]
-    if M is None:
-        M = fd.shape[1]
-
-    fd_data = {"grid_size": (N, M)}
-    key = 0
-
-    if fd.ndim > 3:
-        fd = fd.squeeze()
-
-    assert fd.ndim == 3
-    assert len(orientations) == fd.shape[-1]
-
-    for i in range(N):
-        for j in range(M):
-            plot_fd = fd[
-                i, j, :
-            ].mean()  # Average over sub-cells (cells_per_block_x, cells_per_block_y)
-            key += 1
-            fd_data[key] = plot_fd
-
-    if fd_data_as_array:
-        vectors = []
-        for key, value in fd_data.items():
-            if key == "grid_size":
-                continue  # Skip the 'grid_size' key
-            # Append the vector to the list
-            vectors.append(value)
-        # Convert the list of vectors to a 2D numpy array
-        fd_data = np.array(vectors)
-    return fd_data
 
 
 def correct_round_angles(histog_dict, corr90=True, corr45=False):
@@ -280,69 +200,6 @@ def correct_round_angles(histog_dict, corr90=True, corr45=False):
     return histog_dict
 
 
-def correction_of_round_angles_old(histog_dict, corr90=True, corr45=False):
-    # Sort the keys (angles) for proper indexing (in case they are not sorted)
-    keys_sorted = np.array(sorted(histog_dict.keys()))
-
-    # correction at 0 degrees
-    index_0 = np.argmin(np.abs(keys_sorted))
-    histog_dict[keys_sorted[index_0]] = 0.5 * (
-        histog_dict[keys_sorted[index_0 - 1]] + histog_dict[keys_sorted[index_0 + 1]]
-    )
-
-    if corr90:  # correction at 90 degrees (smoothing)
-        index_90 = np.argmin(np.abs(keys_sorted - 90))
-        histog_dict[keys_sorted[index_90]] = 0.5 * (
-            histog_dict[keys_sorted[index_90 - 1]]
-            + histog_dict[keys_sorted[index_90 + 1]]
-        )
-
-    if corr45:  # smoothing at 45 and 135 degrees
-        index_45 = np.argmin(np.abs(keys_sorted - 45))
-        index_135 = np.argmin(np.abs(keys_sorted - 135))
-
-        histog_dict[keys_sorted[index_45]] = 0.5 * (
-            histog_dict[keys_sorted[index_45 - 1]]
-            + histog_dict[keys_sorted[index_45 + 1]]
-        )
-        histog_dict[keys_sorted[index_135]] = 0.5 * (
-            histog_dict[keys_sorted[index_135 - 1]]
-            + histog_dict[keys_sorted[index_135 + 1]]
-        )
-
-    return histog_dict
-
-
-def correction_of_round_angles_older(
-    orientations_180_deg, histog_data, corr90=True, corr45=False
-):
-
-    # correction at 0*: normally speaking the index should be always = 0 but
-    # we compute the argmin here just in case there were previous manipulations
-    index_0 = np.argmin(np.abs(orientations_180_deg))
-    histog_data[index_0] = 0.5 * (histog_data[index_0 + 1] + histog_data[index_0 - 1])
-
-    if corr90:  # make correction at 90 degrees:
-        index_90 = np.argmin(np.abs(orientations_180_deg - 90))
-        # smooth with neighbours
-        histog_data[index_90] = 0.5 * (
-            histog_data[index_90 + 1] + histog_data[index_90 - 1]
-        )
-    # # correction at 45 and 135 degrees:
-    if corr45:
-        index_45 = np.argmin(np.abs(orientations_180_deg - 45))
-        index_135 = np.argmin(np.abs(orientations_180_deg - 135))
-
-        histog_data[index_45] = 0.5 * (
-            histog_data[index_45 + 1] + histog_data[index_45 - 1]
-        )
-        histog_data[index_135] = 0.5 * (
-            histog_data[index_135 + 1] + histog_data[index_135 - 1]
-        )
-
-    return histog_data
-
-
 def cell_signal_strengths(fd_data, norm_ord=1):
 
     strengths = np.zeros_like(fd_data[:, :, 0])  # ignore last axis (n_orientations)
@@ -402,12 +259,16 @@ def compute_deviations(global_hist_vals, orientations_deg, reference_angle_deg):
 
 
 def compute_distribution_direction(
-    global_histogram: Dict | np.ndarray,
+    global_histogram: dict | np.ndarray,
     orientations_deg: (
         np.ndarray | None
     ) = None,  # consider @overload for typing (2 cases)
-) -> Tuple[Dict, Dict]:
+) -> tuple[dict, dict]:
     """Compute mean, mode, and deviations (w.r.t. mean and mode)."""
+
+    # INPUTS typing:
+    #  - either a dict with angles as keys and histogram values as values (2nd input = None)
+    #  - or a np.ndarray with histogram values, and orientations_deg as a separate array
 
     # Handle retro-compatibility and convert dict input to numpy arrays
     if isinstance(global_histogram, dict):

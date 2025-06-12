@@ -8,5 +8,5 @@ dependencies:
   - pandas
   - scikit-image
   - matplotlib
-  - imagecodecs
   - ipykernel
+  - imagecodecs

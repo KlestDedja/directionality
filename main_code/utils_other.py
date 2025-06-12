@@ -16,36 +16,36 @@ def clean_filename(filename):
     return filename
 
 
-def get_folder_threshold(image_folder) -> float:
+# def get_folder_threshold(image_folder) -> float:
 
-    if "images-3D-lightsheet-20240928_BAM_fkt20_P3_fkt21_P3_PEMFS" in image_folder:
-        threshold = 1.5  # approved
-    if "images-3D-lighsheet-20241115_BAM_fkt20-P3-fkt21-P3-PEMFS-12w" in image_folder:
-        threshold = 4  # seems good. Directionality is very pronounced as the signal is mostly near the walls
+#     if "images-3D-lightsheet-20240928_BAM_fkt20_P3_fkt21_P3_PEMFS" in image_folder:
+#         threshold = 1.5  # approved
+#     if "images-3D-lighsheet-20241115_BAM_fkt20-P3-fkt21-P3-PEMFS-12w" in image_folder:
+#         threshold = 4  # seems good. Directionality is very pronounced as the signal is mostly near the walls
 
-    # elif "confocal-20241022-fusion" in image_folder:
-    #     threshold = 2  # probably doesnt work anyway
-    # elif "confocal-20241116-fusion":
-    #     threshold = 2
-    elif "20241116-fusion-bMyoB-PEMFS-TM-12w" in image_folder:
-        threshold = 6  # Some images have no signal to show, but no worries: We drop them later in the pipeline.
-    elif "confocal-20241022-fusion-bMyoB-BAMS" in image_folder:
-        threshold = 6  # doesn't really work anyway, contrast needs to be enhanced
-        warnings.warn(
-            "As of now, the method does not work with this folder. Consider enhancing contrast."
-        )
-    elif (
-        "images-longitudinal" in image_folder or "fotosalignement-tool3" in image_folder
-    ):
-        threshold = 10
+#     # elif "confocal-20241022-fusion" in image_folder:
+#     #     threshold = 2  # probably doesnt work anyway
+#     # elif "confocal-20241116-fusion":
+#     #     threshold = 2
+#     elif "20241116-fusion-bMyoB-PEMFS-TM-12w" in image_folder:
+#         threshold = 6  # Some images have no signal to show, but no worries: We drop them later in the pipeline.
+#     elif "confocal-20241022-fusion-bMyoB-BAMS" in image_folder:
+#         threshold = 6  # doesn't really work anyway, contrast needs to be enhanced
+#         warnings.warn(
+#             "As of now, the method does not work with this folder. Consider enhancing contrast."
+#         )
+#     elif (
+#         "images-longitudinal" in image_folder or "fotosalignement-tool3" in image_folder
+#     ):
+#         threshold = 10
 
-    elif "good-bad-validation" in image_folder:
-        threshold = 0.025
+#     elif "good-bad-validation" in image_folder:
+#         threshold = 0.025
 
-    else:
-        threshold = 3  # random value, in between
+#     else:
+#         threshold = 3  # random value, in between
 
-    return threshold
+#     return threshold
 
 
 def set_sample_condition(filename, suppress_warnings=False):
@@ -108,36 +108,6 @@ def set_sample_condition(filename, suppress_warnings=False):
     return condition
 
 
-# def update_conditions_to_csv(
-#     input_csv: str, output_csv: str, suppress_warnings: bool = False
-# ) -> None:
-#     """
-#     Reads a CSV file, extracts conditions from the filenames in the first column,
-#     and adds a 'condition' column with the extracted conditions.
-
-#     Parameters:
-#         input_csv (str): Path to the input CSV file.
-#         output_csv (str): Path where the output CSV with conditions will be saved.
-#         suppress_warnings (bool): If False, warnings are raised for unknown conditions.
-#     """
-#     df = pd.read_csv(input_csv)
-
-#     # Check if the DataFrame has at least one column
-#     if df.shape[1] < 1:
-#         raise ValueError("Input CSV must have at least one column with filenames.")
-
-#     # Assume the first column contains the filenames
-#     filename_column = df.columns[0]
-
-#     # Apply the set_sample_condition function to each filename
-#     df["condition"] = df[filename_column].apply(
-#         lambda x: set_sample_condition(str(x), suppress_warnings)
-#     )
-
-#     # Save the updated DataFrame to a new CSV file
-#     df.to_csv(output_csv, index=False)
-
-
 def set_sample_replicate(filename: str, suppress_warnings: bool = False):
     """
     Assuming the Image Fluorescence 2D images are given as an input, this function extracts the
@@ -172,61 +142,6 @@ def set_sample_replicate(filename: str, suppress_warnings: bool = False):
     return replicate
 
 
-# def update_replicates_to_csv(
-#     input_csv, output_csv, suppress_warnings=False, print_process=False
-# ) -> None:
-#     """
-#     Reads a CSV file, extracts replicates from the filenames in the first column,
-#     and adds a 'condition' column with the extracted replicates.
-
-#     Parameters:
-#         input_csv (str): Path to the input CSV file.
-#         output_csv (str): Path where the output CSV with replicates will be saved.
-#         suppress_warnings (bool): If False, warnings are raised for unknown replicates.
-#     """
-#     df = pd.read_csv(input_csv)
-
-#     # Check if the DataFrame has at least one column
-#     if df.shape[1] < 1:
-#         raise ValueError("Input CSV must have at least one column with filenames.")
-
-#     # Assume the first column contains the filenames
-#     filename_column = df.columns[0]
-
-#     # Apply the set_sample_replicate function to each filename, if df has some data:
-#     if df.shape[0] > 0:
-#         df["replicate"] = df[filename_column].apply(
-#             lambda x: set_sample_replicate(
-#                 str(x), suppress_warnings, verbose=print_process
-#             )
-#         )
-
-#         df["replicate"] = df.apply(
-#             lambda row: str(row["donor"]) + "__" + str(row["replicate"]), axis=1
-#         )
-
-#     # Save the updated DataFrame to a new CSV file
-#     df.to_csv(output_csv, index=False)
-#     if print_process is True:
-#         print(f"Replicates added and saved to {output_csv}")
-
-
-# def clean_csv_rows(input_csv, output_csv, missing_threshold=2) -> None:
-#     """
-#     Removes rows with more than 'missing_threshold' missing values,
-#     Parameters:
-#         input_csv (str): Path to the input Excel file.
-#         output_csv (str): Path where the cleaned Excel file will be saved.
-#         missing_threshold (int): Maximum allowed missing values per row.
-#     """
-#     df = pd.read_csv(input_csv)
-
-#     # Keep only rows where the number of missing values is less than or equal to the threshold
-#     df_clean = df[df.isnull().sum(axis=1) <= missing_threshold]
-
-#     df_clean.to_csv(output_csv, index=False)
-
-
 def calculate_and_print_percentiles(
     arr, percentiles=[0, 25, 50, 75, 100], format_str="{:.2f}"
 ):
@@ -244,6 +159,7 @@ def calculate_and_print_percentiles(
     return percentile_dict
 
 
+# useful for debugging:
 def print_top_values(my_dict, top_n=3):
     # Sort dictionary by value descending
     sorted_items = sorted(my_dict.items(), key=lambda x: x[1], reverse=True)

@@ -39,7 +39,7 @@ def external_plot_hog_analysis(
     hog_norm = exposure.rescale_intensity(
         hog_image,
         in_range="image",  # use the actual min/max of hog_image
-        out_range=(0, 1),  # map into 0–1 for matplotlib
+        # out_range=(0, 1),  # map into 0–1 for matplotlib
     )
     ax2.imshow(
         hog_norm,
@@ -119,9 +119,6 @@ def explanatory_plot_intro(image):
     ax2.set_title("Input image (zoomed)", fontsize=14)
     ax2.imshow(zoomed_image)
     ax2.axis("off")
-    # Note: we invert the y-limits because images in pyplot have y increasing downward
-    # ax2.set_xlim([zoom_width, 2 * zoom_width])
-    # ax2.set_ylim([zoom_height, 0])
 
     # --- Right plot: highlight a grid of windows 64×64 ---
     ax3.imshow(zoomed_image)
@@ -468,6 +465,7 @@ def explanatory_plot_polar(
     return plt
 
 
+## some debugging and comaprison with sepcific images.
 def list_boo_boo() -> list:
     return [
         "20241115 bMyoB fkt21 P3_2h R2-Image Export-29_i2z005c1-2.tif",
