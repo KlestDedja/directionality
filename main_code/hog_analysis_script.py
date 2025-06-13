@@ -145,10 +145,11 @@ class HOGAnalysis:
             hog_image = hog_image_bg
             fd_norm = fd_bg / (1e-7 + strengths[:, :, np.newaxis])
 
-        # Drop cells below threshold and normalise the rest:
-        # So that it has equal weight
+        # Drop cells below threshold, the rest is normalised if self.block_norm
+        # is None, so that all cells have equal weight in the histogram
         fd_norm[~cells_to_keep] = 0
-        gradient_hist_180 = fd_norm[cells_to_keep].mean(axis=0)
+
+        gradient_hist_180 = fd_norm[cells_to_keep].mean(axis=0)  # was this always run?
         gradient_hist = dict(
             zip(
                 np.linspace(0, 180, len(gradient_hist_180), endpoint=False),
@@ -186,7 +187,8 @@ class HOGAnalysis:
         os.makedirs(self.output_folder, exist_ok=True)
         fig.savefig(os.path.join(self.output_folder, filename_png), dpi=300)
         if self.show_plots:
-            plt.show()
+            plt.show(block=False)
+            input("Close the plot window, or press [Enter] to continue:")
         plt.close(fig)
 
     def adjust_threshold(

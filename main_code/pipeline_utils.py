@@ -282,6 +282,11 @@ def compute_distribution_direction(
             f"Input should be 2D, got shape {global_hist_vals.shape} instead."
         )
 
+    if orientations_deg is None:
+        raise ValueError(
+            "orientations_deg could not be computed and " "therefore must be provided."
+        )
+
     # Compute mean direction and deviations
     mean_angle_deg = compute_vector_mean(global_hist_vals, orientations_deg)
     std_dev_mean, abs_dev_mean = compute_deviations(

@@ -66,10 +66,13 @@ def external_plot_hog_analysis(
     ax3.set_theta_zero_location("N")
     ax3.set_theta_direction(-1)
 
-    # included_cells = cells_to_keep.reshape(strengths.shape)
+    # print(f"Proportion of window cells kept: {np.mean(cells_to_keep)}")
     ax4.axis("off")
     heatmap = ax4.imshow(strengths, cmap="viridis", interpolation="nearest")
-    cbar = fig.colorbar(heatmap, ax=ax4, shrink=0.4, pad=0.04, fraction=0.07)
+
+    # adjust colorab height: make it smaller for wide images
+    cbar_size = 0.4 if image.shape[1] > 1.2 * image.shape[0] else 0.7
+    cbar = fig.colorbar(heatmap, ax=ax4, shrink=cbar_size, pad=0.04, fraction=0.07)
     cbar.ax.tick_params(labelsize=8)
     ax4.set_title("Signal heatmap, mask in grey", fontsize=14)
 
