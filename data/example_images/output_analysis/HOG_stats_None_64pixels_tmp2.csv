@@ -1,0 +1,7 @@
+Unnamed: 0,avg. direction,condition,donor,replicate,std. deviation (mean),abs. deviation (mean),mode direction,std. deviation (mode),abs. deviation (mode),image size,signal_threshold,elapsed time (mm:ss)
+20241115 bMyoB fkt20 P3_1_5'0_5' R1_2-Image Export-01_i1z095c1-2.tif,92.621,90s-30s,fkt20,fkt20__R1,61.647,56.562,168.0,41.685,33.373,"(1920, 1920)",3,0:02
+20241115 bMyoB fkt20 P3_1_5'0_5' R2_2-Image Export-03_i1z054c1-2.tif,48.161,90s-30s,fkt20,fkt20__R2,46.87,42.128,8.0,31.228,22.35,"(1920, 1920)",3,0:01
+20241115 bMyoB fkt20 P3_1_5'0_5' R2_3-Image Export-04_i1z17c1-2.tif,57.337,90s-30s,fkt20,fkt20__R2,51.975,46.867,12.0,36.53,27.391,"(1920, 1920)",3,0:01
+20241115 bMyoB fkt21 P3_1_5'0_5' R2_3-Image Export-19_i1z14c1-2.tif,80.679,90s-30s,fkt21,fkt21__R2,55.029,48.859,24.0,48.296,40.491,"(1920, 1920)",3,0:02
+20241115 bMyoB fkt21 P3_2h R1-Image Export-25_i1z18c1-2.tif,93.607,2h,fkt21,fkt21__R1,56.747,50.804,152.0,47.725,39.848,"(1920, 1920)",3,0:02
+20241115 bMyoB fkt21 P3_2h R1-Image Export-25_i1z49c1-2.tif,88.738,2h,fkt21,fkt21__R1,56.114,49.835,168.0,47.958,40.296,"(1920, 1920)",3,0:02

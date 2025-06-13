@@ -1,0 +1,82 @@
+Unnamed: 0,image size,condition,elapsed time (mm:ss),donor,signal_threshold,avg. direction,mode direction,std. deviation,abs. deviation,replicate
+20241116  fkt20 P3 PEMS 1.5 1_2 25x 0.6 zoom PBS-Image Export-112_c1-2.tif,"(1024, 1024)",90s-30s,0:01,20,6,84.723,80,47.401,39.108,fkt20__1
+20241116  fkt20 P3 PEMS 1.5 1_25x 0.6 zoom PBS-Image Export-113_c1-2.tif,"(1024, 1024)",90s-30s,0:01,20,6,86.874,80,47.303,39.129,fkt20__1
+20241116  fkt20 P3 PEMS 1.5 1_3 25x 0.6 zoom PBS-Image Export-110_c1-2.tif,"(1024, 1024)",90s-30s,0:01,20,6,88.551,104,47.713,39.702,fkt20__1
+20241116  fkt20 P3 PEMS 1.5 1_4 25x 0.6 zoom PBS-Image Export-109_c1-2.tif,"(1024, 1024)",90s-30s,0:01,20,6,86.913,80,45.893,37.672,fkt20__1
+20241116  fkt20 P3 PEMS 1.5 1_5 25x 0.6 zoom PBS-Image Export-108_c1-2.tif,"(1024, 1024)",90s-30s,0:01,20,6,82.493,72,45.67,37.316,fkt20__1
+20241116  fkt20 P3 PEMS 1.5 1_7 25x 0.6 zoom PBS-Image Export-105_c1-2.tif,"(1024, 1024)",90s-30s,0:01,20,6,83.493,72,46.776,38.64,fkt20__1
+20241116  fkt20 P3 PEMS 2h 1 25x 0.6 zoom PBS (not)-Image Export-39_c1-2.tif,"(1024, 1024)",2h,0:01,20,6,83.645,80,45.717,37.736,fkt20__1
+20241116  fkt20 P3 PEMS 2h 1_2 25x 0.6 zoom PBS-Image Export-101_c1-2.tif,"(1024, 1024)",2h,0:01,20,6,85.58,80,47.765,39.764,fkt20__1
+20241116  fkt20 P3 PEMS 2h 1_3 25x 0.6 zoom PBS-Image Export-36_c1-2.tif,"(1024, 1024)",2h,0:01,20,6,83.803,80,47.943,39.758,fkt20__1
+20241116  fkt20 P3 PEMS 2h 1_4 25x 0.6 zoom PBS-Image Export-41_c1-2.tif,"(1024, 1024)",2h,0:01,20,6,79.433,68,42.824,34.885,fkt20__1
+20241116  fkt20 P3 PEMS 2h 1_5 25x 0.6 zoom PBS-Image Export-42_c1-2.tif,"(1024, 1024)",2h,0:01,20,6,82.761,72,46.612,38.742,fkt20__1
+20241116  fkt20 P3 PEMS 2h 1_6 25x 0.6 zoom PBS-Image Export-40_c1-2.tif,"(1024, 1024)",2h,0:01,20,6,80.186,72,45.137,37.42,fkt20__1
+20241116  fkt20 P3 PEMS CTR 1_2 25x 0.6 zoom PBS-Image Export-122_c1-2.tif,"(1024, 1024)",CTR,0:01,20,6,84.031,76,45.005,36.987,fkt20__1
+20241116  fkt20 P3 PEMS CTR 1_25x 0.6 zoom PBS (not)-Image Export-123_c1-2.tif,"(1024, 1024)",CTR,0:01,20,6,84.497,60,47.909,40.131,fkt20__1
+20241116  fkt20 P3 PEMS CTR 1_3 25x 0.6 zoom PBS-Image Export-121_c1-2.tif,"(1024, 1024)",CTR,0:01,20,6,82.225,68,44.625,36.491,fkt20__1
+20241116  fkt20 P3 PEMS CTR 1_4 25x 0.6 zoom PBS-Image Export-120_c1-2.tif,"(1024, 1024)",CTR,0:01,20,6,83.354,72,43.521,35.069,fkt20__1
+20241116  fkt20 P3 PEMS CTR 1_5 25x 0.6 zoom PBS-Image Export-119_c1-2.tif,"(1024, 1024)",CTR,0:01,20,6,79.918,72,42.925,34.525,fkt20__1
+20241116  fkt20 P3 PEMS CTR 1_6 25x 0.6 zoom PBS-Image Export-118_c1-2.tif,"(1024, 1024)",CTR,0:01,20,6,77.694,72,42.837,34.323,fkt20__1
+20241116  fkt20 P3 PEMS CTR 1_7 25x 0.6 zoom PBS-Image Export-117_c1-2.tif,"(1024, 1024)",CTR,0:01,20,6,74.327,64,41.767,33.22,fkt20__1
+20241128  fkt20 P3 PEMS CTR 2_2 25x 0.6 zoom PBS-Image Export-71_c1-2.tif,"(1024, 1024)",CTR,0:01,20,6,78.993,72,45.097,37.009,fkt20__2
+20241128  fkt20 P3 PEMS CTR 2_25x 0.6 zoom PBS-Image Export-56_c1-2.tif,"(1024, 1024)",CTR,0:01,20,6,81.462,72,46.886,38.928,fkt20__2
+20241128  fkt20 P3 PEMS CTR 2_3 25x 0.6 zoom PBS-Image Export-55_c1-2.tif,"(1024, 1024)",CTR,0:01,20,6,78.519,72,44.647,36.469,fkt20__2
+20241128  fkt20 P3 PEMS CTR 2_4 25x 0.6 zoom PBS-Image Export-73_c1-2.tif,"(1024, 1024)",CTR,0:01,20,6,78.474,72,44.301,36.118,fkt20__2
+20241128  fkt20 P3 PEMS CTR 2_5 25x 0.6 zoom PBS-Image Export-72_c1-2.tif,"(1024, 1024)",CTR,0:01,20,6,79.619,68,45.556,37.408,fkt20__2
+20241128  fkt20 P3 PEMS CTR 2_6 25x 0.6 zoom PBS-Image Export-70_c1-2.tif,"(1024, 1024)",CTR,0:01,20,6,77.275,68,43.986,35.689,fkt20__2
+20241202  fkt20 P3 PEMS 1.5 2_2 25x 0.6 zoom PBS-Image Export-63_c1-2.tif,"(1024, 1024)",90s-30s,0:01,20,6,85.834,80,46.869,38.757,fkt20__2
+20241202  fkt20 P3 PEMS 1.5 2_25x 0.6 zoom PBS-Image Export-66_c1-2.tif,"(1024, 1024)",90s-30s,0:01,20,6,84.966,80,46.117,37.734,fkt20__2
+20241202  fkt20 P3 PEMS 1.5 2_3 25x 0.6 zoom PBS-Image Export-65_c1-2.tif,"(1024, 1024)",90s-30s,0:01,20,6,86.192,76,44.478,36.187,fkt20__2
+20241202  fkt20 P3 PEMS 1.5 2_4 25x 0.6 zoom PBS-Image Export-64_c1-2.tif,"(1024, 1024)",90s-30s,0:01,20,6,85.234,76,45.856,37.708,fkt20__2
+20241202  fkt20 P3 PEMS 1.5 2_5 25x 0.6 zoom PBS (not)-Image Export-62_c1-2.tif,"(1024, 1024)",90s-30s,0:01,20,6,87.858,100,46.435,38.137,fkt20__2
+20241202  fkt20 P3 PEMS 1.5 2_6 25x 0.6 zoom PBS-Image Export-61_c1-2.tif,"(1024, 1024)",90s-30s,0:01,20,6,84.034,80,43.121,34.483,fkt20__2
+20241202  fkt20 P3 PEMS 1.5 2_7 25x 0.6 zoom PBS-Image Export-60_c1-2.tif,"(1024, 1024)",90s-30s,0:01,20,6,85.86,80,41.912,33.212,fkt20__2
+20241202  fkt20 P3 PEMS 1.5 2_8 25x 0.6 zoom PBS-Image Export-59_c1-2.tif,"(1024, 1024)",90s-30s,0:01,20,6,83.563,80,42.462,33.652,fkt20__2
+20241202  fkt20 P3 PEMS 2h 2_2 25x 0.6 zoom PBS-Image Export-53_c1-2.tif,"(1024, 1024)",2h,0:01,20,6,79.394,76,42.087,33.695,fkt20__2
+20241202  fkt20 P3 PEMS 2h 2_25x 0.6 zoom PBS-Image Export-52_c1-2.tif,"(1024, 1024)",2h,0:01,20,6,81.435,80,42.433,33.946,fkt20__2
+20241202  fkt20 P3 PEMS 2h 2_3 25x 0.6 zoom PBS-Image Export-54_c1-2.tif,"(1024, 1024)",2h,0:01,20,6,76.953,72,40.144,31.486,fkt20__2
+20241202  fkt20 P3 PEMS 2h 2_4 25x 0.6 zoom PBS-Image Export-51_c1-2.tif,"(1024, 1024)",2h,0:01,20,6,76.668,72,40.113,31.523,fkt20__2
+20241202  fkt20 P3 PEMS 2h 2_5 25x 0.6 zoom PBS-Image Export-30_c1-2.tif,"(1024, 1024)",2h,0:01,20,6,77.018,68,40.493,32.176,fkt20__2
+20241202  fkt20 P3 PEMS 2h 2_6 25x 0.6 zoom PBS-Image Export-32_c1-2.tif,"(1024, 1024)",2h,0:01,20,6,81.103,80,43.81,35.209,fkt20__2
+20241202  fkt20 P3 PEMS 2h 2_7 25x 0.6 zoom PBS-Image Export-31_c1-2.tif,"(1024, 1024)",2h,0:01,20,6,80.522,80,43.624,35.222,fkt20__2
+20241116  fkt21 P3 PEMS CTR 1_2 25x 0.6 zoom PBS-Image Export-98_c1-2.tif,"(1024, 1024)",CTR,0:01,21,6,71.141,52,40.758,32.497,fkt21__1
+20241116  fkt21 P3 PEMS CTR 1_25x 0.6 zoom PBS-Image Export-99_c1-2.tif,"(1024, 1024)",CTR,0:01,21,6,63.911,52,37.998,29.55,fkt21__1
+20241116  fkt21 P3 PEMS CTR 1_3 25x 0.6 zoom PBS-Image Export-97_c1-2.tif,"(1024, 1024)",CTR,0:01,21,6,74.881,64,42.446,34.183,fkt21__1
+20241116  fkt21 P3 PEMS CTR 1_4 25x 0.6 zoom PBS (not)-Image Export-96_c1-2.tif,"(1024, 1024)",CTR,0:01,21,6,80.22,76,41.454,32.835,fkt21__1
+20241116  fkt21 P3 PEMS CTR 1_5 25x 0.6 zoom PBS-Image Export-95_c1-2.tif,"(1024, 1024)",CTR,0:01,21,6,93.172,100,41.298,32.731,fkt21__1
+20241116  fkt21 P3 PEMS CTR 1_6 25x 0.6 zoom PBS-Image Export-94_c1-2.tif,"(1024, 1024)",CTR,0:01,21,6,86.301,80,43.297,35.186,fkt21__1
+20241128  fkt21 P3 PEMS CTR 1_7 25x 0.6 zoom PBS-Image Export-38_c1-2.tif,"(1024, 1024)",CTR,0:01,21,6,82.735,76,41.478,33.247,fkt21__1
+20241128  fkt21 P3 PEMS 1.5 1_2 25x 0.6 zoom PBS-Image Export-74_c1-2.tif,"(1024, 1024)",90s-30s,0:01,21,6,88.641,104,46.803,38.865,fkt21__1
+20241128  fkt21 P3 PEMS 1.5 1_25x 0.6 zoom PBS-Image Export-75_c1-2.tif,"(1024, 1024)",90s-30s,0:01,21,6,87.643,100,45.27,37,fkt21__1
+20241128  fkt21 P3 PEMS 1.5 1_3 25x 0.6 zoom PBS-Image Export-90_c1-2.tif,"(1024, 1024)",90s-30s,0:01,21,6,87.45,80,45.043,36.789,fkt21__1
+20241128  fkt21 P3 PEMS 1.5 1_4 25x 0.6 zoom PBS-Image Export-89_c1-2.tif,"(1024, 1024)",90s-30s,0:01,21,6,89.927,100,45.297,37.116,fkt21__1
+20241128  fkt21 P3 PEMS 1.5 1_5 25x 0.6 zoom PBS-Image Export-88_c1-2.tif,"(1024, 1024)",90s-30s,0:01,21,6,86.06,76,46.663,38.457,fkt21__1
+20241128  fkt21 P3 PEMS 1.5 1_6 25x 0.6 zoom PBS-Image Export-86_c1-2.tif,"(1024, 1024)",90s-30s,0:01,21,6,87.759,80,43.308,34.89,fkt21__1
+20241128  fkt21 P3 PEMS 2h 1_2 25x 0.6 zoom PBS-Image Export-82_c1-2.tif,"(1024, 1024)",2h,0:01,21,6,79.841,80,40.676,31.616,fkt21__1
+20241128  fkt21 P3 PEMS 2h 1_25x 0.6 zoom PBS-Image Export-83_c1-2.tif,"(1024, 1024)",2h,0:01,21,6,84.584,76,46.071,37.821,fkt21__1
+20241128  fkt21 P3 PEMS 2h 1_3 25x 0.6 zoom PBS-Image Export-81_c1-2.tif,"(1024, 1024)",2h,0:01,21,6,78.089,72,43.138,34.493,fkt21__1
+20241128  fkt21 P3 PEMS 2h 1_4 25x 0.6 zoom PBS-Image Export-80_c1-2.tif,"(1024, 1024)",2h,0:01,21,6,75.646,68,40.237,31.697,fkt21__1
+20241128  fkt21 P3 PEMS 2h 1_5 25x 0.6 zoom PBS-Image Export-79_c1-2.tif,"(1024, 1024)",2h,0:01,21,6,76.445,72,43.312,34.839,fkt21__1
+20241128  fkt21 P3 PEMS 2h 1_6 25x 0.6 zoom PBS-Image Export-77_c1-2.tif,"(1024, 1024)",2h,0:01,21,6,81.101,80,42.858,33.863,fkt21__1
+20241128  fkt21 P3 PEMS 2h 1_7 25x 0.6 zoom PBS-Image Export-78_c1-2.tif,"(1024, 1024)",2h,0:01,21,6,78.359,72,40.917,32.387,fkt21__1
+20241202  fkt21 P3 PEMS 1.5 2_2 25x 0.6 zoom PBS (not)-Image Export-17_c1-2.tif,"(1024, 1024)",90s-30s,0:01,21,6,82.479,76,47.237,39.107,fkt21__2
+20241202  fkt21 P3 PEMS 1.5 2_25x 0.6 zoom PBS-Image Export-18_c1-2.tif,"(1024, 1024)",90s-30s,0:01,21,6,80.98,76,47.165,38.904,fkt21__2
+20241202  fkt21 P3 PEMS 1.5 2_3 25x 0.6 zoom PBS-Image Export-16_c1-2.tif,"(1024, 1024)",90s-30s,0:01,21,6,79.523,68,45.338,37.146,fkt21__2
+20241202  fkt21 P3 PEMS 1.5 2_4 25x 0.6 zoom PBS-Image Export-15_c1-2.tif,"(1024, 1024)",90s-30s,0:01,21,6,87.27,80,49.879,41.538,fkt21__2
+20241202  fkt21 P3 PEMS 1.5 2_5 25x 0.6 zoom PBS-Image Export-14_c1-2.tif,"(1024, 1024)",90s-30s,0:01,21,6,77.94,76,42.531,34.274,fkt21__2
+20241202  fkt21 P3 PEMS 1.5 2_6 25x 0.6 zoom PBS-Image Export-13_c1-2.tif,"(1024, 1024)",90s-30s,0:01,21,6,84.196,76,47.18,38.851,fkt21__2
+20241202  fkt21 P3 PEMS 1.5 2_7 25x 0.6 zoom PBS-Image Export-21_c1-2.tif,"(1024, 1024)",90s-30s,0:01,21,6,80.536,72,46.356,38.061,fkt21__2
+20241202  fkt21 P3 PEMS 2h 2_2 25x 0.6 zoom PBS-Image Export-07_c1-2.tif,"(1024, 1024)",2h,0:01,21,6,92.806,100,41.898,33.503,fkt21__2
+20241202  fkt21 P3 PEMS 2h 2_25x 0.6 zoom PBS-Image Export-08_c1-2.tif,"(1024, 1024)",2h,0:01,21,6,89.481,100,41.183,32.759,fkt21__2
+20241202  fkt21 P3 PEMS 2h 2_3 25x 0.6 zoom PBS-Image Export-06_c1-2.tif,"(1024, 1024)",2h,0:01,21,6,91.402,100,40.242,32.007,fkt21__2
+20241202  fkt21 P3 PEMS 2h 2_4 25x 0.6 zoom PBS-Image Export-05_c1-2.tif,"(1024, 1024)",2h,0:01,21,6,91.371,104,42.403,34.366,fkt21__2
+20241202  fkt21 P3 PEMS 2h 2_5 25x 0.6 zoom PBS-Image Export-04_c1-2.tif,"(1024, 1024)",2h,0:01,21,6,90.979,100,43.315,34.843,fkt21__2
+20241202  fkt21 P3 PEMS 2h 2_6 25x 0.6 zoom PBS-Image Export-03_c1-2.tif,"(1024, 1024)",2h,0:01,21,6,87.179,80,40.826,32.413,fkt21__2
+20241202  fkt21 P3 PEMS 2h 2_7 25x 0.6 zoom PBS-Image Export-02_c1-2.tif,"(1024, 1024)",2h,0:01,21,6,90.821,100,43.078,34.475,fkt21__2
+20241202  fkt21 P3 PEMS CTR 2_2 25x 0.6 zoom PBS-Image Export-35_c1-2.tif,"(1024, 1024)",CTR,0:01,21,6,79.93,76,38.373,29.715,fkt21__2
+20241202  fkt21 P3 PEMS CTR 2_25x 0.6 zoom PBS-Image Export-37_c1-2.tif,"(1024, 1024)",CTR,0:01,21,6,85.885,80,41.089,32.303,fkt21__2
+20241202  fkt21 P3 PEMS CTR 2_3 25x 0.6 zoom PBS-Image Export-33_c1-2.tif,"(1024, 1024)",CTR,0:01,21,6,78.154,76,41.278,32.831,fkt21__2
+20241202  fkt21 P3 PEMS CTR 2_4 25x 0.6 zoom PBS (not)-Image Export-34_c1-2.tif,"(1024, 1024)",CTR,0:01,21,6,74.469,56,42.189,33.869,fkt21__2
+20241202  fkt21 P3 PEMS CTR 2_5 25x 0.6 zoom PBS-Image Export-22_c1-2.tif,"(1024, 1024)",CTR,0:01,21,6,78.456,76,41.029,32.31,fkt21__2
+20241202  fkt21 P3 PEMS CTR 2_6 25x 0.6 zoom PBS-Image Export-27_c1-2.tif,"(1024, 1024)",CTR,0:01,21,6,83.968,76,43.149,34.692,fkt21__2
+20241202  fkt21 P3 PEMS CTR 2_7 25x 0.6 zoom PBS-Image Export-26_c1-2.tif,"(1024, 1024)",CTR,0:01,21,6,86.485,80,40.695,31.977,fkt21__2

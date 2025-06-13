@@ -38,7 +38,7 @@ from utils_other import (
 
 root_folder = os.getcwd()
 
-DRAFT = True
+DRAFT = False
 SHOW_PLOTS = True
 SAVE_PLOTS = True
 SAVE_STATS = True
@@ -180,12 +180,28 @@ class HOGAnalysis:
                 gradient_hist_180,
             )  # bin centered around 0, etc.. ok?
         )
+
+        import pickle
+
+        root_folder = os.getcwd()
+        file_path = os.path.join(root_folder, filename.strip(".tif") + "dict_pre.pkl")
+
+        # Serialize (pickle) the dictionary to a file in the project root
+        with open(file_path, "wb") as f:
+            pickle.dump(gradient_hist, f)
+
         if CORRECT_ARTEFACTS:
             correct_45deg = False if "20240928" in folder else True
             # correct_45deg = True
             gradient_hist = correction_of_round_angles(
                 gradient_hist, corr90=True, corr45=correct_45deg
             )
+
+        file_path = os.path.join(root_folder, filename.strip(".tif") + "dict_post.pkl")
+
+        # Serialize (pickle) the dictionary to a file in the project root
+        with open(file_path, "wb") as f:
+            pickle.dump(gradient_hist, f)
 
         # Compute distribution directions and grouped statistics
         mean_stats, mode_stats = compute_distribution_direction(
