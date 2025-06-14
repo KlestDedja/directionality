@@ -1,8 +1,10 @@
 # all image data
 data/*
 data-extra/*
-
+images-lightsheet*/
+images-confocal*/
 old_files/*
+testing/
 
 # Manuscript files
 manuscript-related-figures/
