@@ -38,12 +38,12 @@ from utils_other import (
 
 root_folder = os.getcwd()
 
-DRAFT = False
-SHOW_PLOTS = True
+DRAFT = True
+SHOW_PLOTS = False
 SAVE_PLOTS = True
 SAVE_STATS = True
 CORRECT_ARTEFACTS = True
-EXTRA_PLOTS = True
+EXTRA_PLOTS = False
 
 
 class HOGAnalysis:
@@ -99,33 +99,33 @@ class HOGAnalysis:
         print(f"Images after filtering: {len(image_files)}")
 
         if self.draft:
-            if "lightsheet-20241115" in sub_group_folder:
-                # Only process specific indices for lightsheet-20241115 in Draft mode
-                # selected_indices = [1004, 863, 1413]
-                list_run = list_boo_boo()
-                list_run = list_images_plot()
-                name_matches = [image_file in list_run for image_file in image_files]
-                selected_indices = list(np.where(name_matches)[0])
-                print(f"Draft mode: Processing only indices {selected_indices}")
-                for img_idx, image_file in enumerate(image_files):
-                    if img_idx in selected_indices:
-                        # if image_file in list_run:
-                        self.process_image(sub_group_folder, image_file, threshold)
-                        print("Processed image in the list:", image_file)
-                        print("indexed", img_idx)
+            # if "lightsheet-20241115" in sub_group_folder:
+            # Only process specific indices for lightsheet-20241115 in Draft mode
+            # selected_indices = [1004, 863, 1413]
+            # list_run = list_boo_boo()
+            # list_run = list_images_plot()
+            # name_matches = [image_file in list_run for image_file in image_files]
+            # selected_indices = list(np.where(name_matches)[0])
+            # print(f"Draft mode: Processing only indices {selected_indices}")
+            # for img_idx, image_file in enumerate(image_files):
+            #     if img_idx in selected_indices:
+            #         # if image_file in list_run:
+            #         self.process_image(sub_group_folder, image_file, threshold)
+            #         print("Processed image in the list:", image_file)
+            #         print("indexed", img_idx)
 
-            else:
-                # For other folders in Draft mode, process ~10 images uniformly distributed
-                if len(image_files) > 15:
-                    js = max(1, (len(image_files) // 10))
-                    image_files = image_files[::js][
-                        :10
-                    ]  # Approx. 10 uniformly spread images
-                    print(
-                        f"Draft mode: Processing {len(image_files)}, uniformly spread images."
-                    )
-                for img_idx, image_file in enumerate(image_files):
-                    self.process_image(sub_group_folder, image_file, threshold)
+            # else:
+            # For other folders in Draft mode, process ~10 images uniformly distributed
+            if len(image_files) > 15:
+                js = max(1, (len(image_files) // 10))
+                image_files = image_files[::js][
+                    :10
+                ]  # Approx. 10 uniformly spread images
+                print(
+                    f"Draft mode: Processing {len(image_files)}, uniformly spread images."
+                )
+            for img_idx, image_file in enumerate(image_files):
+                self.process_image(sub_group_folder, image_file, threshold)
         else:
             # If not in Draft mode, process all images
             for img_idx, image_file in enumerate(image_files):
@@ -184,7 +184,9 @@ class HOGAnalysis:
         import pickle
 
         root_folder = os.getcwd()
-        file_path = os.path.join(root_folder, filename.strip(".tif") + "dict_pre.pkl")
+        file_path = os.path.join(
+            root_folder, "testing", filename.strip(".tif") + "dict_pre.pkl"
+        )
 
         # Serialize (pickle) the dictionary to a file in the project root
         with open(file_path, "wb") as f:
@@ -197,7 +199,9 @@ class HOGAnalysis:
                 gradient_hist, corr90=True, corr45=correct_45deg
             )
 
-        file_path = os.path.join(root_folder, filename.strip(".tif") + "dict_post.pkl")
+        file_path = os.path.join(
+            root_folder, "testing", filename.strip(".tif") + "dict_post.pkl"
+        )
 
         # Serialize (pickle) the dictionary to a file in the project root
         with open(file_path, "wb") as f:
