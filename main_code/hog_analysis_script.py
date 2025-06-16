@@ -157,14 +157,32 @@ class HOGAnalysis:
             )
         )
 
-        gradient_hist = correct_round_angles(
+        import pickle
+
+        file_path = os.path.join(os.getcwd(), "testing")
+
+        dict_pre = os.path.join(file_path, filename.strip(".tif") + "dict_pre.pkl")
+        dict_post = os.path.join(file_path, filename.strip(".tif") + "dict_post.pkl")
+
+        with open(dict_pre, "rb") as f:
+            gradient_dict_pre = pickle.load(f)
+        with open(dict_post, "rb") as f:
+            gradient_dict_post = pickle.load(f)
+
+        print("assertion before rounding:")
+        print(all(a == b for a, b in zip(gradient_hist, gradient_dict_pre)))
+
+        gradient_hist_post = correct_round_angles(
             gradient_hist, corr90=True, corr45=("20240928" not in folder)
         )
+
+        print("assertion after rounding:")
+        print(all(a == b for a, b in zip(gradient_hist_post, gradient_dict_post)))
 
         # mean_stats, mode_stats = compute_distribution_direction(
         #     gradient_hist, list(gradient_hist.keys())
         # )
-        mean_stats, mode_stats = compute_distribution_direction(gradient_hist)
+        mean_stats, mode_stats = compute_distribution_direction(gradient_hist_post)
 
         self.save_stats(filename, image, threshold, mean_stats, mode_stats, t1)
 
