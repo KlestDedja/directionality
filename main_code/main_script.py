@@ -10,13 +10,13 @@ from main_code.get_default_params import (
 )
 
 # ===== DEVELOPER SETTINGS ==========
-DRAFT_MODE = False
+DRAFT_MODE = True
 BLOCK_NORM = None  # or "L2-Hys"
 VERBOSE = 1  # higher value -> printing more debug messages
 
 # ========== USER SETTINGS ==========
 CELL_SIZE = 64  # pixels per cell for HOG descriptor
-CHANNEL = 1  # channel axis for HOG descriptor
+CHANNEL = 1  # channel color for HOG descriptor
 
 SAVE_STATS = True  # save statistics to CSV
 SAVE_PLOTS = True  # save ouctcomes of directionality analysis
