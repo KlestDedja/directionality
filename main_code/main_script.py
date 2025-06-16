@@ -1,5 +1,3 @@
-# main_script.py
-
 import os
 from main_code.hog_analysis_script import HOGAnalysis
 from main_code.postprocess_csv_files import postprocess_hog_csv
