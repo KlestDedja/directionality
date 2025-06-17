@@ -41,6 +41,7 @@ class HOGAnalysis:
         self.draft = draft
         self.show_plots = show_plots
         self.df_statistics = pd.DataFrame()
+        self.saved_stats_path = None
 
         # If the user wants to see plots, turn on interactive mode
         if self.show_plots:
@@ -87,7 +88,7 @@ class HOGAnalysis:
             self.process_image(image_folder, image_file, threshold, save_plots)
 
         if save_stats:
-            self.save_results(self.output_folder)
+            self.saved_stats_path = self.save_results(self.output_folder)
 
     def clean_and_select_channel(self, image, channel_image: int | str = -1):
 
@@ -143,7 +144,7 @@ class HOGAnalysis:
             fd_norm = np.squeeze(fd_norm)
         else:
             hog_image = hog_image_bg
-            fd_norm = fd_bg / (1e-7 + strengths[:, :, np.newaxis])
+            fd_norm = fd_bg  # / (1e-7 + strengths[:, :, np.newaxis])
 
         # Drop cells below threshold, the rest is normalised if self.block_norm
         # is None, so that all cells have equal weight in the histogram
@@ -157,27 +158,27 @@ class HOGAnalysis:
             )
         )
 
-        import pickle
+        # import pickle
 
-        file_path = os.path.join(os.getcwd(), "testing")
+        # file_path = os.path.join(os.getcwd(), "testing")
 
-        dict_pre = os.path.join(file_path, filename.strip(".tif") + "dict_pre.pkl")
-        dict_post = os.path.join(file_path, filename.strip(".tif") + "dict_post.pkl")
+        # dict_pre = os.path.join(file_path, filename.strip(".tif") + "dict_pre.pkl")
+        # dict_post = os.path.join(file_path, filename.strip(".tif") + "dict_post.pkl")
 
-        with open(dict_pre, "rb") as f:
-            gradient_dict_pre = pickle.load(f)
-        with open(dict_post, "rb") as f:
-            gradient_dict_post = pickle.load(f)
+        # with open(dict_pre, "rb") as f:
+        #     gradient_dict_pre = pickle.load(f)
+        # with open(dict_post, "rb") as f:
+        #     gradient_dict_post = pickle.load(f)
 
-        print("assertion before rounding:")
-        print(all(a == b for a, b in zip(gradient_hist, gradient_dict_pre)))
+        # print("assertion before rounding:")
+        # print(all(a == b for a, b in zip(gradient_hist, gradient_dict_pre)))
 
         gradient_hist_post = correct_round_angles(
             gradient_hist, corr90=True, corr45=("20240928" not in folder)
         )
 
-        print("assertion after rounding:")
-        print(all(a == b for a, b in zip(gradient_hist_post, gradient_dict_post)))
+        # print("assertion after rounding:")
+        # print(all(a == b for a, b in zip(gradient_hist_post, gradient_dict_post)))
 
         # mean_stats, mode_stats = compute_distribution_direction(
         #     gradient_hist, list(gradient_hist.keys())
@@ -285,7 +286,9 @@ class HOGAnalysis:
     def save_results(self, save_folder):
         fname = f"HOG_stats_{self.block_norm}_{self.hog_descriptor.pixels_per_cell[0]}pixels"
         if self.draft:
-            fname += "_draft"
-        final_path = os.path.join(save_folder, fname + ".csv")
-        self.df_statistics.to_csv(final_path, index=True)
-        print(f"Saved results to {final_path}")
+            fname += "_draft2"
+        saved_stats_path = os.path.join(save_folder, fname + ".csv")
+        self.df_statistics.to_csv(saved_stats_path, index=True)
+        print(f"Saved results to {saved_stats_path}")
+
+        return saved_stats_path

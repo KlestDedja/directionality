@@ -19,7 +19,7 @@ CELL_SIZE = 64  # pixels per cell for HOG descriptor
 CHANNEL = 1  # channel color for HOG descriptor
 
 SAVE_STATS = True  # save statistics to CSV
-SAVE_PLOTS = True  # save ouctcomes of directionality analysis
+SAVE_PLOTS = False  # save ouctcomes of directionality analysis
 SHOW_PLOTS = False  # show plots interactively
 
 # ========== FOLDER STRUCTURE ==========
@@ -74,12 +74,17 @@ if __name__ == "__main__":
 
     # ========== POSTPROCESS RESULTS FILE ==========
 
-    filename = (
-        f"HOG_stats_{BLOCK_NORM}_{CELL_SIZE}pixels"  # manual? Can we rather retrieve?
-    )
-    if DRAFT_MODE:
-        filename += "_draft"
-    csv_path = os.path.join(output_folder_path, f"{filename}.csv")
+    # filename = (
+    #     f"HOG_stats_{BLOCK_NORM}_{CELL_SIZE}pixels"  # manual? Can we rather retrieve?
+    # )
 
-    df, clean_csv_path = postprocess_hog_csv(csv_path)
+    stats_file = hog_runner.saved_stats_path
+    df, clean_csv_path = postprocess_hog_csv(stats_file)
     df.to_csv(clean_csv_path, index=False)
+
+    # if DRAFT_MODE:
+    #     filename += "_draft2"
+    # csv_path = os.path.join(output_folder_path, f"{filename}.csv")
+
+    # df, clean_csv_path = postprocess_hog_csv(csv_path)
+    # df.to_csv(clean_csv_path, index=False)
