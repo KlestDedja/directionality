@@ -41,6 +41,7 @@ class HOGAnalysis:
         self.draft = draft
         self.show_plots = show_plots
         self.df_statistics = pd.DataFrame()
+        self.saved_stats_path = None
 
         # If the user wants to see plots, turn on interactive mode
         if self.show_plots:
@@ -87,7 +88,7 @@ class HOGAnalysis:
             self.process_image(image_folder, image_file, threshold, save_plots)
 
         if save_stats:
-            self.save_results(self.output_folder)
+            self.saved_stats_path = self.save_results(self.output_folder)
 
     def clean_and_select_channel(self, image, channel_image: int | str = -1):
 
@@ -143,7 +144,7 @@ class HOGAnalysis:
             fd_norm = np.squeeze(fd_norm)
         else:
             hog_image = hog_image_bg
-            fd_norm = fd_bg / (1e-7 + strengths[:, :, np.newaxis])
+            fd_norm = fd_bg  # / (1e-7 + strengths[:, :, np.newaxis])
 
         # Drop cells below threshold, the rest is normalised if self.block_norm
         # is None, so that all cells have equal weight in the histogram
@@ -267,7 +268,9 @@ class HOGAnalysis:
     def save_results(self, save_folder):
         fname = f"HOG_stats_{self.block_norm}_{self.hog_descriptor.pixels_per_cell[0]}pixels"
         if self.draft:
-            fname += "_draft"
-        final_path = os.path.join(save_folder, fname + ".csv")
-        self.df_statistics.to_csv(final_path, index=True)
-        print(f"Saved results to {final_path}")
+            fname += "_draft2"
+        saved_stats_path = os.path.join(save_folder, fname + ".csv")
+        self.df_statistics.to_csv(saved_stats_path, index=True)
+        print(f"Saved results to {saved_stats_path}")
+
+        return saved_stats_path
