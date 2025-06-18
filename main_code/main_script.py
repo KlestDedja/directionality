@@ -17,7 +17,7 @@ VERBOSE = 1  # higher value -> printing more debug messages
 # ========== USER SETTINGS ==========
 CELL_SIZE = 64  # pixels per cell for HOG descriptor
 CHANNEL = 1  # channel color for HOG descriptor
-POST_NORMALIZATION = False  # normalize color brightness across cells
+POST_NORMALIZATION = True  # normalize color brightness across cells
 
 SAVE_STATS = True  # save statistics to CSV
 SAVE_PLOTS = True  # save ouctcomes of directionality analysis

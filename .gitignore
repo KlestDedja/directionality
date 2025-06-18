@@ -5,7 +5,7 @@ images-lightsheet*/
 images-confocal*/
 old_files/*
 testing/
-demo-data/output-analysis/*
+demo-data/output_analysis/*
 
 # Manuscript files
 manuscript-related-figures/
