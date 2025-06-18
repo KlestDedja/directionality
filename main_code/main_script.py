@@ -29,7 +29,8 @@ ROOT_FOLDER = os.getcwd()
 # DATA_FOLDER_NAME = "images-confocal-20241022-fusion-bMyoB-BAMS-TM-6w"
 # DATA_FOLDER_NAME = "images-good-bad-validation"
 # DATA_FOLDER_NAME = "images-confocal-20241116-fusion-bMyoB-PEMFS-TM-12w"
-DATA_FOLDER_NAME = "images-lightsheet-20241115_BAM_fkt20-P3-fkt21-P3-PEMFS-12w"
+# DATA_FOLDER_NAME = "images-lightsheet-20241115_BAM_fkt20-P3-fkt21-P3-PEMFS-12w"
+DATA_FOLDER_NAME = "images-lightsheet-20240928_BAM_fkt20_P3_fkt21_P3_PEMFS"
 
 INPUT_FOLDER = "input_images"
 OUTPUT_FOLDER = "output_analysis"
