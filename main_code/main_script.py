@@ -26,12 +26,8 @@ SHOW_PLOTS = False  # show plots interactively
 # ========== FOLDER STRUCTURE ==========
 ROOT_FOLDER = os.getcwd()
 
-# DATA_FOLDER_NAME = "images-confocal-20241022-fusion-bMyoB-BAMS-TM-6w"
-# DATA_FOLDER_NAME = "images-good-bad-validation""
-# DATA_FOLDER_NAME = "images-confocal-20241116-fusion-bMyoB-PEMFS-TM-12w"
-# DATA_FOLDER_NAME = "images-confocal-20241022-fusion-bMyoB-BAMS-TM-6w"
-DATA_FOLDER_NAME = "images-lightsheet-20241115_BAM_fkt20-P3-fkt21-P3-PEMFS-12w"
-# DATA_FOLDER_NAME = "images-lightsheet-20240928_BAM_fkt20_P3_fkt21_P3_PEMFS"
+# change accordingly if your structure differs from the demo
+DATA_FOLDER_NAME = "demo-data"
 
 INPUT_FOLDER = "input_images"
 OUTPUT_FOLDER = "output_analysis"
@@ -39,7 +35,7 @@ OUTPUT_FOLDER = "output_analysis"
 # ========== RUN ANALYSIS ==========
 if __name__ == "__main__":
 
-    data_folder = os.path.join(ROOT_FOLDER, "data", DATA_FOLDER_NAME)
+    data_folder = os.path.join(ROOT_FOLDER, DATA_FOLDER_NAME)
 
     image_folder_path = os.path.join(data_folder, INPUT_FOLDER)
     output_folder_path = os.path.join(data_folder, OUTPUT_FOLDER)
@@ -87,10 +83,3 @@ if __name__ == "__main__":
         print(f"Storing final cvs results in {stats_file}")
     df, clean_csv_path = postprocess_hog_csv(stats_file, "_clean")
     df.to_csv(clean_csv_path, index=False)
-
-    # if DRAFT_MODE:
-    #     filename += "_draft2"
-    # csv_path = os.path.join(output_folder_path, f"{filename}.csv")
-
-    # df, clean_csv_path = postprocess_hog_csv(csv_path)
-    # df.to_csv(clean_csv_path, index=False)
