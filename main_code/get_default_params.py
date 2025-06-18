@@ -13,20 +13,20 @@ DEFAULT_CHANNEL = int(defaults_df["channel"])
 DEFAULT_BACKGROUND_MIN = float(defaults_df["background_min"])
 DEFAULT_BACKGROUND_MAX = float(defaults_df["background_max"])
 
-overrides_df = df.drop(index="default")
+overrides_df = df.drop(index="default")  # TO?DO: move to within _find_override function
 
 
 def _find_override(folder: str | bytes, col: str, cast):
     """
     Look for the first override whose 'dataset_name' (index) appears in folder,
     and return the non-NaN value for column `col`:
-      - if it’s a string, return it (stripped) [useful for cahnnel = 'grayscale']
+      - if it’s a string, return it (stripped) [useful for channel = 'grayscale']
       - otherwise, cast it via `cast` (e.g. int, float)
     Returns None if no override applies.
     """
     for name, row in overrides_df.iterrows():
-        key = str(name)  # ensure we’re working with a string
-        if key in folder and not pd.isna(row[col]):
+        name = str(name)  # ensure we are working with a string
+        if name in folder and not pd.isna(row[col]):
             val = row[col]
             if isinstance(val, str):
                 return val.strip()
@@ -75,7 +75,7 @@ def get_folder_cellsize(folder: str | bytes) -> int:
     return int(size)
 
 
-def get_background_range(folder: str | bytes, verbose: int = 0) -> tuple[float, float]:
+def get_background_range(folder: str | bytes) -> tuple[float, float]:
     """
     Return (background_min, background_max) for this folder path.
     Falls back to DEFAULT_BACKGROUND_MIN and DEFAULT_BACKGROUND_MAX if no
