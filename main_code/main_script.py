@@ -21,7 +21,7 @@ POST_NORMALIZATION = True  # normalize color brightness across cells
 
 SAVE_STATS = True  # save statistics to CSV
 SAVE_PLOTS = True  # save ouctcomes of directionality analysis
-SHOW_PLOTS = False  # show plots interactively
+SHOW_PLOTS = True  # show plots interactively
 
 # ========== FOLDER STRUCTURE ==========
 ROOT_FOLDER = os.getcwd()
