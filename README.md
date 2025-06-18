@@ -44,7 +44,7 @@ You should be good to go!
 ## 🚀 Try It Out: Run the example demo
 To see the Directionality tool in action, you can use the example dataset in the `demo-data` folder.
 
-You simply have to run  `main_script.py` from your favorite IDE or through a bash command. Make sure you are pointing to the location of this repository.  
+You simply have to run  `main_script.py` (in the `main_code` folder) from your favorite IDE or through a bash command. Make sure you are pointing to the location of this repository.  
 
 ## 📂 What happens when you run it?
 
