@@ -17,6 +17,7 @@ VERBOSE = 1  # higher value -> printing more debug messages
 # ========== USER SETTINGS ==========
 CELL_SIZE = 64  # pixels per cell for HOG descriptor
 CHANNEL = 1  # channel color for HOG descriptor
+POST_NORMALIZATION = False  # normalize color brightness across cells
 
 SAVE_STATS = True  # save statistics to CSV
 SAVE_PLOTS = False  # save ouctcomes of directionality analysis
@@ -53,6 +54,7 @@ if __name__ == "__main__":
         print(f"Using cell size={CELL_SIZE}")
         print(f"Using channel={CHANNEL}")
         print(f"Using background range=({100*BG_RANGE[0]}%, {100*BG_RANGE[1]}%)")
+        print(f"Staining normalization: {POST_NORMALIZATION}")
 
     hog_runner = HOGAnalysis(
         input_folder=image_folder_path,
@@ -63,10 +65,14 @@ if __name__ == "__main__":
         background_range=BG_RANGE,
         draft=DRAFT_MODE,
         show_plots=SHOW_PLOTS,
+        post_normalization=POST_NORMALIZATION,
     )
+
+    filename = f"HOG_stats_{BLOCK_NORM}_{CELL_SIZE}pixels"
 
     hog_runner.process_folder(
         image_folder=image_folder_path,
+        output_filename=filename,
         threshold=THRESHOLD,
         save_stats=SAVE_STATS,
         save_plots=SAVE_PLOTS,
@@ -74,12 +80,10 @@ if __name__ == "__main__":
 
     # ========== POSTPROCESS RESULTS FILE ==========
 
-    # filename = (
-    #     f"HOG_stats_{BLOCK_NORM}_{CELL_SIZE}pixels"  # manual? Can we rather retrieve?
-    # )
-
     stats_file = hog_runner.saved_stats_path
-    df, clean_csv_path = postprocess_hog_csv(stats_file)
+    if VERBOSE > 0:
+        print(f"Storing final cvs results in {stats_file}")
+    df, clean_csv_path = postprocess_hog_csv(stats_file, "_clean")
     df.to_csv(clean_csv_path, index=False)
 
     # if DRAFT_MODE:

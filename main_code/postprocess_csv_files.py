@@ -63,13 +63,15 @@ def extract_donor(filename):
     return match.group(0) if match else "Unknown"
 
 
-def postprocess_hog_csv(csv_path, verbose=True, missing_threshold=2):
+def postprocess_hog_csv(
+    csv_path, filename_extra_tail="_clean", verbose=True, missing_threshold=2
+):
     """
     Postprocessign steps: add 'condition' and 'replicate' column.
     Finally, drop rows that exceed the missing‐value threshold.
     """
 
-    cleaned_csv_path = csv_path.replace(".csv", "_clean.csv")
+    cleaned_csv_path = csv_path.replace(".csv", filename_extra_tail + ".csv")
 
     if verbose:
         print(f"Reading raw CSV from:\n{csv_path}")

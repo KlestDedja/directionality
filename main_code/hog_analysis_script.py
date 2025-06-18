@@ -31,6 +31,7 @@ class HOGAnalysis:
         background_range=(0.10, 0.90),
         draft: bool = False,
         show_plots: bool = False,
+        post_normalization: bool = True,
     ):
         self.input_folder = input_folder  # default: ./input_images
         self.output_folder = output_folder  # default: ./output_analysis
@@ -40,6 +41,7 @@ class HOGAnalysis:
         self.background_range = background_range
         self.draft = draft
         self.show_plots = show_plots
+        self.post_normalization = post_normalization
         self.df_statistics = pd.DataFrame()
         self.saved_stats_path = None
 
@@ -56,7 +58,8 @@ class HOGAnalysis:
 
     def process_folder(
         self,
-        image_folder: str,
+        image_folder: str | bytes,
+        output_filename: str | bytes,
         threshold: float | int,
         save_stats: bool = True,
         save_plots: bool = True,
@@ -88,7 +91,9 @@ class HOGAnalysis:
             self.process_image(image_folder, image_file, threshold, save_plots)
 
         if save_stats:
-            self.saved_stats_path = self.save_results(self.output_folder)
+            self.saved_stats_path = self.save_results_to_file(
+                self.output_folder, output_filename
+            )
 
     def clean_and_select_channel(self, image, channel_image: int | str = -1):
 
@@ -144,7 +149,10 @@ class HOGAnalysis:
             fd_norm = np.squeeze(fd_norm)
         else:
             hog_image = hog_image_bg
-            fd_norm = fd_bg  # / (1e-7 + strengths[:, :, np.newaxis])
+            if self.post_normalization is True:
+                fd_norm = fd_bg / (1e-7 + strengths[:, :, np.newaxis])
+            else:
+                fd_norm = fd_bg
 
         # Drop cells below threshold, the rest is normalised if self.block_norm
         # is None, so that all cells have equal weight in the histogram
@@ -251,25 +259,13 @@ class HOGAnalysis:
 
         df_row = pd.DataFrame(stats, index=[filename])
 
-        # df_row.insert(
-        #     1, "condition", set_sample_condition(filename, suppress_warnings=True)
-        # )
-        # df_row.insert(2, "donor", self.extract_donor(filename))
-        # df_row.insert(
-        #     3, "replicate", set_sample_replicate(filename, suppress_warnings=True)
-        # )
-
         self.df_statistics = pd.concat([self.df_statistics, df_row])
 
-    # def extract_donor(self, filename):
-    #     match = re.search(r"fkt\d{1,2}", filename)
-    #     return match.group(0) if match else "Unknown"
-
-    def save_results(self, save_folder):
-        fname = f"HOG_stats_{self.block_norm}_{self.hog_descriptor.pixels_per_cell[0]}pixels"
+    def save_results_to_file(self, save_folder, filename):
+        # fname = f"HOG_stats_{self.block_norm}_{self.hog_descriptor.pixels_per_cell[0]}pixels"
         if self.draft:
-            fname += "_draft2"
-        saved_stats_path = os.path.join(save_folder, fname + ".csv")
+            filename += "_draft"
+        saved_stats_path = os.path.join(save_folder, filename + ".csv")
         self.df_statistics.to_csv(saved_stats_path, index=True)
         print(f"Saved results to {saved_stats_path}")
 
