@@ -75,7 +75,7 @@ class HOGAnalysis:
             image_files = [
                 f
                 for f in os.listdir(image_folder)
-                if not "z" in f or int(re.search(r"z(\d+)", f).group(1)) % 5 == 0
+                if not "z" in f or int(re.search(r"z(\d+)", f).group(1)) % 10 == 0
             ]
 
         if self.draft and len(image_files) > 15:

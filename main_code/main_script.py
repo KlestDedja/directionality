@@ -10,7 +10,7 @@ from main_code.get_default_params import (
 )
 
 # ===== DEVELOPER SETTINGS ==========
-DRAFT_MODE = True
+DRAFT_MODE = False
 BLOCK_NORM = None  # or "L2-Hys"
 VERBOSE = 1  # higher value -> printing more debug messages
 
@@ -20,17 +20,18 @@ CHANNEL = 1  # channel color for HOG descriptor
 POST_NORMALIZATION = False  # normalize color brightness across cells
 
 SAVE_STATS = True  # save statistics to CSV
-SAVE_PLOTS = False  # save ouctcomes of directionality analysis
+SAVE_PLOTS = True  # save ouctcomes of directionality analysis
 SHOW_PLOTS = False  # show plots interactively
 
 # ========== FOLDER STRUCTURE ==========
 ROOT_FOLDER = os.getcwd()
 
 # DATA_FOLDER_NAME = "images-confocal-20241022-fusion-bMyoB-BAMS-TM-6w"
-# DATA_FOLDER_NAME = "images-good-bad-validation"
+# DATA_FOLDER_NAME = "images-good-bad-validation""
 # DATA_FOLDER_NAME = "images-confocal-20241116-fusion-bMyoB-PEMFS-TM-12w"
-# DATA_FOLDER_NAME = "images-lightsheet-20241115_BAM_fkt20-P3-fkt21-P3-PEMFS-12w"
-DATA_FOLDER_NAME = "images-lightsheet-20240928_BAM_fkt20_P3_fkt21_P3_PEMFS"
+# DATA_FOLDER_NAME = "images-confocal-20241022-fusion-bMyoB-BAMS-TM-6w"
+DATA_FOLDER_NAME = "images-lightsheet-20241115_BAM_fkt20-P3-fkt21-P3-PEMFS-12w"
+# DATA_FOLDER_NAME = "images-lightsheet-20240928_BAM_fkt20_P3_fkt21_P3_PEMFS"
 
 INPUT_FOLDER = "input_images"
 OUTPUT_FOLDER = "output_analysis"
