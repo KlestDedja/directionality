@@ -1,4 +1,6 @@
 import os
+# The following imports work only assuing the working directory is the main repository folder,
+# which contains the main_code folder and the demo-data folder.
 from main_code.hog_analysis_script import HOGAnalysis
 from main_code.postprocess_csv_files import postprocess_hog_csv
 
@@ -20,7 +22,7 @@ CHANNEL = 1  # channel color for HOG descriptor
 POST_NORMALIZATION = True  # normalize color brightness across windows
 
 SAVE_STATS = True  # save statistics to CSV
-SAVE_PLOTS = False  # save ouctcomes of directionality analysis
+SAVE_PLOTS = True  # save ouctcomes of directionality analysis
 SHOW_PLOTS = False  # show plots interactively
 
 # ========== FOLDER STRUCTURE ==========
