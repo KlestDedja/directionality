@@ -1,6 +1,6 @@
 <a name="logo-anchor"></a>
 <p align="center">
-<img src="https://github.com/Klest94/directionality/blob/main/directionality-logo.png?raw=true" alt="Directionality Logo" width="20%"/>
+<img src="directionality-logo.png?raw=true" alt="Directionality Logo" width="20%"/>
 </p>
 
 # Directionality
