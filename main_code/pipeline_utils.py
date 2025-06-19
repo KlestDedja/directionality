@@ -25,13 +25,13 @@ class HOGDescriptor:
     def __init__(
         self,
         orientations=9,
-        pixels_per_cell=(8, 8),
-        cells_per_block=(3, 3),
+        pixels_per_window=(8, 8),
+        windows_per_block=(3, 3),
         channel_axis: int | None | str = -1,
     ):
         self.orientations = orientations
-        self.pixels_per_cell = pixels_per_cell
-        self.cells_per_block = cells_per_block
+        self.pixels_per_window = pixels_per_window
+        self.windows_per_block = windows_per_block
         self.channel_axis = channel_axis
         self.fd = None
         self.hog_image = None
@@ -56,8 +56,8 @@ class HOGDescriptor:
             self.fd, self.hog_image = hog(
                 image,
                 orientations=self.orientations,
-                pixels_per_cell=self.pixels_per_cell,
-                cells_per_block=self.cells_per_block,
+                pixels_per_window=self.pixels_per_window,
+                windows_per_block=self.windows_per_block,
                 visualize=visualize,
                 block_norm=block_norm,
                 feature_vector=feature_vector,
@@ -67,8 +67,8 @@ class HOGDescriptor:
             self.fd = hog(
                 image,
                 orientations=self.orientations,
-                pixels_per_cell=self.pixels_per_cell,
-                cells_per_block=self.cells_per_block,
+                pixels_per_window=self.pixels_per_window,
+                windows_per_block=self.windows_per_block,
                 visualize=False,
                 block_norm=block_norm,
                 feature_vector=feature_vector,

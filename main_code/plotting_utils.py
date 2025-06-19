@@ -166,8 +166,8 @@ def explanatory_plot_hog(image):
     # HOG image here (example)
     hog_descriptor = HOGDescriptor(
         orientations=15,
-        pixels_per_cell=(64, 64),
-        cells_per_block=(1, 1),
+        pixels_per_window=(64, 64),
+        windows_per_block=(1, 1),
         channel_axis=-1,
     )
 
@@ -208,8 +208,8 @@ def explanatory_normalized_hog(image):
     # HOG image here (example)
     hog_descriptor = HOGDescriptor(
         orientations=15,
-        pixels_per_cell=(64, 64),
-        cells_per_block=(1, 1),
+        pixels_per_window=(64, 64),
+        windows_per_block=(1, 1),
         channel_axis=-1,
     )
 
@@ -240,7 +240,7 @@ def explanatory_normalized_hog(image):
     fd_norm[~cells_to_keep, :] = 0
 
     # now do the same normalization procedure to hog_image itself
-    py, px = hog_descriptor.pixels_per_cell
+    py, px = hog_descriptor.pixels_per_window
     h_cells, w_cells = strengths.shape
 
     # reshape the visualization into (n_cells_y, py, n_cells_x, px)
@@ -284,8 +284,8 @@ def explanatory_plot_filter(image):
     # HOG image here (example)
     hog_descriptor = HOGDescriptor(
         orientations=45,
-        pixels_per_cell=(64, 64),
-        cells_per_block=(1, 1),
+        pixels_per_window=(64, 64),
+        windows_per_block=(1, 1),
         channel_axis=-1,
     )
 
@@ -361,8 +361,8 @@ def explanatory_plot_polar(
     # HOG image here (example)
     hog_descriptor = HOGDescriptor(
         orientations=45,
-        pixels_per_cell=(64, 64),
-        cells_per_block=(1, 1),
+        pixels_per_window=(64, 64),
+        windows_per_block=(1, 1),
         channel_axis=-1,
     )
 

@@ -51,8 +51,8 @@ class HOGAnalysis:
 
         self.hog_descriptor = HOGDescriptor(
             orientations=45,
-            pixels_window=self.pixels_window,
-            cells_per_block=(1, 1),
+            pixels_per_window=self.pixels_per_window,
+            windows_per_block=(1, 1),
             channel_axis=-1,  # default value for RGB images
         )
 

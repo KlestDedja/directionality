@@ -7,7 +7,7 @@ df = pd.read_csv(PATH, index_col=0)
 
 # ---- extract default and overriding values ----
 defaults_df = df.loc["default"]
-DEFAULT_CELL_SIZE = int(defaults_df["cell_size"])
+DEFAULT_WINDOW_SIZE = int(defaults_df["window_size"])
 DEFAULT_THRESHOLD = float(defaults_df["threshold"])
 DEFAULT_CHANNEL = int(defaults_df["channel"])
 DEFAULT_BACKGROUND_MIN = float(defaults_df["background_min"])
@@ -62,15 +62,15 @@ def get_folder_channel(folder: str | bytes) -> int | str:
     return channel
 
 
-def get_folder_cellsize(folder: str | bytes) -> int:
+def get_folder_winsize(folder: str | bytes) -> int:
     """
     Return the cell size (n,n) for this folder path.
-    Falls back to DEFAULT_CELL_SIZE if no override applies.
+    Falls back to DEFAULT_WINDOW_SIZE if no override applies.
     """
-    size = _find_override(folder, "cell_size", int)
+    size = _find_override(folder, "window_size", int)
 
     if size is None:
-        size = DEFAULT_CELL_SIZE
+        size = DEFAULT_WINDOW_SIZE
 
     return int(size)
 

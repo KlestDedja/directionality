@@ -3,7 +3,7 @@ from main_code.hog_analysis_script import HOGAnalysis
 from main_code.postprocess_csv_files import postprocess_hog_csv
 
 from main_code.get_default_params import (
-    get_folder_cellsize,
+    get_folder_winsize,
     get_folder_threshold,
     get_folder_channel,
     get_background_range,
@@ -15,9 +15,9 @@ BLOCK_NORM = None  # or "L2-Hys"
 VERBOSE = 1  # higher value -> printing more debug messages
 
 # ========== USER SETTINGS ==========
-WINDOW_SIZE = 64  # pixels per cell for HOG descriptor
+WINDOW_SIZE = 64  # pixels per window for HOG descriptor
 CHANNEL = 1  # channel color for HOG descriptor
-POST_NORMALIZATION = True  # normalize color brightness across cells
+POST_NORMALIZATION = True  # normalize color brightness across windows
 
 SAVE_STATS = True  # save statistics to CSV
 SAVE_PLOTS = True  # save ouctcomes of directionality analysis
@@ -42,7 +42,7 @@ if __name__ == "__main__":
 
     # fetch per-folder defaults
     THRESHOLD = get_folder_threshold(image_folder_path)
-    WINDOW_SIZE = get_folder_cellsize(image_folder_path)
+    WINDOW_SIZE = get_folder_winsize(image_folder_path)
     CHANNEL = get_folder_channel(image_folder_path)
     BG_RANGE = get_background_range(image_folder_path)
 
