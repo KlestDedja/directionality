@@ -1,7 +1,6 @@
 numpy
-scikit-learn
 pandas
-scikit-image
+scikit-image @ git+https://github.com/Klest94/scikit-image-fork.git@v0.25-no-hog-normalization
 matplotlib
 ipykernel
 imagecodecs
