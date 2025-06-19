@@ -58,11 +58,9 @@ Computes signal directionality and visualizations
 
 Saves results into `demo-data/output_analysis/`, including:
 
-- 📊 `HOG_stats_<params>.csv`: summary of average and modal signal directions, with deviations
-
 - 🖼️ One PNG plot per image: overlays original image, HOG visualization, signal strength map, and polar histogram
 
-- ✅ Cleaned CSV file: `HOG_stats_<params>_clean.csv` (filtered and enriched with metadata)
+- 📊 Cleaned CSV file: `HOG_stats_<params>_clean.csv` summary of average and modal signal directions, with deviations (filtered and enriched with metadata)
 
 
 
