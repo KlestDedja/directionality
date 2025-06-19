@@ -15,7 +15,7 @@ BLOCK_NORM = None  # or "L2-Hys"
 VERBOSE = 1  # higher value -> printing more debug messages
 
 # ========== USER SETTINGS ==========
-CELL_SIZE = 64  # pixels per cell for HOG descriptor
+WINDOW_SIZE = 64  # pixels per cell for HOG descriptor
 CHANNEL = 1  # channel color for HOG descriptor
 POST_NORMALIZATION = True  # normalize color brightness across cells
 
@@ -42,14 +42,14 @@ if __name__ == "__main__":
 
     # fetch per-folder defaults
     THRESHOLD = get_folder_threshold(image_folder_path)
-    CELL_SIZE = get_folder_cellsize(image_folder_path)
+    WINDOW_SIZE = get_folder_cellsize(image_folder_path)
     CHANNEL = get_folder_channel(image_folder_path)
     BG_RANGE = get_background_range(image_folder_path)
 
     if VERBOSE > 0:
         print(f"Input folder:\n{image_folder_path}")
         print(f"Using threshold={THRESHOLD}")
-        print(f"Using cell size={CELL_SIZE}")
+        print(f"Using window size={WINDOW_SIZE}")
         print(f"Using channel={CHANNEL}")
         print(f"Using background range=({100*BG_RANGE[0]}%, {100*BG_RANGE[1]}%)")
         print(f"Staining normalization: {POST_NORMALIZATION}")
@@ -58,7 +58,7 @@ if __name__ == "__main__":
         input_folder=image_folder_path,
         output_folder=output_folder_path,
         block_norm=BLOCK_NORM,
-        pixels_per_cell=(CELL_SIZE, CELL_SIZE),
+        pixels_window=(WINDOW_SIZE, WINDOW_SIZE),
         channel_image=CHANNEL,
         background_range=BG_RANGE,
         draft=DRAFT_MODE,
@@ -66,7 +66,7 @@ if __name__ == "__main__":
         post_normalization=POST_NORMALIZATION,
     )
 
-    filename = f"HOG_stats_{BLOCK_NORM}_{CELL_SIZE}pixels"
+    filename = f"HOG_stats_{BLOCK_NORM}_{WINDOW_SIZE}pixels"
 
     hog_runner.process_folder(
         image_folder=image_folder_path,
