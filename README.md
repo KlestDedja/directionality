@@ -26,7 +26,7 @@ git clone https://github.com/klest94/directionality.git
 cd directionality
 ```
 
-### 🐍 2. Set up the environement
+### 🐍 2. Set up the environment
 
 ```
 python -m venv directionality
