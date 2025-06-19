@@ -30,7 +30,7 @@ cd directionality
 
 ```
 python -m venv directionality
-source directionality/bin/activate  # On Windows: venv\Scripts\activate ?
+source directionality/bin/activate  # On Windows: source directionality/Scripts/activate
 pip install -r requirements.txt
 ```
 Alternatively, if you are familiar with `conda`:
