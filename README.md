@@ -37,6 +37,9 @@ Alternatively, if you are familiar with `conda`:
 ```
 conda create -n directionality python=3.12
 conda activate directionality
+```
+`cd` your way to the repository location (default location is `GitHub/directionality`) and install required packages:
+```
 pip install -r requirements.txt
 ```
 You should be good to go!
