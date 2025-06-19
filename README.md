@@ -10,7 +10,7 @@ This tool automates the extraction of dominant gradient directions and produces 
 
 ## 🧠 Purpose
 
-The aim is to quantify and visualize how directional structures (like fibers or gradients in fluorescence) are distributed across microscopy images. This is particularly useful in studies where the biological samples exhibit alignment or anisotropy.
+The aim is to quantify and visualize how directional structures (like fibers or gradients) are distributed in fluorescence and brightfield images. This is particularly useful in studies where the biological samples exhibit alignment or anisotropy.
 
 ## 🚀 Installation
 
@@ -58,11 +58,9 @@ Computes signal directionality and visualizations
 
 Saves results into `demo-data/output_analysis/`, including:
 
-- 📊 `HOG_stats_<params>.csv`: summary of average and modal signal directions, with deviations
-
 - 🖼️ One PNG plot per image: overlays original image, HOG visualization, signal strength map, and polar histogram
 
-- ✅ Cleaned CSV file: `HOG_stats_<params>_clean.csv` (filtered and enriched with metadata)
+- 📊 Cleaned CSV file: `HOG_stats_<params>_clean.csv` summary of average and modal signal directions, with deviations (filtered and enriched with metadata)
 
 
 
