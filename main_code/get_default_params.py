@@ -9,11 +9,11 @@ df = pd.read_csv(PATH, index_col=0)
 defaults_df = df.loc["default"]
 DEFAULT_WINDOW_SIZE = int(defaults_df["window_size"])
 DEFAULT_THRESHOLD = float(defaults_df["threshold"])
-DEFAULT_CHANNEL = int(defaults_df["channel"])
+DEFAULT_CHANNEL = defaults_df["channel"]  # could be int or str, e.g. 'grayscale'
 DEFAULT_BACKGROUND_MIN = float(defaults_df["background_min"])
 DEFAULT_BACKGROUND_MAX = float(defaults_df["background_max"])
 
-overrides_df = df.drop(index="default")  # TO?DO: move to within _find_override function
+overrides_df = df.drop(index="default")  # TODO: move to within _find_override function
 
 
 def _find_override(folder: str | bytes, col: str, cast):

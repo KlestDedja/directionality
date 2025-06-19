@@ -20,8 +20,8 @@ CHANNEL = 1  # channel color for HOG descriptor
 POST_NORMALIZATION = True  # normalize color brightness across windows
 
 SAVE_STATS = True  # save statistics to CSV
-SAVE_PLOTS = True  # save ouctcomes of directionality analysis
-SHOW_PLOTS = True  # show plots interactively
+SAVE_PLOTS = False  # save ouctcomes of directionality analysis
+SHOW_PLOTS = False  # show plots interactively
 
 # ========== FOLDER STRUCTURE ==========
 ROOT_FOLDER = os.getcwd()
@@ -58,7 +58,7 @@ if __name__ == "__main__":
         input_folder=image_folder_path,
         output_folder=output_folder_path,
         block_norm=BLOCK_NORM,
-        pixels_window=(WINDOW_SIZE, WINDOW_SIZE),
+        pixels_per_window=(WINDOW_SIZE, WINDOW_SIZE),
         channel_image=CHANNEL,
         background_range=BG_RANGE,
         draft=DRAFT_MODE,

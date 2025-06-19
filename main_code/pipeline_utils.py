@@ -52,13 +52,15 @@ class HOGDescriptor:
         # the resulting image is therefore a 2D array (grayscale-style)
         # for this reason we set channel_axis=None
 
+        ## BEWARE: what we call "window" is called "cell" in skimage library
+        # TODO: fork skimage for block_norm = None support
         if visualize:
             self.fd, self.hog_image = hog(
                 image,
                 orientations=self.orientations,
-                pixels_per_window=self.pixels_per_window,
-                windows_per_block=self.windows_per_block,
-                visualize=visualize,
+                pixels_per_cell=self.pixels_per_window,
+                cells_per_block=self.windows_per_block,
+                visualize=True,
                 block_norm=block_norm,
                 feature_vector=feature_vector,
                 channel_axis=None,
@@ -67,8 +69,8 @@ class HOGDescriptor:
             self.fd = hog(
                 image,
                 orientations=self.orientations,
-                pixels_per_window=self.pixels_per_window,
-                windows_per_block=self.windows_per_block,
+                pixels_per_cell=self.pixels_per_window,
+                cells_per_block=self.windows_per_block,
                 visualize=False,
                 block_norm=block_norm,
                 feature_vector=feature_vector,

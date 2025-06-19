@@ -26,7 +26,7 @@ class HOGAnalysis:
         input_folder: str,
         output_folder: str,
         block_norm: str | None = None,
-        pixels_window: tuple[int, int] = (64, 64),
+        pixels_per_window: tuple[int, int] = (64, 64),
         channel_image: int | str = 1,  # default: green channel for RGBA images
         background_range=(0.10, 0.90),
         draft: bool = False,
@@ -36,7 +36,7 @@ class HOGAnalysis:
         self.input_folder = input_folder  # default: ./input_images
         self.output_folder = output_folder  # default: ./output_analysis
         self.block_norm = block_norm
-        self.pixels_window = pixels_window
+        self.pixels_per_window = pixels_per_window
         self.channel_image = channel_image
         self.background_range = background_range
         self.draft = draft
@@ -190,7 +190,9 @@ class HOGAnalysis:
         )
         fig.tight_layout()
 
-        filename_info = f"_{self.block_norm}_{self.hog_descriptor.pixels_window[0]}p"
+        filename_info = (
+            f"_{self.block_norm}_{self.hog_descriptor.pixels_per_window[0]}p"
+        )
         filename_png = clean_filename(filename).replace(".tif", filename_info + ".png")
 
         os.makedirs(self.output_folder, exist_ok=True)
@@ -262,7 +264,7 @@ class HOGAnalysis:
         self.df_statistics = pd.concat([self.df_statistics, df_row])
 
     def save_results_to_file(self, save_folder, filename):
-        # fname = f"HOG_stats_{self.block_norm}_{self.hog_descriptor.pixels_window[0]}pixels"
+        # fname = f"HOG_stats_{self.block_norm}_{self.hog_descriptor.pixels_per_window[0]}pixels"
         if self.draft:
             filename += "_draft"
         saved_stats_path = os.path.join(save_folder, filename + ".csv")
