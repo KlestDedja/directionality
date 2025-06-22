@@ -34,7 +34,7 @@ Navigate to the newly created folder:
 ```
 cd directionality-demo
 ```
-Create a Python environment within this folder:
+Create a Python environment:
 ```
 python3.12 -m venv .venv
 ```
