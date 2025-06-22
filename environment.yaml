@@ -9,6 +9,6 @@ dependencies:
   - matplotlib
   - ipykernel
   - imagecodecs
-#  - pip
+#  - pip  # ensure pip is available for pip installs
 #  - pip:
-#      - scikit-image @ git+https://github.com/Klest94/scikit-image-fork.git@v0.25-hogpatch
+#      - scikit-image @ git+https://github.com/Klest94/scikit-image-fork.git

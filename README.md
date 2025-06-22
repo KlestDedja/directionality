@@ -29,16 +29,55 @@ cd directionality
 ### 🐍 2. Set up the environment
 
 ```
-python -m venv directionality
-source directionality/bin/activate  # On Windows: source directionality/Scripts/activate
+python -m venv directionality-demo
+source directionality-demo/bin/activate  # On Windows: source directionality/Scripts/activate
 pip install -r requirements.txt
 ```
 Alternatively, if you are familiar with `conda`:
 ```
-conda create -n directionality python=3.12
-conda activate directionality
+conda create -n directionality-demo python=3.12
+conda activate directionality-demo
+```
+`cd` your way to the repository location (default location is `GitHub/directionality-demo`) and install required packages:
+```
 pip install -r requirements.txt
 ```
+### 🐛 3. Fix scikit-image code (temporary)
+
+As we haven't managed to make build the scikit-image fork correctly, best current workaround is to navigate to the installation of `scikit-image` within the `directionality-demo` environment, search for the `_hog_normalize_block` function under `skimage/feature/_hog.py` and replace the lines:
+```
+def _hog_normalize_block(block, method, eps=1e-5):
+    if method == 'L1':
+        out = block / (np.sum(np.abs(block)) + eps)
+    elif method == 'L1-sqrt':
+        out = np.sqrt(block / (np.sum(np.abs(block)) + eps))
+    elif method == 'L2':
+        out = block / np.sqrt(np.sum(block**2) + eps**2)
+    elif method == 'L2-Hys':
+        out = block / np.sqrt(np.sum(block**2) + eps**2)
+        out = np.minimum(out, 0.2)
+        out = out / np.sqrt(np.sum(out**2) + eps**2)
+```
+
+with the following ones:
+
+```
+def _hog_normalize_block(block, method, eps=1e-5):
+    if method == 'L1':
+        out = block / (np.sum(np.abs(block)) + eps)
+    elif method == 'L1-sqrt':
+        out = np.sqrt(block / (np.sum(np.abs(block)) + eps))
+    elif method == 'L2':
+        out = block / np.sqrt(np.sum(block**2) + eps**2)
+    elif method == 'L2-Hys':
+        out = block / np.sqrt(np.sum(block**2) + eps**2)
+        out = np.minimum(out, 0.2)
+        out = out / np.sqrt(np.sum(out**2) + eps**2)
+    elif method == 'None':
+        out = block
+``` 
+In practice, we added an extra case to the normalization options, namely *no* normalization.
+
 You should be good to go!
 
 ## 🚀 Try It Out: Run the example demo
