@@ -4,9 +4,11 @@ channels:
   - conda-forge
 dependencies:
   - numpy
-  - scikit-image
   - pandas
-  - scikit-image
+  - scikit-image>=0.23,<0.26
   - matplotlib
   - ipykernel
   - imagecodecs
+#  - pip
+#  - pip:
+#      - scikit-image @ git+https://github.com/Klest94/scikit-image-fork.git@v0.25-hogpatch

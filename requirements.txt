@@ -1,6 +1,7 @@
 numpy
 pandas
-scikit-image @ git+https://github.com/Klest94/scikit-image-fork.git@v0.25-no-hog-normalization
+scikit-image>=0.23.0,<0.26.0
+# CURRENTLY FAILS: scikit-image @ git+https://github.com/Klest94/scikit-image-fork.git@main
 matplotlib
 ipykernel
 imagecodecs
