@@ -10,21 +10,20 @@ This tool automates the extraction of dominant gradient directions and produces 
 
 ## 🧠 Purpose
 
-The aim is to quantify and visualize how directional structures (like fibers or gradients) are distributed in fluorescence and brightfield images. This is particularly useful in studies where the biological samples exhibit alignment or anisotropy.
+The aim is to quantify and visualize how directional structures (like fibers) are distributed in fluorescence and brightfield images. This is particularly useful in studies where the biological samples exhibit alignment or anisotropy.
 
 ## 🚀 Installation
 
-The repository includes a self-contained demo dataset to help you get started quickly.
+The repository includes a self-contained demo dataset to help you get started quickly. You first need to make sure you have [Git](https://git-scm.com/) or [GitHub](https://docs.github.com/en/desktop/installing-and-authenticating-to-github-desktop/installing-github-desktop) and [Python 3.10+](https://www.python.org/downloads/) installed.
 
 ### 🔁 1. Clone the repository
 
-Make sure you have [Git](https://git-scm.com/) and [Python 3.10+](https://www.python.org/downloads/) installed. 
-You can clone the repository through GitHub
-
+Clone the repository either with Git:
 ```bash
 git clone https://github.com/klest94/directionality.git
 cd directionality
 ```
+Or with GitHub Desktop: `Add -> Clone repository -> url -> https://github.com/klest94/directionality.git`
 
 ### 🐍 2. Set up the environment
 
