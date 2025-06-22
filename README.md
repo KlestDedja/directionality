@@ -14,25 +14,40 @@ The aim is to quantify and visualize how directional structures (like fibers) ar
 
 ## 🚀 Installation
 
-The repository includes a self-contained demo dataset to help you get started quickly. You first need to make sure you have [Git](https://git-scm.com/) or [GitHub](https://docs.github.com/en/desktop/installing-and-authenticating-to-github-desktop/installing-github-desktop) and [Python 3.10+](https://www.python.org/downloads/) installed.
+The repository includes a self-contained demo dataset to help you create a folder named `directionality-demo` to get started quickly. You first need to make sure you have [Git](https://git-scm.com/) or [GitHub](https://docs.github.com/en/desktop/installing-and-authenticating-to-github-desktop/installing-github-desktop) and [Python 3.10+](https://www.python.org/downloads/) installed.
+
 
 ### 🔁 1. Clone the repository
 
 Clone the repository either with Git:
 ```bash
-git clone https://github.com/klest94/directionality.git
-cd directionality
+git clone https://github.com/your-username/directionality.git directionality-demo
+cd directionality-demo
 ```
-Or with GitHub Desktop: `Add -> Clone repository -> url -> https://github.com/klest94/directionality.git`
+Or with GitHub Desktop: `Add -> Clone repository -> url -> https://github.com/klest94/directionality.git` Name the repo `directionality-demo` in your local path.
 
 ### 🐍 2. Set up the environment
 
+#### Option A: Python virtual environment.
+
+Navigate to the newly created folder:
 ```
-python -m venv directionality-demo
-source directionality-demo/bin/activate  # On Windows: source directionality/Scripts/activate
+cd directionality-demo
+```
+Create a Python environment within this folder:
+```
+python3.12 -m venv .venv
+```
+This creates a virtual environment inside `directionality-demo/.venv/`.
+Now we can activate the virtual environment and install the required packages:
+```
+source .venv/bin/activate  # On Windows: .venv\Scripts\activate
 pip install -r requirements.txt
 ```
-Alternatively, if you are familiar with `conda`:
+
+#### Option B: if you are familiar with `conda`
+
+Assuming you have `anaconda` installed, then:
 ```
 conda create -n directionality-demo python=3.12
 conda activate directionality-demo
