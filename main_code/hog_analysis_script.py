@@ -158,7 +158,7 @@ class HOGAnalysis:
         # is None, so that all cells have equal weight in the histogram
         fd_norm[~cells_to_keep] = 0
 
-        gradient_hist_180 = fd_norm[cells_to_keep].mean(axis=0)  # was this always run?
+        gradient_hist_180 = fd_norm[cells_to_keep].mean(axis=0)
         gradient_hist = dict(
             zip(
                 np.linspace(0, 180, len(gradient_hist_180), endpoint=False),
@@ -170,9 +170,6 @@ class HOGAnalysis:
             gradient_hist, corr90=True, corr45=("20240928" not in folder)
         )
 
-        # mean_stats, mode_stats = compute_distribution_direction(
-        #     gradient_hist, list(gradient_hist.keys())
-        # )
         mean_stats, mode_stats = compute_distribution_direction(gradient_hist)
 
         self.save_stats(filename, image, threshold, mean_stats, mode_stats, t1)
@@ -264,7 +261,7 @@ class HOGAnalysis:
         self.df_statistics = pd.concat([self.df_statistics, df_row])
 
     def save_results_to_file(self, save_folder, filename):
-        # fname = f"HOG_stats_{self.block_norm}_{self.hog_descriptor.pixels_per_window[0]}pixels"
+
         if self.draft:
             filename += "_draft"
         saved_stats_path = os.path.join(save_folder, filename + ".csv")
