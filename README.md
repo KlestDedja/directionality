@@ -32,18 +32,26 @@ Alternatively, you can clone with GitHub Desktop: click on `Add -> Clone reposit
 
 #### Option A: Python virtual environment.
 
-Navigate to the newly created folder:
+Navigate to the newly created folder with your favourite terminal (Powershell, GitBash, Command Prompt...) and create a Python environment:
 ```
 cd directionality-demo
-```
-Create a Python environment:
-```
 python3.12 -m venv .venv
 ```
-This creates a virtual environment inside `directionality-demo/.venv/`.
-Now we can activate the virtual environment and install the required packages:
+This creates a virtual environment `.venv` in: `directionality-demo/.venv/`.
+Activate the virtual environment:
+
+on **Windows**
 ```
-source .venv/bin/activate  # On Windows: .venv\Scripts\activate
+.venv\Scripts\activate
+```
+
+on **macOS / Linux / WSL**:
+```
+source .venv/bin/activate 
+```
+
+And install the required packages
+```
 pip install -r requirements.txt
 ```
 
