@@ -21,10 +21,12 @@ The repository includes a self-contained demo dataset to help you create a folde
 
 Clone the repository either with Git:
 ```bash
-git clone https://github.com/your-username/directionality.git directionality-demo
+git clone https://github.com/Klest94/directionality.git directionality-demo
 cd directionality-demo
 ```
-Or with GitHub Desktop: `Add -> Clone repository -> url -> https://github.com/klest94/directionality.git` Name the repo `directionality-demo` in your local path.
+where `directionality-demo` can be replaced by the name you want to give to the newly formed repository.
+
+Alternatively, you can clone with GitHub Desktop: click on `Add -> Clone repository -> url -> https://github.com/klest94/directionality.git` Name the repo as `directionality-demo` or anything of your choice in your local path.
 
 ### 🐍 2. Set up the environment
 
