@@ -38,14 +38,12 @@ cd directionality-demo
 python3.12 -m venv .venv
 ```
 This creates a virtual environment `.venv` in: `directionality-demo/.venv/`.
-Activate the virtual environment:
-
-on **Windows**
+Activate the virtual environment, if you are using **Windows**
 ```
 .venv\Scripts\activate
 ```
 
-on **macOS / Linux / WSL**:
+if you are using **macOS / Linux / WSL**:
 ```
 source .venv/bin/activate 
 ```
