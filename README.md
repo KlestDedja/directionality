@@ -3,7 +3,7 @@
 <img src="directionality-logo.png?raw=true" alt="Directionality Logo" width="20%"/>
 </p>
 
-# Directionality
+# Directionality with EDGEHOG
 
 This repository analyzes image  by computing Histograms of Oriented Gradients (HOGs) and deriving orientation statistics. 
 This tool automates the extraction of dominant directions and produces visual and statistical outputs for biomedical interpretation.
