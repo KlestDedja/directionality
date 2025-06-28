@@ -1,6 +1,6 @@
 <a name="logo-anchor"></a>
 <p align="center">
-<img src="directionality-logo.png?raw=true" alt="Directionality Logo" width="20%"/>
+<img src="directionality-edgehog-logo.png?raw=true" alt="Directionality Logo" width="20%"/>
 </p>
 
 # Directionality with EDGEHOG
