@@ -26,7 +26,7 @@ from main_code.get_default_params import (
 
 # ===== DEVELOPER SETTINGS ==========
 DRAFT_MODE = False
-BLOCK_NORM = None  # or "L2-Hys"
+BLOCK_NORM = 'None'  # or "L2-Hys"
 VERBOSE = 1  # higher value -> printing more debug messages
 
 # ========== USER SETTINGS ==========
