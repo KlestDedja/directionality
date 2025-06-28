@@ -6,12 +6,9 @@
 # Directionality
 
 This repository analyzes image  by computing Histograms of Oriented Gradients (HOGs) and deriving orientation statistics. 
-This tool automates the extraction of dominant gradient directions and produces visual and statistical outputs to aid biological interpretation.
+This tool automates the extraction of dominant directions and produces visual and statistical outputs for biomedical interpretation.
 
-## 🧠 Purpose
-
-The aim is to quantify and visualize how directional structures (like fibers) are distributed in fluorescence and brightfield images. This is particularly useful in studies where the biological samples exhibit alignment or anisotropy.
-
+The aim is to quantify and visualize how directional structures (e.g. fibers) are distributed in fluorescence and brightfield images.
 ## 🚀 Installation
 
 The repository includes a self-contained demo dataset to help you create a folder named `directionality-demo` to get started quickly. You first need to make sure you have [Git](https://git-scm.com/) or [GitHub](https://docs.github.com/en/desktop/installing-and-authenticating-to-github-desktop/installing-github-desktop) and [Python 3.10+](https://www.python.org/downloads/) installed.
@@ -24,7 +21,7 @@ Clone the repository either with Git:
 git clone https://github.com/Klest94/directionality.git directionality-demo
 cd directionality-demo
 ```
-where `directionality-demo` can be replaced by the name you want to give to the newly formed repository.
+where `directionality-demo` can be replaced by the name you want to give to the new repository.
 
 Alternatively, you can clone with GitHub Desktop: click on `Add -> Clone repository -> url -> https://github.com/klest94/directionality.git` Name the repo as `directionality-demo` or anything of your choice in your local path.
 
@@ -32,7 +29,7 @@ Alternatively, you can clone with GitHub Desktop: click on `Add -> Clone reposit
 
 #### Option A: Python virtual environment.
 
-Navigate to the newly created folder with your favourite terminal (Powershell, GitBash, Command Prompt...) and create a Python environment:
+Navigate to the new folder with your favourite terminal (Powershell, GitBash, Command Prompt...) and create a Python environment:
 ```
 cd directionality-demo
 python3.12 -m venv .venv
