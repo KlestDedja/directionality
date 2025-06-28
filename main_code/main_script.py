@@ -1,6 +1,19 @@
+import sys
 import os
-# The following imports work only assuing the working directory is the main repository folder,
-# which contains the main_code folder and the demo-data folder.
+
+# directory of the script itself
+script_dir = os.path.dirname(os.path.abspath(__file__))
+# directory of the parent folder (the project root)
+project_root = os.path.abspath(os.path.join(script_dir, ".."))
+
+# We now give the option to run the script from either
+# the project root folder or from the main_code folder.
+
+# if we are running from project root, keep sys.path as is
+# if we are running from main_code/, then add project_root to sys.path
+if project_root not in sys.path:
+    sys.path.insert(0, project_root)
+# The next few import lines are supposed to work regardless of the working directory, now.
 from main_code.hog_analysis_script import HOGAnalysis
 from main_code.postprocess_csv_files import postprocess_hog_csv
 
