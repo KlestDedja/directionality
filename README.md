@@ -1,40 +1,41 @@
 <a name="logo-anchor"></a>
 <p align="center">
-<img src="directionality-edgehog-logo.png?raw=true" alt="Directionality Logo" width="20%"/>
+<img src="directionality-edgehog-logo.png?raw=true" alt="Directionality Logo" width="25%"/>
 </p>
 
 # Directionality with EDGEHOG
 
-This repository analyzes image  by computing Histograms of Oriented Gradients (HOGs) and deriving orientation statistics. 
-This tool automates the extraction of dominant directions and produces visual and statistical outputs for biomedical interpretation.
+**EDGEHOG** provides a reproducible framework to analyze images using Histograms of Oriented Gradients (HOGs) to derive orientation statistics.  
+This tool automates the extraction of directions and their distirbutions, by producing both visual and statistical outputs for images. A paper is underway explaining how EDGEHOG works and how it can be employed in a several biomedical applications.
 
-The aim is to quantify and visualize how directional structures (e.g. fibers) are distributed in fluorescence and brightfield images.
 ## 🚀 Installation
 
-The repository includes a self-contained demo dataset to help you create a folder named `directionality-demo` to get started quickly. You first need to make sure you have [Git](https://git-scm.com/) or [GitHub](https://docs.github.com/en/desktop/installing-and-authenticating-to-github-desktop/installing-github-desktop) and [Python 3.10+](https://www.python.org/downloads/) installed.
+The repository includes a self-contained demo dataset, making it easy to get started. Please ensure you have [Git](https://git-scm.com/) (or [GitHub Desktop](https://docs.github.com/en/desktop/installing-and-authenticating-to-github-desktop/installing-github-desktop)) and [Python 3.10+](https://www.python.org/downloads/) installed on your system
+> *In the future, we want to provide a fully fledged package, installable via `pip`.*
 
+---
 
 ### 🔁 1. Clone the repository
 
 Clone the repository either with Git:
 ```bash
-git clone https://github.com/Klest94/directionality.git directionality-demo
-cd directionality-demo
+git clone https://github.com/Klest94/directionality.git ~/Documents/GitHub/directionality-demo
+cd .\Documents\GitHub\directionality-demo
 ```
-where `directionality-demo` can be replaced by the name you want to give to the new repository.
+where `directionality-demo` is the name of the new repository.
 
-Alternatively, you can clone with GitHub Desktop: click on `Add -> Clone repository -> url -> https://github.com/klest94/directionality.git` Name the repo as `directionality-demo` or anything of your choice in your local path.
+Or, you can clone with GitHub Desktop: click on `Add -> Clone repository -> url -> https://github.com/klest94/directionality.git` Name the repo as `directionality-demo` or anything of your choice in your local path.
 
 ### 🐍 2. Set up the environment
 
 #### Option A: Python virtual environment.
 
-Navigate to the new folder with your favourite terminal (Powershell, GitBash, Command Prompt...) and create a Python environment:
+Navigate to the new folder with your favourite terminal (**Powershell**, **GitBash**, **Command Prompt**,...) and create a Python environment:
 ```
 cd directionality-demo
-python3.12 -m venv .venv
+python -m venv .venv
 ```
-This creates a virtual environment `.venv` in: `directionality-demo/.venv/`.
+This creates a virtual environment `.venv` in `directionality-demo/.venv/`.
 Activate the virtual environment, if you are using **Windows**
 ```
 .venv\Scripts\activate
@@ -49,6 +50,8 @@ And install the required packages
 ```
 pip install -r requirements.txt
 ```
+
+⚠️ These instructions have been tested with Python 3.12. All version above `3.10` should work, but compatibility is not guaranteed.
 
 #### Option B: if you are familiar with `conda`
 
