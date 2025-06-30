@@ -17,14 +17,13 @@ The repository includes a self-contained demo dataset, making it easy to get sta
 
 ### 🔁 1. Clone the repository
 
-Clone the repository either with Git:
+Clone the repository to the desired local path either with Git:
 ```bash
-git clone https://github.com/Klest94/directionality.git ~/Documents/GitHub/directionality-demo
-cd .\Documents\GitHub\directionality-demo
+git clone https://github.com/Klest94/directionality.git ~/your/local/path/directionality-demo
 ```
 where `directionality-demo` is the name of the new repository.
 
-Or, you can clone with GitHub Desktop: click on `Add -> Clone repository -> url -> https://github.com/klest94/directionality.git` Name the repo as `directionality-demo` or anything of your choice in your local path.
+Or, you can clone with GitHub Desktop: click on `Add -> Clone repository -> url -> https://github.com/klest94/directionality.git` Name the repo as e.g. `directionality-demo` in your local path.
 
 ### 🐍 2. Set up the environment
 
