@@ -50,7 +50,7 @@ def external_plot_hog_analysis(
     ax2.set_title("Histogram of Oriented Gradients", fontsize=14)
 
     ROTATE_FOR_GRADIENT = 0
-    orientations_360_deg = np.linspace(0, 360, 90, endpoint=False)
+    orientations_360_deg = np.linspace(0, 360, len(gradient_hist_360), endpoint=False)
     orientations_polar_deg = np.mod(orientations_360_deg + ROTATE_FOR_GRADIENT, 360)
     estim_ymax = np.array(list(gradient_hist.values())).max()
 
