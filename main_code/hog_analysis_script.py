@@ -87,8 +87,14 @@ class HOGAnalysis:
             )
 
         for idx, image_file in enumerate(image_files):
-            if idx % 20 == 0:
-                print(f"Processing image {idx + 1} out of {len(image_files)}")
+            if len(image_file) > 100:  # output message every 20 images
+                if idx % 20 == 0:
+                    print(f"Processing image {idx + 1} out of {len(image_files)}")
+            else:  # output message every 20% progress
+                chunk20 = len(image_files) // 5
+                if idx % chunk20 == 0:
+                    print(f"Processing image {idx + 1} out of {len(image_files)}")
+
             self.process_image(image_folder, image_file, threshold, save_plots)
 
         if save_stats:
