@@ -3,24 +3,6 @@ import numpy as np
 from skimage.feature import hog
 
 
-# def load_and_prepare_image(
-#     path, name, to_grayscale: bool = False, channel: int | None = None
-# ):
-#     """Load an image and proivde option to convert it to grayscale."""
-#     image = io.imread(os.path.join(path, name))
-
-#     # # Check if the image has four channels (RGBA)
-#     # if image.ndim == 3 and image.shape[2] == 4:
-#     #     image = image[:, :, :3]  # ignore the alpha channel
-
-#     # # Convert RGB to grayscale
-#     # if image.ndim == 3 and to_grayscale == True:
-#     #     image = rgb2gray(image)
-#     # if image.ndim == 3 and to_grayscale == False and channel is not None:
-#     #     image = image[:, :, channel]
-#     return image
-
-
 class HOGDescriptor:
     def __init__(
         self,
@@ -43,7 +25,7 @@ class HOGDescriptor:
         self,
         image,
         visualize=True,
-        block_norm=None,
+        block_norm="None",
         feature_vector=False,
     ):
         """Compute Histogram of Oriented Gradients (HOG) RGB or grayscale image."""
