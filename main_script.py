@@ -21,6 +21,7 @@ VERBOSE = 1  # higher value -> printing more debug messages
 WINDOW_SIZE = 64  # pixels per window for HOG descriptor
 CHANNEL = 1  # channel color for HOG descriptor
 POST_NORMALIZATION = True  # normalize color brightness across windows
+N_BINS = 45
 
 SAVE_STATS = True  # save statistics to CSV
 SAVE_PLOTS = True  # save ouctcomes of directionality analysis
@@ -67,6 +68,7 @@ if __name__ == "__main__":
         draft=DRAFT_MODE,
         show_plots=SHOW_PLOTS,
         post_normalization=POST_NORMALIZATION,
+        num_bins=N_BINS,
     )
 
     filename = f"HOG_stats_{BLOCK_NORM}_{WINDOW_SIZE}pixels"

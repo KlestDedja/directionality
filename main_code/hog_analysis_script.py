@@ -32,6 +32,7 @@ class HOGAnalysis:
         draft: bool = False,
         show_plots: bool = False,
         post_normalization: bool = True,
+        num_bins: int = 45,
     ):
         self.input_folder = input_folder  # default: ./input_images
         self.output_folder = output_folder  # default: ./output_analysis
@@ -50,7 +51,7 @@ class HOGAnalysis:
             plt.ion()  # hopefully works both for .py and for .ipynb
 
         self.hog_descriptor = HOGDescriptor(
-            orientations=45,
+            orientations=num_bins,
             pixels_per_window=self.pixels_per_window,
             windows_per_block=(1, 1),
             channel_axis=-1,  # default value for RGB images
