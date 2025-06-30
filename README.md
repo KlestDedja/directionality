@@ -59,7 +59,7 @@ Assuming you have `anaconda` installed, then:
 conda create -n directionality-demo python=3.12
 conda activate directionality-demo
 ```
-`cd` your way to the repository location (default location is `GitHub/directionality-demo`) and install required packages:
+`cd` your way to the repository location (e.g. `cd ~/your/local/path/directionality-demo`) and install required packages:
 ```
 pip install -r requirements.txt
 ```
@@ -98,6 +98,8 @@ def _hog_normalize_block(block, method, eps=1e-5):
         out = block
 ``` 
 In practice, we added an extra case to the normalization options, namely *no* normalization.
+
+⚠️ If you skip this step, you can still run the script as long as the `block_norm` is one of the cases handled by `_hog_normalize_block`.
 
 You should be good to go!
 
