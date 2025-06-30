@@ -25,7 +25,7 @@ class HOGAnalysis:
         self,
         input_folder: str,
         output_folder: str,
-        block_norm: str | None = None,
+        block_norm: str = "None",
         pixels_per_window: tuple[int, int] = (64, 64),
         channel_image: int | str = 1,  # default: green channel for RGBA images
         background_range=(0.10, 0.90),
@@ -130,7 +130,7 @@ class HOGAnalysis:
         image = self.clean_and_select_channel(image, self.channel_image)
 
         fd_raw_bg, hog_image_bg = self.hog_descriptor.compute_hog(
-            image, block_norm=None, feature_vector=False
+            image, block_norm="None", feature_vector=False
         )
         fd_bg = np.squeeze(fd_raw_bg)
         strengths = cell_signal_strengths(fd_bg, norm_ord=1)
@@ -142,7 +142,7 @@ class HOGAnalysis:
             self.save_nan_stats(filename, image, threshold)
             return
 
-        if self.block_norm is not None:
+        if self.block_norm != "None":
             # (re)compute HOG features with the specified block normalization
             fd_norm, hog_image = self.hog_descriptor.compute_hog(
                 image, block_norm=self.block_norm, feature_vector=False
@@ -156,7 +156,7 @@ class HOGAnalysis:
                 fd_norm = fd_bg
 
         # Drop cells below threshold, the rest is normalised if self.block_norm
-        # is None, so that all cells have equal weight in the histogram
+        # is "None", so that all cells have equal weight in the histogram
         fd_norm[~cells_to_keep] = 0
 
         gradient_hist_180 = fd_norm[cells_to_keep].mean(axis=0)
