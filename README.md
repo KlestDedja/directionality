@@ -31,7 +31,7 @@ Or, you can clone with GitHub Desktop: click on `Add -> Clone repository -> url 
 
 Navigate to the new folder with your favourite terminal (**Powershell**, **GitBash**, **Command Prompt**,...) and create a Python environment:
 ```
-cd directionality-demo
+cd ~/your/local/path/directionality-demo
 python -m venv .venv
 ```
 This creates a virtual environment `.venv` in `directionality-demo/.venv/`.
