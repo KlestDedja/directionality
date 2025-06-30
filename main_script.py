@@ -1,6 +1,8 @@
+'''
+This is the main script for running EDGEHOG
+It is assumed that the script is localted in the project root folder
+'''
 import os
-
-# Assume the script is run from the project root folder
 
 from main_code.hog_analysis_script import HOGAnalysis
 from main_code.postprocess_csv_files import postprocess_hog_csv
