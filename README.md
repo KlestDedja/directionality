@@ -111,17 +111,14 @@ You simply have to run  `main_script.py` (in the `main_code` folder) from your f
 
 The demo script:
 
-Loads `.tif`, `.png` and `.jpg` images from `demo-data/input_images/`
+- Loads `.tif`, `.png` and `.jpg` images from `demo-data/input_images/`,
 
-Selects sensible defaults:
+-  runs the directionality estimator EDGEOG with default or user provided parameters, computes signal directionality statistics.
 
-Computes signal directionality and visualizations
+- saves results into `demo-data/output_analysis/`, including:
 
-Saves results into `demo-data/output_analysis/`, including:
+    - 📊 Cleaned CSV file: `HOG_stats_<params>_clean.csv` summary of average and modal signal directions, with deviations (filtered and enriched with metadata)
 
-- 🖼️ One PNG plot per image: overlays original image, HOG visualization, signal strength map, and polar histogram
-
-- 📊 Cleaned CSV file: `HOG_stats_<params>_clean.csv` summary of average and modal signal directions, with deviations (filtered and enriched with metadata)
-
+    - 🖼️ Optionally, a PNG plot per image, containing:original image, HOG visualization, signal strength map, and a histogram of the distribution of directioanlity, in poalr coordinates. 
 
 
