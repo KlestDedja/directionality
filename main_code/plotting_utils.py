@@ -107,11 +107,6 @@ def explanatory_plot_intro(image):
     height, width = image.shape[:2]
     fig, (ax2, ax3) = plt.subplots(1, 2, figsize=(9, 4))
 
-    # --- Left plot: original image ---
-    # ax1.set_title("Original Image")
-    # ax1.imshow(image)
-    # ax1.axis("off")
-
     # --- Middle plot: zoomed-in top-left corner ---
     # The coordinate system in Matplotlib for images typically has origin in top-left.
 
@@ -367,7 +362,7 @@ def explanatory_plot_polar(
     )
 
     fd_raw, hog_image = hog_descriptor.compute_hog(
-        image, block_norm=None, feature_vector=False
+        image, block_norm="None", feature_vector=False
     )
 
     orient_arr = np.arange(2 * hog_descriptor.orientations)

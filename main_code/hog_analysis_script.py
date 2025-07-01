@@ -10,7 +10,7 @@ import re
 
 from main_code.pipeline_utils import (
     HOGDescriptor,
-    compute_distribution_direction,
+    compute_distribution_directions,
     correct_round_angles,
     cell_signal_strengths,
 )
@@ -33,6 +33,8 @@ class HOGAnalysis:
         show_plots: bool = False,
         post_normalization: bool = True,
         num_bins: int = 45,
+        max_main_directions: int = 1,
+        min_direction_gap: float = 20.0,  # in degrees
     ):
         self.input_folder = input_folder  # default: ./input_images
         self.output_folder = output_folder  # default: ./output_analysis
@@ -43,6 +45,8 @@ class HOGAnalysis:
         self.draft = draft
         self.show_plots = show_plots
         self.post_normalization = post_normalization
+        self.max_main_directions = max_main_directions
+        self.min_direction_gap = min_direction_gap
         self.df_statistics = pd.DataFrame()
         self.saved_stats_path = None
 
@@ -177,7 +181,11 @@ class HOGAnalysis:
             gradient_hist, corr90=True, corr45=("20240928" not in folder)
         )
 
-        mean_stats, mode_stats = compute_distribution_direction(gradient_hist)
+        mean_stats, mode_stats = compute_distribution_directions(
+            gradient_hist,
+            n_max_directions=self.max_main_directions,
+            min_direction_gap=self.min_direction_gap,
+        )
 
         self.save_stats(filename, image, threshold, mean_stats, mode_stats, t1)
 
@@ -251,19 +259,46 @@ class HOGAnalysis:
         elapsed = round(time.time() - t_start)
         time_fmt = f"{elapsed // 60}:{elapsed % 60:02d}"
 
-        stats = {
+        angle_str = "angle" if self.max_main_directions == 1 else "angles"
+
+        # Generic statistics dictionary entries first:
+        basic_stats = {
             "image size": str(image.shape),
+            "signal_threshold": threshold,
+        }
+
+        mode_directions = [round(peak_ang, 3) for peak_ang in mode_stats[angle_str]]
+        if self.max_main_directions > 1:
+            mode_direction_cols = {
+                f"mode direction {i+1}": mode_directions[i]
+                for i in range(len(mode_directions))
+            }
+        else:
+            mode_direction_cols = {"mode direction": mode_directions[0]}
+
+        # add the remaining mode statistics:
+        mode_stats_dict = {
+            "std. deviation (mode)": round(mode_stats["std_dev"], 3),
+            "abs. deviation (mode)": round(mode_stats["abs_dev"], 3),
+        }
+
+        # lastly, add the elapsed time and mean statistics:
+        other_stats_dict = {
+            "elapsed time (mm:ss)": time_fmt,
             "avg. direction": round(mean_stats["angle"], 3),
             "std. deviation (mean)": round(mean_stats["std_dev"], 3),
             "abs. deviation (mean)": round(mean_stats["abs_dev"], 3),
-            "mode direction": round(mode_stats["angle"], 3),
-            "std. deviation (mode)": round(mode_stats["std_dev"], 3),
-            "abs. deviation (mode)": round(mode_stats["abs_dev"], 3),
-            "signal_threshold": threshold,
-            "elapsed time (mm:ss)": time_fmt,
         }
 
-        df_row = pd.DataFrame(stats, index=[filename])
+        # now assemble in the desired order:
+        ordered_stats = {
+            **basic_stats,
+            **mode_direction_cols,
+            **mode_stats_dict,
+            **other_stats_dict,
+        }
+
+        df_row = pd.DataFrame(ordered_stats, index=[filename])
 
         self.df_statistics = pd.concat([self.df_statistics, df_row])
 

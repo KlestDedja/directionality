@@ -184,6 +184,33 @@ def correct_round_angles(histog_dict, corr90=True, corr45=False):
     return histog_dict
 
 
+def compute_polar_direction_diff(
+    angle1: float | np.ndarray, angle2: float | np.ndarray, in_degs: bool = True
+) -> np.ndarray | float:
+    """
+    This function computes the angular difference between two angles in polar coordinates,
+    where directions 180 degrees apart are to be considered identical.
+    This implies that the resulting difference is always less than or equal to 90 degrees.
+
+    This function assumes the angles are in the [-90, 360] range (in degrees by default).
+    """
+    if in_degs is False:
+        angle1 = np.rad2deg(angle1)
+        angle2 = np.rad2deg(angle2)
+
+    angle_diff = np.abs(angle1 - angle2)
+
+    angle_diff_real = np.min(
+        np.stack(
+            [np.abs(angle_diff), np.abs(180 - angle_diff), np.abs(360 - angle_diff)]
+        ),
+        axis=0,
+    )
+    assert np.all(angle_diff_real <= 90), "Not all values are <= 90, smth went wrong"
+
+    return angle_diff_real
+
+
 def cell_signal_strengths(fd_data, norm_ord=1):
 
     strengths = np.zeros_like(fd_data[:, :, 0])  # ignore last axis (n_orientations)
@@ -213,21 +240,12 @@ def compute_vector_mean(global_hist_vals, orientations_deg):
 
 
 def compute_deviations(global_hist_vals, orientations_deg, reference_angle_deg):
-    """Compute standard deviation and absolute deviation w.r.t. a reference angle."""
-    # Calculate angle residuals (in degs). Remember we are only using the angles 0-180 (right side of the polar plot)
-    angle_diffs = np.abs(orientations_deg - reference_angle_deg)
-
-    # angle_diffs = np.abs(np.minimum(angle_diffs, 90 - angle_diffs))
-    # angle_diffs_real = np.minimum(
-    #     np.abs(angle_diffs), np.abs(180 - angle_diffs), np.abs(360 - angle_diffs)
-    # )
-    angle_diffs_real = np.min(
-        np.stack(
-            [np.abs(angle_diffs), np.abs(180 - angle_diffs), np.abs(360 - angle_diffs)]
-        ),
-        axis=0,
+    """Compute standard deviation and absolute deviation w.r.t. a (list of) reference angle(s)."""
+    # Calculate angle residuals (in degrees). It should work for any angle in 0-360,
+    #  but we only need this to work for angles in 0-180
+    angle_diffs_real = compute_polar_direction_diff(
+        orientations_deg, reference_angle_deg
     )
-    assert np.all(angle_diffs_real <= 90), "Not all values are less than or equal to 90"
 
     # Calculate the standard deviation (sqrt of the average squared residuals)
     std_dev_deg = np.sqrt(
@@ -242,7 +260,152 @@ def compute_deviations(global_hist_vals, orientations_deg, reference_angle_deg):
     return std_dev_deg, abs_dev_deg
 
 
-def compute_distribution_direction(
+def compute_peaks_from_histogram(
+    global_histogram: np.ndarray,
+    orientations_deg: np.ndarray,
+    n_max_directions: int = 1,
+    min_direction_gap: float = 20.0,
+) -> list[float]:
+
+    hist_copy = global_histogram.copy()
+    peaks_found = []
+
+    for _ in range(n_max_directions):
+        idx = np.argmax(hist_copy)
+        peak_angle = orientations_deg[idx]
+        peaks_found.append(peak_angle)
+
+        # suppress neighbors to enforece distance of at least min_direction_gap between peaks
+        angle_diff = compute_polar_direction_diff(orientations_deg, peak_angle)
+
+        suppression_mask = angle_diff < min_direction_gap
+        hist_copy[suppression_mask] = 0
+
+        if np.all(hist_copy == 0):
+            break
+
+    return peaks_found
+
+
+def compute_distribution_directions(
+    global_histogram: dict | np.ndarray,
+    orientations_deg: np.ndarray | None = None,
+    n_max_directions: int = 1,
+    min_direction_gap: float = 20.0,
+) -> tuple[dict, dict]:
+    """
+    Find (possibly multiple) dominant directions, spaced by at least min_direction_gap,
+    and compute a global deviation relative to the closest dominant direction.
+
+    Parameters
+    ----------
+    global_histogram : dict or np.ndarray
+        Histogram of directions.
+    orientations_deg : np.ndarray, optional
+        Angles corresponding to the histogram values.
+    n_max_directions : int
+        Number of dominant peaks to extract.
+    min_direction_gap : float
+        Minimum distance (degrees) to keep between peaks.
+
+    Returns
+    -------
+    mean_stats : list of dict
+        List of peak statistics with mean angle, std_dev, abs_dev w.r.t. to the mean.
+    mode_stats : list of dict
+        List of peak statistics with most frequent angle, std_dev, abs_dev w.r.t. to the mode.
+
+
+    deviation_stats : dict
+        Overall deviation relative to the closest dominant direction.
+    """
+    if isinstance(global_histogram, dict):
+        global_hist_vals = np.array(list(global_histogram.values()))
+        orientations_deg = np.array(list(global_histogram.keys()))
+    else:
+        global_hist_vals = global_histogram
+
+    if orientations_deg is None:
+        raise ValueError("orientations_deg must be provided if histogram is ndarray.")
+
+    if global_hist_vals.ndim > 2:
+        raise ValueError(
+            f"Input should be 1D or 2D, got shape {global_hist_vals.shape} instead."
+        )
+
+    if n_max_directions < 1:
+        raise ValueError(
+            f"n_max_directions must be at least 1, got {n_max_directions} instead."
+        )
+
+    if min_direction_gap < 0:
+        raise ValueError(
+            f"min_direction_gap must be non-negative, got {min_direction_gap} instead."
+        )
+
+    mean_stats = []
+    mode_stats = []
+    # peaks_found = []
+
+    # for _ in range(n_max_directions):
+    #     idx = np.argmax(hist_copy)
+    #     peak_angle = orientations_deg[idx]
+    #     peaks_found.append(peak_angle)
+
+    #     # suppress neighbors to enforece distance of at least min_direction_gap between peaks
+    #     # angle_diff = np.abs((orientations_deg - peak_angle + 180) % 360 - 180)
+    #     angle_diff = compute_polar_direction_diff(orientations_deg, peak_angle)
+
+    #     suppression_mask = angle_diff < min_direction_gap
+    #     hist_copy[suppression_mask] = 0
+
+    #     if np.all(hist_copy == 0):
+    #         break
+    peaks_found = compute_peaks_from_histogram(
+        global_hist_vals,
+        orientations_deg,
+        n_max_directions,
+        min_direction_gap,
+    )
+
+    # mean stats is computed over a single direction
+    mean_angle_deg = compute_vector_mean(global_hist_vals, orientations_deg)
+    std_dev_mean, abs_dev_mean = compute_deviations(
+        global_hist_vals, orientations_deg, mean_angle_deg
+    )
+    mean_stats = {
+        "angle": mean_angle_deg,
+        "std_dev": std_dev_mean,
+        "abs_dev": abs_dev_mean,
+    }
+
+    # now compute deviations w.r.t. the closest peak
+    deltas_per_peak = []
+    for peak in peaks_found:
+        deltas = compute_polar_direction_diff(orientations_deg, peak, in_degs=True)
+        deltas_per_peak.append(deltas)
+
+    # stack arrays and take the minimum value across the peaks (axis=0)
+    stacked_deltas = np.stack(deltas_per_peak, axis=0)
+    closest_delta = np.min(stacked_deltas, axis=0)
+
+    std_dev_mode = np.sqrt(
+        np.sum(global_hist_vals * closest_delta**2) / np.sum(global_hist_vals)
+    )
+    abs_dev_mode = np.sum(global_hist_vals * closest_delta) / np.sum(global_hist_vals)
+
+    angle_str = "angle" if n_max_directions == 1 else "angles"
+
+    mode_stats = {
+        angle_str: peaks_found,
+        "std_dev": std_dev_mode,
+        "abs_dev": abs_dev_mode,
+    }
+
+    return mean_stats, mode_stats
+
+
+def old_compute_distribution_directions(
     global_histogram: dict | np.ndarray,
     orientations_deg: (
         np.ndarray | None

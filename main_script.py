@@ -1,7 +1,8 @@
-'''
+"""
 This is the main script for running EDGEHOG
 It is assumed that the script is localted in the project root folder
-'''
+"""
+
 import os
 
 from main_code.hog_analysis_script import HOGAnalysis
@@ -25,8 +26,10 @@ CHANNEL = 1  # channel color for HOG descriptor
 POST_NORMALIZATION = True  # normalize color brightness across windows
 N_BINS = 45
 
+MAX_MAIN_DIRECTIONS = 2
+
 SAVE_STATS = True  # save statistics to CSV
-SAVE_PLOTS = True  # save ouctcomes of directionality analysis
+SAVE_PLOTS = False  # save ouctcomes of directionality analysis
 SHOW_PLOTS = False  # show plots interactively
 
 # ========== FOLDER STRUCTURE ==========
@@ -71,9 +74,10 @@ if __name__ == "__main__":
         show_plots=SHOW_PLOTS,
         post_normalization=POST_NORMALIZATION,
         num_bins=N_BINS,
+        max_main_directions=MAX_MAIN_DIRECTIONS,
     )
 
-    filename = f"HOG_stats_{BLOCK_NORM}_{WINDOW_SIZE}pixels"
+    filename = f"HOG_stats_{BLOCK_NORM}_{WINDOW_SIZE}pixels_v2"
 
     hog_runner.process_folder(
         image_folder=image_folder_path,
