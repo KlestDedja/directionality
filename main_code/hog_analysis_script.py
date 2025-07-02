@@ -35,6 +35,7 @@ class HOGAnalysis:
         num_bins: int = 45,
         max_main_directions: int = 1,
         min_direction_gap: float = 20.0,  # in degrees
+        enforce_local_maxima: bool = True,
     ):
         self.input_folder = input_folder  # default: ./input_images
         self.output_folder = output_folder  # default: ./output_analysis
@@ -47,6 +48,7 @@ class HOGAnalysis:
         self.post_normalization = post_normalization
         self.max_main_directions = max_main_directions
         self.min_direction_gap = min_direction_gap
+        self.enforce_local_maxima = enforce_local_maxima
         self.df_statistics = pd.DataFrame()
         self.saved_stats_path = None
 
@@ -185,6 +187,7 @@ class HOGAnalysis:
             gradient_hist,
             n_max_directions=self.max_main_directions,
             min_direction_gap=self.min_direction_gap,
+            enforce_local_maxima=self.enforce_local_maxima,
         )
 
         self.save_stats(filename, image, threshold, mean_stats, mode_stats, t1)

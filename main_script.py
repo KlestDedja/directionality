@@ -17,17 +17,19 @@ from main_code.get_default_params import (
 
 # ===== DEVELOPER SETTINGS ==========
 
-DRAFT_MODE = False
+DRAFT_MODE = True
 BLOCK_NORM = "None"  # or "L2-Hys"
 VERBOSE = 1  # higher value -> printing more debug messages
 
 # ========== USER SETTINGS ==========
-WINDOW_SIZE = 64  # pixels per window for HOG descriptor
-CHANNEL = 1  # channel color for HOG descriptor
+# WINDOW_SIZE = 64  # pixels per window for HOG descriptor
+# CHANNEL = 1  # channel color for HOG descriptor
 POST_NORMALIZATION = True  # normalize color brightness across windows
 N_BINS = 45
 
-MAX_MAIN_DIRECTIONS = 1
+MAX_MAIN_DIRECTIONS = 2
+MIN_DIRECTION_GAP = 20
+ENFORCE_LOCAL_MAXIMA = True
 
 SAVE_STATS = True  # save statistics to CSV
 SAVE_PLOTS = True  # save ouctcomes of directionality analysis
@@ -39,6 +41,7 @@ ROOT_FOLDER = os.getcwd()
 # change accordingly if your structure differs from the demo
 DATA_FOLDER_NAME = "data"
 SUBFOLDER_NAME = "images-longitudinal"  # images-fotosalignement-tool3
+# SUBFOLDER_NAME = "images-fotosalignement-tool3"
 
 INPUT_FOLDER = "input_images"
 OUTPUT_FOLDER = "output_analysis"
@@ -77,9 +80,11 @@ if __name__ == "__main__":
         post_normalization=POST_NORMALIZATION,
         num_bins=N_BINS,
         max_main_directions=MAX_MAIN_DIRECTIONS,
+        min_direction_gap=MIN_DIRECTION_GAP,
+        enforece_local_maxima=ENFORCE_LOCAL_MAXIMA,
     )
 
-    filename = f"HOG_stats_{BLOCK_NORM}_{WINDOW_SIZE}pixels_v2"
+    filename = f"HOG_stats_{BLOCK_NORM}_{WINDOW_SIZE}pixels"
 
     hog_runner.process_folder(
         image_folder=image_folder_path,

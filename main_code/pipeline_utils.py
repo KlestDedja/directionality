@@ -297,13 +297,13 @@ def compute_peaks_from_histogram(
     orientations_deg: np.ndarray,
     n_max_directions: int = 1,
     min_direction_gap: float = 20.0,
-    must_be_local_max: bool = True,
+    enforce_local_maxima: bool = True,
 ) -> list[float]:
 
     hist_copy = global_histogram.copy()
     peaks_found = []
 
-    if must_be_local_max:
+    if enforce_local_maxima:
         # suppress non-local maxima. Precompute mask:
         left_neighbors = np.roll(global_histogram, 1)
         right_neighbors = np.roll(global_histogram, -1)
@@ -335,6 +335,7 @@ def compute_distribution_directions(
     orientations_deg: np.ndarray | None = None,
     n_max_directions: int = 1,
     min_direction_gap: float = 20.0,
+    enforce_local_maxima: bool = True,
 ) -> tuple[dict, dict]:
     """
     Find (possibly multiple) dominant directions, spaced by at least min_direction_gap,
@@ -394,6 +395,7 @@ def compute_distribution_directions(
         orientations_deg,
         n_max_directions,
         min_direction_gap,
+        enforce_local_maxima,
     )
 
     # mean stats is computed over a single direction
