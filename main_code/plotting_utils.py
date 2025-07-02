@@ -5,9 +5,12 @@ import matplotlib.pyplot as plt
 from matplotlib.ticker import FormatStrFormatter
 import numpy as np
 import pandas as pd
+from skimage import exposure  # , filters, feature
+
 from main_code.pipeline_utils import (
     HOGDescriptor,
     cell_signal_strengths,
+    compute_peaks_from_histogram,
     correct_round_angles,
     plot_polar_histogram,
 )
@@ -20,6 +23,8 @@ def external_plot_hog_analysis(
     gradient_hist,
     cells_to_keep,
     strengths,
+    n_max_directions,
+    min_direction_gap,
 ):
 
     gradient_hist_360 = np.tile(np.array(list(gradient_hist.values())), 2)
@@ -55,7 +60,12 @@ def external_plot_hog_analysis(
     estim_ymax = np.array(list(gradient_hist.values())).max()
 
     bars = plot_polar_histogram(
-        ax3, gradient_hist_360, orientations_polar_deg, plot_mean=False
+        ax3,
+        gradient_hist_360,
+        orientations_polar_deg,
+        plot_mean=False,
+        n_max_directions=n_max_directions,
+        min_direction_gap=min_direction_gap,
     )
     ymax_lim = max(estim_ymax, 1e-3)
     ax3.set_yticks(np.linspace(0, ymax_lim, num=4))
@@ -135,9 +145,6 @@ def explanatory_plot_intro(image):
     return fig
 
 
-from skimage import exposure  # , filters, feature
-
-
 def explanatory_plot_hog(image):
 
     height, width = image.shape[:2]
@@ -209,7 +216,7 @@ def explanatory_normalized_hog(image):
     )
 
     _, hog_image = hog_descriptor.compute_hog(
-        zoomed_image, block_norm=None, feature_vector=False
+        zoomed_image, block_norm="None", feature_vector=False
     )
 
     ax3.axis("off")
@@ -218,7 +225,7 @@ def explanatory_normalized_hog(image):
     ax3.set_title("Direction of the Oriented Gradients", fontsize=14)
 
     fd_raw_bg, hog_image = hog_descriptor.compute_hog(
-        zoomed_image, block_norm=None, feature_vector=False
+        zoomed_image, block_norm="None", feature_vector=False
     )
 
     fd_bg = np.squeeze(fd_raw_bg)
@@ -285,11 +292,11 @@ def explanatory_plot_filter(image):
     )
 
     fd_raw, hog_image = hog_descriptor.compute_hog(
-        zoomed_image, block_norm=None, feature_vector=False
+        zoomed_image, block_norm="None", feature_vector=False
     )
     fd = np.squeeze(fd_raw)  # fd has now shape (N, M, n_orientations)
 
-    # computes strenghts of signal for each cell. Assumes block_norm is None
+    # computes strenghts of signal for each cell. Assumes block_norm is 'None'
     strengths = cell_signal_strengths(
         fd, norm_ord=1
     )  # output shape is shape (N, M), we normalize by L1 norm.

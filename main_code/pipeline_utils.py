@@ -63,7 +63,14 @@ class HOGDescriptor:
         return self.fd, self.hog_image
 
 
-def plot_polar_histogram(ax, global_histogram, orientations_deg, plot_mean=True):
+def plot_polar_histogram(
+    ax,
+    global_histogram,
+    orientations_deg,
+    plot_mean=True,
+    n_max_directions=1,
+    min_direction_gap=20.0,
+):
     # bin centers in radians
     orientations_rad = np.deg2rad(orientations_deg)
     n_bins = len(orientations_deg)
@@ -76,13 +83,38 @@ def plot_polar_histogram(ax, global_histogram, orientations_deg, plot_mean=True)
         bottom=0,
     )
 
-    # highlight all max bins in red
-    max_idxs = np.where(global_histogram == global_histogram.max())[0]
-    for i in max_idxs:
+    # # highlight all max bins in red
+    # max_idxs = np.where(global_histogram == global_histogram.max())[0]
+    # for i in max_idxs:
+    #     bars[i].set_color("red")
+
+    global_hist_180 = global_histogram[: n_bins // 2]
+    orientations_deg_180 = orientations_deg[: n_bins // 2]
+
+    main_peaks_180 = compute_peaks_from_histogram(
+        global_hist_180,
+        orientations_deg_180,
+        n_max_directions,  # histogram is in [0, 180) and contains two copies per direction
+        min_direction_gap,
+    )
+
+    main_peaks = main_peaks_180 + [
+        main_peaks_180[i] + 180 for i in range(len(main_peaks_180))
+    ]
+
+    # given the angle of the peaks, map them to indeces:
+    peak_idxs = []
+    for peak in main_peaks:
+        # find the closest index to the peak angle
+        idx = np.argmin(np.abs(orientations_deg - peak))
+        peak_idxs.append(idx)
+
+    # now that all peaks have been mapped to indeces, color them
+    for i in peak_idxs:
         bars[i].set_color("red")
 
     if plot_mean:
-        # compute mean direction (in deg → rad) and plot as green line
+        # compute mean direction (in deg -> rad) and plot as green line
         mean_deg = compute_vector_mean(global_histogram, orientations_deg)
         mean_rad = np.deg2rad(mean_deg)
         r_max = ax.get_ylim()[1]  # current radial max
@@ -265,19 +297,30 @@ def compute_peaks_from_histogram(
     orientations_deg: np.ndarray,
     n_max_directions: int = 1,
     min_direction_gap: float = 20.0,
+    must_be_local_max: bool = True,
 ) -> list[float]:
 
     hist_copy = global_histogram.copy()
     peaks_found = []
+
+    if must_be_local_max:
+        # suppress non-local maxima. Precompute mask:
+        left_neighbors = np.roll(global_histogram, 1)
+        right_neighbors = np.roll(global_histogram, -1)
+        is_local_max = (global_histogram >= left_neighbors) & (
+            global_histogram >= right_neighbors
+        )
+        # Only local maxima remain
+        hist_copy[~is_local_max] = 0
 
     for _ in range(n_max_directions):
         idx = np.argmax(hist_copy)
         peak_angle = orientations_deg[idx]
         peaks_found.append(peak_angle)
 
-        # suppress neighbors to enforece distance of at least min_direction_gap between peaks
+        # suppress neighbors to enforce distance of at least min_direction_gap
+        # between peaks. Also, suppress the peak itself so it is not selected again
         angle_diff = compute_polar_direction_diff(orientations_deg, peak_angle)
-
         suppression_mask = angle_diff < min_direction_gap
         hist_copy[suppression_mask] = 0
 
@@ -345,22 +388,7 @@ def compute_distribution_directions(
 
     mean_stats = []
     mode_stats = []
-    # peaks_found = []
 
-    # for _ in range(n_max_directions):
-    #     idx = np.argmax(hist_copy)
-    #     peak_angle = orientations_deg[idx]
-    #     peaks_found.append(peak_angle)
-
-    #     # suppress neighbors to enforece distance of at least min_direction_gap between peaks
-    #     # angle_diff = np.abs((orientations_deg - peak_angle + 180) % 360 - 180)
-    #     angle_diff = compute_polar_direction_diff(orientations_deg, peak_angle)
-
-    #     suppression_mask = angle_diff < min_direction_gap
-    #     hist_copy[suppression_mask] = 0
-
-    #     if np.all(hist_copy == 0):
-    #         break
     peaks_found = compute_peaks_from_histogram(
         global_hist_vals,
         orientations_deg,

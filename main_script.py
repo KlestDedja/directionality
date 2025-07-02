@@ -16,6 +16,7 @@ from main_code.get_default_params import (
 )
 
 # ===== DEVELOPER SETTINGS ==========
+
 DRAFT_MODE = False
 BLOCK_NORM = "None"  # or "L2-Hys"
 VERBOSE = 1  # higher value -> printing more debug messages
@@ -26,17 +27,18 @@ CHANNEL = 1  # channel color for HOG descriptor
 POST_NORMALIZATION = True  # normalize color brightness across windows
 N_BINS = 45
 
-MAX_MAIN_DIRECTIONS = 2
+MAX_MAIN_DIRECTIONS = 1
 
 SAVE_STATS = True  # save statistics to CSV
-SAVE_PLOTS = False  # save ouctcomes of directionality analysis
+SAVE_PLOTS = True  # save ouctcomes of directionality analysis
 SHOW_PLOTS = False  # show plots interactively
 
 # ========== FOLDER STRUCTURE ==========
 ROOT_FOLDER = os.getcwd()
 
 # change accordingly if your structure differs from the demo
-DATA_FOLDER_NAME = "demo-data"
+DATA_FOLDER_NAME = "data"
+SUBFOLDER_NAME = "images-longitudinal"  # images-fotosalignement-tool3
 
 INPUT_FOLDER = "input_images"
 OUTPUT_FOLDER = "output_analysis"
@@ -44,7 +46,7 @@ OUTPUT_FOLDER = "output_analysis"
 # ========== RUN ANALYSIS ==========
 if __name__ == "__main__":
 
-    data_folder = os.path.join(ROOT_FOLDER, DATA_FOLDER_NAME)
+    data_folder = os.path.join(ROOT_FOLDER, DATA_FOLDER_NAME, SUBFOLDER_NAME)
 
     image_folder_path = os.path.join(data_folder, INPUT_FOLDER)
     output_folder_path = os.path.join(data_folder, OUTPUT_FOLDER)

@@ -198,7 +198,13 @@ class HOGAnalysis:
         self, image, hog_image, gradient_hist, cells_to_keep, strengths, filename
     ):
         fig = external_plot_hog_analysis(
-            image, hog_image, gradient_hist, cells_to_keep, strengths
+            image,
+            hog_image,
+            gradient_hist,
+            cells_to_keep,
+            strengths,
+            n_max_directions=self.max_main_directions,
+            min_direction_gap=self.min_direction_gap,
         )
         fig.tight_layout()
 
