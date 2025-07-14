@@ -208,6 +208,7 @@ class HOGAnalysis:
             strengths,
             n_max_directions=self.max_main_directions,
             min_direction_gap=self.min_direction_gap,
+            enforce_local_maxima=self.enforce_local_maxima,
         )
         fig.tight_layout()
 

@@ -25,6 +25,7 @@ def external_plot_hog_analysis(
     strengths,
     n_max_directions,
     min_direction_gap,
+    enforce_local_maxima,
 ):
 
     gradient_hist_360 = np.tile(np.array(list(gradient_hist.values())), 2)
@@ -66,6 +67,7 @@ def external_plot_hog_analysis(
         plot_mean=False,
         n_max_directions=n_max_directions,
         min_direction_gap=min_direction_gap,
+        enforce_local_maxima=enforce_local_maxima,
     )
     ymax_lim = max(estim_ymax, 1e-3)
     ax3.set_yticks(np.linspace(0, ymax_lim, num=4))

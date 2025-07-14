@@ -17,17 +17,17 @@ from main_code.get_default_params import (
 
 # ===== DEVELOPER SETTINGS ==========
 
-DRAFT_MODE = True
+DRAFT_MODE = False
 BLOCK_NORM = "None"  # or "L2-Hys"
 VERBOSE = 1  # higher value -> printing more debug messages
 
 # ========== USER SETTINGS ==========
 # WINDOW_SIZE = 64  # pixels per window for HOG descriptor
 # CHANNEL = 1  # channel color for HOG descriptor
-POST_NORMALIZATION = True  # normalize color brightness across windows
+POST_NORMALIZATION = False  # normalize color brightness across windows
 N_BINS = 45
 
-MAX_MAIN_DIRECTIONS = 2
+MAX_MAIN_DIRECTIONS = 1
 MIN_DIRECTION_GAP = 20
 ENFORCE_LOCAL_MAXIMA = True
 
@@ -40,11 +40,11 @@ ROOT_FOLDER = os.getcwd()
 
 # change accordingly if your structure differs from the demo
 DATA_FOLDER_NAME = "data"
-SUBFOLDER_NAME = "images-longitudinal"  # images-fotosalignement-tool3
-# SUBFOLDER_NAME = "images-fotosalignement-tool3"
+# SUBFOLDER_NAME = "images-longitudinal"
+SUBFOLDER_NAME = "images-fotosalignement-tool3"
 
 INPUT_FOLDER = "input_images"
-OUTPUT_FOLDER = "output_analysis"
+OUTPUT_FOLDER = "output_analysis_notnorm"
 
 # ========== RUN ANALYSIS ==========
 if __name__ == "__main__":
@@ -67,6 +67,9 @@ if __name__ == "__main__":
         print(f"Using channel={CHANNEL}")
         print(f"Using background range=({100*BG_RANGE[0]}%, {100*BG_RANGE[1]}%)")
         print(f"Staining normalization: {POST_NORMALIZATION}")
+        print(f"Maximum main directions: {MAX_MAIN_DIRECTIONS}")
+        print(f"Minimum gap between main directions: {MIN_DIRECTION_GAP} degrees")
+        print(f"Enforcing local maxima: {ENFORCE_LOCAL_MAXIMA}")
 
     hog_runner = HOGAnalysis(
         input_folder=image_folder_path,
@@ -81,7 +84,7 @@ if __name__ == "__main__":
         num_bins=N_BINS,
         max_main_directions=MAX_MAIN_DIRECTIONS,
         min_direction_gap=MIN_DIRECTION_GAP,
-        enforece_local_maxima=ENFORCE_LOCAL_MAXIMA,
+        enforce_local_maxima=ENFORCE_LOCAL_MAXIMA,
     )
 
     filename = f"HOG_stats_{BLOCK_NORM}_{WINDOW_SIZE}pixels"

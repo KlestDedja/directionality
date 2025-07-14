@@ -70,6 +70,7 @@ def plot_polar_histogram(
     plot_mean=True,
     n_max_directions=1,
     min_direction_gap=20.0,
+    enforce_local_maxima=True,
 ):
     # bin centers in radians
     orientations_rad = np.deg2rad(orientations_deg)
@@ -96,6 +97,7 @@ def plot_polar_histogram(
         orientations_deg_180,
         n_max_directions,  # histogram is in [0, 180) and contains two copies per direction
         min_direction_gap,
+        enforce_local_maxima=enforce_local_maxima,
     )
 
     main_peaks = main_peaks_180 + [
