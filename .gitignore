@@ -1,6 +1,6 @@
 # all image data
 data/*
-data-extra/*
+data-extr*/*
 images-lightsheet*/
 images-confocal*/
 old_files/*
