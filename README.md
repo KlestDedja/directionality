@@ -5,7 +5,7 @@
 
 # Directionality with EDGEHOG
 
-**EDGEHOG** provides a reproducible framework to analyze images using Histograms of Oriented Gradients (HOGs) to derive orientation statistics.  
+**EDGEHOG** provides a reproducible framework to analyze images using Histograms of Oriented Gradients (HOGs) to derive orientation statistics.
 This tool automates the extraction of directions and their distirbutions, by producing both visual and statistical outputs for images. A paper is underway explaining how EDGEHOG works and how it can be employed in a several biomedical applications.
 
 ## 🚀 Installation
@@ -19,11 +19,11 @@ The repository includes a self-contained demo dataset, making it easy to get sta
 
 Clone the repository to the desired local path either with Git:
 ```bash
-git clone https://github.com/Klest94/directionality.git ~/your/local/path/directionality-demo
+git clone https://github.com/KlestDedja/directionality.git ~/your/local/path/directionality-test
 ```
-where `directionality-demo` is the name of the new repository.
+where `directionality-test` is the name of the new repository.
 
-Or, you can clone with GitHub Desktop: click on `Add -> Clone repository -> url -> https://github.com/klest94/directionality.git` Name the repo as e.g. `directionality-demo` in your local path.
+Or, you can clone with GitHub Desktop: click on `Add -> Clone repository -> url -> https://github.com/KlestDedja/directionality.git` Name the repo as e.g. `directionality-test` in your local path.
 
 ### 🐍 2. Set up the environment
 
@@ -31,10 +31,10 @@ Or, you can clone with GitHub Desktop: click on `Add -> Clone repository -> url 
 
 Navigate to the new folder with your favourite terminal (**Powershell**, **GitBash**, **Command Prompt**,...) and create a Python environment:
 ```
-cd ~/your/local/path/directionality-demo
+cd ~/your/local/path/directionality-test
 python -m venv .venv
 ```
-This creates a virtual environment `.venv` in `directionality-demo/.venv/`.
+This creates a virtual environment `.venv` in `directionality-test/.venv/`.
 Activate the virtual environment, if you are using **Windows**
 ```
 .venv\Scripts\activate
@@ -42,7 +42,7 @@ Activate the virtual environment, if you are using **Windows**
 
 if you are using **macOS / Linux / WSL**:
 ```
-source .venv/bin/activate 
+source .venv/bin/activate
 ```
 
 And install the required packages
@@ -56,16 +56,16 @@ pip install -r requirements.txt
 
 Assuming you have `anaconda` installed, then:
 ```
-conda create -n directionality-demo python=3.12
-conda activate directionality-demo
+conda create -n directionality-test python=3.12
+conda activate directionality-test
 ```
-`cd` your way to the repository location (e.g. `cd ~/your/local/path/directionality-demo`) and install required packages:
+`cd` your way to the repository location (e.g. `cd ~/your/local/path/directionality-test`) and install required packages:
 ```
 pip install -r requirements.txt
 ```
 ### 🐛 3. Fix scikit-image code (temporary)
 
-As we haven't managed to make build the scikit-image fork correctly, best current workaround is to navigate to the installation of `scikit-image` within the `directionality-demo` environment, search for the `_hog_normalize_block` function under `skimage/feature/_hog.py` and replace the lines:
+As we haven't managed to make build the scikit-image fork correctly, best current workaround is to navigate to the installation of `scikit-image` within the `directionality-test` environment, search for the `_hog_normalize_block` function under `skimage/feature/_hog.py` and replace the lines:
 ```
 def _hog_normalize_block(block, method, eps=1e-5):
     if method == 'L1':
@@ -96,7 +96,7 @@ def _hog_normalize_block(block, method, eps=1e-5):
         out = out / np.sqrt(np.sum(out**2) + eps**2)
     elif method == 'None':
         out = block
-``` 
+```
 In practice, we added an extra case to the normalization options, namely *no* normalization.
 
 ⚠️ If you skip this step, you can still run the script as long as the `block_norm` is one of the cases handled by `_hog_normalize_block`.
@@ -106,7 +106,7 @@ You should be good to go!
 ## 🚀 Try It Out: Run the example demo
 To see the Directionality tool in action, you can use the example dataset in the `demo-data` folder.
 
-You simply have to run  `main_script.py` (in the `main_code` folder) from your favorite IDE or through a bash command. Make sure you are pointing to the location of this repository.  
+You simply have to run  `main_script.py` (in the `main_code` folder) from your favorite IDE or through a bash command. Make sure you are pointing to the location of this repository.
 
 ## 📂 What happens when you run it?
 
@@ -120,6 +120,6 @@ The demo script:
 
     - 📊 Cleaned CSV file: `HOG_stats_<params>_clean.csv` summary of average and modal signal directions, with deviations (filtered and enriched with metadata)
 
-    - 🖼️ Optionally, a PNG plot per image, containing:original image, HOG visualization, signal strength map, and a histogram of the distribution of directioanlity, in poalr coordinates. 
+    - 🖼️ Optionally, a PNG plot per image, containing:original image, HOG visualization, signal strength map, and a histogram of the distribution of directioanlity, in poalr coordinates.
 
 

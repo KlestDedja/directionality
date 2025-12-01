@@ -11,4 +11,4 @@ dependencies:
   - imagecodecs
 #  - pip  # ensure pip is available for pip installs
 #  - pip:
-#      - scikit-image @ git+https://github.com/Klest94/scikit-image-fork.git
+#      - scikit-image @ git+https://github.com/KlestDedja/scikit-image-fork.git
