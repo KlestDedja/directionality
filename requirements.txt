@@ -1,7 +1,7 @@
 numpy
 pandas
 scikit-image>=0.23.0,<0.26.0
-# CURRENTLY FAILS: scikit-image @ git+https://github.com/Klest94/scikit-image-fork.git@main
+# CURRENTLY FAILS: scikit-image @ git+https://github.com/KlestDedja/scikit-image-fork.git@main
 matplotlib
 ipykernel
 imagecodecs
