@@ -1,7 +1,8 @@
-'''
+"""
 This is the main script for running EDGEHOG
-It is assumed that the script is localted in the project root folder
-'''
+It is assumed that the script is located in the project root folder
+"""
+
 import os
 
 from main_code.hog_analysis_script import HOGAnalysis
@@ -20,10 +21,14 @@ BLOCK_NORM = "None"  # or "L2-Hys"
 VERBOSE = 1  # higher value -> printing more debug messages
 
 # ========== USER SETTINGS ==========
-WINDOW_SIZE = 64  # pixels per window for HOG descriptor
+WINDOW_SIZE = 32  # pixels per window for HOG descriptor
 CHANNEL = 1  # channel color for HOG descriptor
 POST_NORMALIZATION = True  # normalize color brightness across windows
-N_BINS = 45
+N_BINS = 15
+# two entries, each 'interpolate' or 'None'
+# first for 90-degree correction, second for 45-degree correction, correction at 0 = correction at 90
+CORRECT_EDGES = ("none", "none")
+# CORRECT_EDGES = ("interpolate", "interpolate")
 
 SAVE_STATS = True  # save statistics to CSV
 SAVE_PLOTS = True  # save ouctcomes of directionality analysis
@@ -34,9 +39,12 @@ ROOT_FOLDER = os.getcwd()
 
 # change accordingly if your structure differs from the demo
 DATA_FOLDER_NAME = "demo-data"
+DATA_FOLDER_NAME = os.path.join("data", "synthetic-golden-standard")
+DATA_FOLDER_NAME = os.path.join("data", "test-golden")
+
 
 INPUT_FOLDER = "input_images"
-OUTPUT_FOLDER = "output_analysis"
+OUTPUT_FOLDER = f"output_analysis_{N_BINS}bins"
 
 # ========== RUN ANALYSIS ==========
 if __name__ == "__main__":
@@ -54,11 +62,12 @@ if __name__ == "__main__":
 
     if VERBOSE > 0:
         print(f"Input folder:\n{image_folder_path}")
-        print(f"Using threshold={THRESHOLD}")
-        print(f"Using window size={WINDOW_SIZE}")
-        print(f"Using channel={CHANNEL}")
-        print(f"Using background range=({100*BG_RANGE[0]}%, {100*BG_RANGE[1]}%)")
+        print(f"Threshold={THRESHOLD}")
+        print(f"Window size={WINDOW_SIZE}")
+        print(f"Channel={CHANNEL}")
+        print(f"Background range=({100*BG_RANGE[0]}%, {100*BG_RANGE[1]}%)")
         print(f"Staining normalization: {POST_NORMALIZATION}")
+        print(f"Correction edge angles: {CORRECT_EDGES}")
 
     hog_runner = HOGAnalysis(
         input_folder=image_folder_path,
@@ -70,14 +79,15 @@ if __name__ == "__main__":
         draft=DRAFT_MODE,
         show_plots=SHOW_PLOTS,
         post_normalization=POST_NORMALIZATION,
+        correct_edge_angles=CORRECT_EDGES,
         num_bins=N_BINS,
     )
 
-    filename = f"HOG_stats_{BLOCK_NORM}_{WINDOW_SIZE}pixels"
+    FILENAME = f"HOG_stats_{BLOCK_NORM}_{WINDOW_SIZE}pixels"
 
     hog_runner.process_folder(
         image_folder=image_folder_path,
-        output_filename=filename,
+        output_filename=FILENAME,
         threshold=THRESHOLD,
         save_stats=SAVE_STATS,
         save_plots=SAVE_PLOTS,
@@ -86,7 +96,7 @@ if __name__ == "__main__":
     # ========== POSTPROCESS RESULTS FILE ==========
 
     stats_file = hog_runner.saved_stats_path
-    if VERBOSE > 0:
-        print(f"Storing final cvs results in {stats_file}")
-    df, clean_csv_path = postprocess_hog_csv(stats_file, "_clean")
+    df, clean_csv_path = postprocess_hog_csv(stats_file, "_clean", verbose=0)
     df.to_csv(clean_csv_path, index=False)
+    if VERBOSE > 0:
+        print(f"Stored final results in {clean_csv_path}")

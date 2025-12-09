@@ -32,6 +32,7 @@ class HOGAnalysis:
         draft: bool = False,
         show_plots: bool = False,
         post_normalization: bool = True,
+        correct_edge_angles: tuple[str, str] = ("interpolate", "interpolate"),
         num_bins: int = 45,
     ):
         self.input_folder = input_folder  # default: ./input_images
@@ -43,6 +44,7 @@ class HOGAnalysis:
         self.draft = draft
         self.show_plots = show_plots
         self.post_normalization = post_normalization
+        self.correct_edge_angles = correct_edge_angles
         self.df_statistics = pd.DataFrame()
         self.saved_stats_path = None
 
@@ -173,8 +175,17 @@ class HOGAnalysis:
             )
         )
 
+        # gradient_hist = correct_round_angles(
+        #     gradient_hist, corr90=True, corr45=("20240928" not in folder)
+        # )
+
+        corr90_bool = self.correct_edge_angles[0].lower() == "interpolate"
+        corr45_bool = self.correct_edge_angles[1].lower() == "interpolate"
+
         gradient_hist = correct_round_angles(
-            gradient_hist, corr90=True, corr45=("20240928" not in folder)
+            gradient_hist,
+            corr90=corr90_bool,
+            corr45=corr45_bool,
         )
 
         mean_stats, mode_stats = compute_distribution_direction(gradient_hist)

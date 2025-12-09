@@ -3,6 +3,22 @@ import numpy as np
 from skimage.feature import hog
 
 
+def load_and_prepare_image(path, name, to_grayscale=False, channel=None):
+    """Load an image and proivde option to convert it to grayscale."""
+    image = io.imread(os.path.join(path, name))
+
+    # Check if the image has four channels (RGBA)
+    if image.ndim == 3 and image.shape[2] == 4:
+        image = image[:, :, :3]  # ignore the alpha channel
+
+    # Convert RGB to grayscale
+    if image.ndim == 3 and to_grayscale == True:
+        image = rgb2gray(image)
+    if image.ndim == 3 and to_grayscale == False and channel is not None:
+        image = image[:, :, channel]
+    return image
+
+
 class HOGDescriptor:
     def __init__(
         self,
@@ -171,13 +187,14 @@ def correct_round_angles(histog_dict, corr90=True, corr45=False):
                 )
             linear_interpolate_neighbors_double(histog_dict, keys_sorted, i1, i2)
 
-    # Correction at 0 degrees (always needed)
-    process_interpolation(0)
+    # Correction at 0 degrees (always needed) used to be here, separately:
+    # process_interpolation(0)
 
-    if corr90:
+    if corr90 is True:
         process_interpolation(90)
+        process_interpolation(0)
 
-    if corr45:
+    if corr45 is True:
         process_interpolation(45)
         process_interpolation(135)
 
