@@ -1,6 +1,10 @@
 # from typing import Dict, Tuple
+import os
 import numpy as np
+from skimage import io
+from skimage.color import rgb2gray
 from skimage.feature import hog
+from skimage.filters import scharr_h, scharr_v
 
 
 def load_and_prepare_image(path, name, to_grayscale=False, channel=None):

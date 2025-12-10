@@ -1,11 +1,13 @@
 import os
+import warnings
+import re
 import time
 import numpy as np
+from scipy.ndimage import convolve
 import pandas as pd
 import matplotlib.pyplot as plt
 from skimage import io, color
-import warnings
-import re
+from skimage.filters import scharr_h, scharr_v
 
 
 from main_code.pipeline_utils import (
@@ -17,10 +19,18 @@ from main_code.pipeline_utils import (
 from main_code.utils_other import (
     clean_filename,
 )
-from main_code.plotting_utils import external_plot_hog_analysis
+from main_code.plotting_utils import external_plot_hog_analysis, external_plot_analysis
 
 
 class HOGAnalysis:
+    """This class does the heavy lifting: includes all the  necessarysteps, from
+    loading images, to computing HOG or Scharr-based histograms, to normalizing,
+     to excluding the backgrond under a certain signal intensity, to plotting and storing.
+
+     Note that the name HOGAnalysis is kept for compatibility, even if the 'scharr' method
+     and it should be changed to something more generic in the future.
+    """
+
     def __init__(
         self,
         input_folder: str,
@@ -34,6 +44,7 @@ class HOGAnalysis:
         post_normalization: bool = True,
         correct_edge_angles: tuple[str, str] = ("interpolate", "interpolate"),
         num_bins: int = 45,
+        method: str = "scharr",
     ):
         self.input_folder = input_folder  # default: ./input_images
         self.output_folder = output_folder  # default: ./output_analysis
@@ -45,6 +56,8 @@ class HOGAnalysis:
         self.show_plots = show_plots
         self.post_normalization = post_normalization
         self.correct_edge_angles = correct_edge_angles
+        self.num_bins = num_bins
+        self.method = method.lower()
         self.df_statistics = pd.DataFrame()
         self.saved_stats_path = None
 
@@ -52,6 +65,7 @@ class HOGAnalysis:
         if self.show_plots:
             plt.ion()  # hopefully works both for .py and for .ipynb
 
+        # keep a HOGDescriptor instance for compatibility (stores pixel/window info)
         self.hog_descriptor = HOGDescriptor(
             orientations=num_bins,
             pixels_per_window=self.pixels_per_window,
@@ -100,6 +114,7 @@ class HOGAnalysis:
             self.process_image(image_folder, image_file, threshold, save_plots)
 
         if save_stats:
+
             self.saved_stats_path = self.save_results_to_file(
                 self.output_folder, output_filename
             )
@@ -137,31 +152,129 @@ class HOGAnalysis:
 
         image = self.clean_and_select_channel(image, self.channel_image)
 
-        fd_raw_bg, hog_image_bg = self.hog_descriptor.compute_hog(
-            image, block_norm="None", feature_vector=False
-        )
-        fd_bg = np.squeeze(fd_raw_bg)
-        strengths = cell_signal_strengths(fd_bg, norm_ord=1)
+        # Choose computation method: 'hog', 'scharr', or 'sobel' (5x5)
+        if self.method == "hog":
+            fd_raw_bg, hog_image_bg = self.hog_descriptor.compute_hog(
+                image, block_norm="None", feature_vector=False
+            )
+            fd_bg = np.squeeze(fd_raw_bg)
+            strengths = cell_signal_strengths(fd_bg, norm_ord=1)
+        elif self.method == "scharr" or self.method == "sobel":
+            # Compute gradients with Scharr or Sobel filters and build orientation histograms per window
+            if image.ndim == 3:
+                image_proc = color.rgb2gray(image)
+            else:
+                image_proc = image
+
+            if self.method == "scharr":
+                grad_y = scharr_v(image_proc)
+                grad_x = scharr_h(image_proc)
+            elif self.method == "sobel":
+                # 5x5 Sobel kernels (Fiji style)
+                sobel5_x = np.array(
+                    [
+                        [2, 1, 0, -1, -2],
+                        [3, 2, 0, -2, -3],
+                        [4, 3, 0, -3, -4],
+                        [3, 2, 0, -2, -3],
+                        [2, 1, 0, -1, -2],
+                    ],
+                    dtype=float,
+                )
+                sobel5_y = sobel5_x.T
+                grad_x = convolve(image_proc, sobel5_x, mode="reflect")
+                grad_y = convolve(image_proc, sobel5_y, mode="reflect")
+
+            magnitude = np.hypot(grad_x, grad_y)
+            orientation = np.rad2deg(np.arctan2(grad_y, grad_x))
+            orientation = (
+                np.where(orientation < 0, orientation + 180, orientation) % 180
+            )
+
+            win_h, win_w = self.pixels_per_window
+            h, w = image_proc.shape[:2]
+            n_windows_y = h // win_h
+            n_windows_x = w // win_w
+
+            # histogram bins for orientations 0..180
+            bin_edges = np.linspace(0, 180, self.num_bins + 1)
+
+            fd_bg = np.zeros((n_windows_y, n_windows_x, self.num_bins))
+            for i in range(n_windows_y):
+                y0, y1 = i * win_h, (i + 1) * win_h
+                for j in range(n_windows_x):
+                    x0, x1 = j * win_w, (j + 1) * win_w
+                    w_mag = magnitude[y0:y1, x0:x1].ravel()
+                    w_ori = orientation[y0:y1, x0:x1].ravel()
+                    if w_mag.size == 0:
+                        continue
+                    hist, _ = np.histogram(w_ori, bins=bin_edges, weights=w_mag)
+                    fd_bg[i, j, :] = hist
+
+            hog_image_bg = magnitude  # reuse name for compatibility with plotting
+            strengths = cell_signal_strengths(fd_bg, norm_ord=1)
+        else:
+            raise ValueError(
+                f"Method {self.method} is not recognized. Currently only 'hog', 'scharr', and 'sobel' are supported."
+            )
 
         skip, threshold, cells_to_keep = self.adjust_threshold(
             strengths, threshold, background_range=self.background_range
         )
-        if skip:
+
+        if skip:  # if skip > skip_tol, we were unable to adjust threshold properly
             self.save_nan_stats(filename, image, threshold)
             return
 
-        if self.block_norm != "None":
-            # (re)compute HOG features with the specified block normalization
-            fd_norm, hog_image = self.hog_descriptor.compute_hog(
-                image, block_norm=self.block_norm, feature_vector=False
-            )
-            fd_norm = np.squeeze(fd_norm)
-        else:
-            hog_image = hog_image_bg
-            if self.post_normalization is True:
-                fd_norm = fd_bg / (1e-7 + strengths[:, :, np.newaxis])
+        # Normalization: if using original 'hog' method, defer to HOGDescriptor
+        # behavior; otherwise apply per-cell normalization for Scharr histograms.
+        if self.method == "hog":
+            if self.block_norm != "None":
+                fd_norm, hog_image = self.hog_descriptor.compute_hog(
+                    image, block_norm=self.block_norm, feature_vector=False
+                )
+                fd_norm = np.squeeze(fd_norm)
             else:
-                fd_norm = fd_bg
+                hog_image = hog_image_bg
+                if self.post_normalization is True:
+                    fd_norm = fd_bg / (1e-7 + strengths[:, :, np.newaxis])
+                else:
+                    fd_norm = fd_bg
+
+        elif self.method == "scharr":
+            # per-cell normalization for Scharr descriptor
+            # using same normalization schemes as HOG for consistency
+            if self.block_norm != "None":
+                fd_norm = np.copy(fd_bg)
+                # simple per-cell normalization
+                for iy in range(fd_norm.shape[0]):
+                    for ix in range(fd_norm.shape[1]):
+                        cell = fd_norm[iy, ix, :]
+                        if self.block_norm == "L1":
+                            nrm = np.sum(np.abs(cell)) + 1e-7
+                            fd_norm[iy, ix, :] = cell / nrm
+                        elif self.block_norm == "L2":
+                            nrm = np.sqrt(np.sum(cell**2)) + 1e-7
+                            fd_norm[iy, ix, :] = cell / nrm
+                        elif self.block_norm == "L2-Hys":
+                            nrm = np.sqrt(np.sum(cell**2)) + 1e-7
+                            celln = cell / nrm
+                            celln = np.minimum(celln, 0.2)
+                            nrm2 = np.sqrt(np.sum(celln**2)) + 1e-7
+                            fd_norm[iy, ix, :] = celln / nrm2
+                        else:
+                            fd_norm[iy, ix, :] = cell
+                hog_image = hog_image_bg
+            else:
+                hog_image = hog_image_bg
+                if self.post_normalization is True:
+                    fd_norm = fd_bg / (1e-7 + strengths[:, :, np.newaxis])
+                else:
+                    fd_norm = fd_bg
+        else:
+            raise ValueError(
+                f"Method {self.method} is not recognized. Currently only 'hog' and 'scharr' are supported."
+            )
 
         # Drop cells below threshold, the rest is normalised if self.block_norm
         # is "None", so that all cells have equal weight in the histogram
@@ -200,8 +313,18 @@ class HOGAnalysis:
     def save_plot(
         self, image, hog_image, gradient_hist, cells_to_keep, strengths, filename
     ):
-        fig = external_plot_hog_analysis(
-            image, hog_image, gradient_hist, cells_to_keep, strengths
+        # fig = external_plot_hog_analysis(
+        #     image, hog_image, gradient_hist, cells_to_keep, strengths
+        # )
+        # fig.tight_layout()
+
+        fig = external_plot_analysis(
+            image,
+            hog_image,
+            gradient_hist,
+            cells_to_keep,
+            strengths,
+            method=self.method,
         )
         fig.tight_layout()
 
