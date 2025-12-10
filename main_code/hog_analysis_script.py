@@ -108,8 +108,8 @@ class HOGAnalysis:
                 if idx % 20 == 0 or (idx % 5 == 0 and verbose > 0):
                     print(f"Processing image {idx + 1} out of {len(image_files)}")
             else:  # output message every 20% progress
-                chunk20 = len(image_files) // 5
-                chunk05 = len(image_files) // 20
+                chunk20 = max(len(image_files) // 5, 2)
+                chunk05 = max(len(image_files) // 20, 2)
                 if idx % chunk20 == 0 or (idx % chunk05 == 0 and verbose > 0):
                     print(f"Processing image {idx + 1} out of {len(image_files)}")
 

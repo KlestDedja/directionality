@@ -28,7 +28,7 @@ N_BINS = 45
 # two entries, each 'interpolate' or 'None'
 # first for 90-degree correction, second for 45-degree correction, correction at 0 = correction at 90
 CORRECT_EDGES = ("none", "none")
-CORRECT_EDGES = ("interpolate", "interpolate")
+# CORRECT_EDGES = ("interpolate", "interpolate")
 
 # Choose method: 'scharr' or 'hog'
 METHOD = "scharr"
