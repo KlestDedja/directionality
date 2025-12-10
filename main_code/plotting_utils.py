@@ -67,11 +67,6 @@ def external_plot_analysis(
     ax3.set_ylim(0, 1.1 * ymax_lim)
     ax3.set_title("Directionality plot", fontsize=14, y=1.05)
 
-    # Only set polar orientation explicitly for HOG visualizations
-    if isinstance(method, str) and method.lower() == "hog":
-        ax3.set_theta_zero_location("N")  # North,  West, or East?
-        ax3.set_theta_direction(-1)  # -1 for Clockwise
-
     # print(f"Proportion of window cells kept: {np.mean(cells_to_keep)}")
     ax4.axis("off")
     heatmap = ax4.imshow(strengths, cmap="viridis", interpolation="nearest")
@@ -157,8 +152,6 @@ def external_plot_hog_analysis(
     ax3.yaxis.label.set_size(6)
     ax3.set_ylim(0, 1.1 * ymax_lim)
     ax3.set_title("Directionality plot", fontsize=14, y=1.05)
-    ax3.set_theta_zero_location("N")
-    ax3.set_theta_direction(-1)
 
     # print(f"Proportion of window cells kept: {np.mean(cells_to_keep)}")
     ax4.axis("off")
@@ -554,8 +547,6 @@ def explanatory_plot_polar(
     ax3.yaxis.label.set_size(6)
     ax3.set_ylim(0, 1.1 * ymax_lim)
     ax3.set_title("Directionality plot", fontsize=14)
-    ax3.set_theta_zero_location("N")  # North,  West, or East?
-    ax3.set_theta_direction(-1)  # -1 for Clockwise
 
     plt.tight_layout()
 

@@ -80,6 +80,7 @@ class HOGAnalysis:
         threshold: float | int,
         save_stats: bool = True,
         save_plots: bool = True,
+        verbose: int = 0,
     ):
 
         image_files = [
@@ -104,11 +105,12 @@ class HOGAnalysis:
 
         for idx, image_file in enumerate(image_files):
             if len(image_file) > 100:  # output message every 20 images
-                if idx % 20 == 0:
+                if idx % 20 == 0 or (idx % 5 == 0 and verbose > 0):
                     print(f"Processing image {idx + 1} out of {len(image_files)}")
             else:  # output message every 20% progress
                 chunk20 = len(image_files) // 5
-                if idx % chunk20 == 0:
+                chunk05 = len(image_files) // 20
+                if idx % chunk20 == 0 or (idx % chunk05 == 0 and verbose > 0):
                     print(f"Processing image {idx + 1} out of {len(image_files)}")
 
             self.process_image(image_folder, image_file, threshold, save_plots)

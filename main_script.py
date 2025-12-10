@@ -28,10 +28,12 @@ N_BINS = 45
 # two entries, each 'interpolate' or 'None'
 # first for 90-degree correction, second for 45-degree correction, correction at 0 = correction at 90
 CORRECT_EDGES = ("none", "none")
-# CORRECT_EDGES = ("interpolate", "interpolate")
+CORRECT_EDGES = ("interpolate", "interpolate")
 
 # Choose method: 'scharr' or 'hog'
-METHOD = "hog"
+METHOD = "scharr"
+# METHOD = "hog"
+
 
 SAVE_STATS = True  # save statistics to CSV
 SAVE_PLOTS = True  # save ouctcomes of directionality analysis
@@ -45,7 +47,7 @@ ROOT_FOLDER = os.getcwd()
 # change accordingly if your structure differs from the demo
 DATA_FOLDER_NAME = "demo-data"
 DATA_FOLDER_NAME = os.path.join("data", "synthetic-golden-standard")
-# DATA_FOLDER_NAME = os.path.join("data", "test-golden")
+DATA_FOLDER_NAME = os.path.join("data", "test-golden")
 
 
 INPUT_FOLDER = "input-images"

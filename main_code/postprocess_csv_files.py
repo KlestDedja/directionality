@@ -16,15 +16,13 @@ def clean_csv_df(df: pd.DataFrame, missing_threshold: int = 2) -> pd.DataFrame:
     return df.loc[mask].copy()
 
 
-def add_conditions_to_df(
-    df: pd.DataFrame, verbose: bool = False, suppress_warnings: bool = False
-) -> pd.DataFrame:
+def add_conditions_to_df(df: pd.DataFrame, verbose: int = 0) -> pd.DataFrame:
 
     df = df.copy()
     filename_column = df.columns[0]
 
     df["condition"] = df[filename_column].apply(
-        lambda x: set_sample_condition(str(x), suppress_warnings)
+        lambda x: set_sample_condition(str(x), verbose)
     )
 
     return df
@@ -78,9 +76,9 @@ def postprocess_hog_csv(
 
     df = pd.read_csv(csv_path)
 
-    df = add_conditions_to_df(df, suppress_warnings=False, verbose=verbose)
+    df = add_conditions_to_df(df, verbose=verbose)
 
-    df = add_replicates_to_df(df, suppress_warnings=False, verbose=verbose)
+    df = add_replicates_to_df(df, verbose=verbose)
 
     if verbose:
         print(f"Dropping rows with more than {missing_threshold} missing values")

@@ -187,8 +187,6 @@ for group in group_folders:
         ax3.yaxis.label.set_size(6)
         ax3.set_ylim(0, 1.1 * estim_ymax)
         ax3.set_title("Directionality plot")
-        ax3.set_theta_zero_location("N")  # North,  West, or East?
-        ax3.set_theta_direction(-1)  # -1 for Clockwise
 
         included_cells = cells_to_keep.reshape(fd.shape[0], fd.shape[1])
         ax4.axis("off")
