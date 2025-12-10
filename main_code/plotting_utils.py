@@ -65,93 +65,7 @@ def external_plot_analysis(
     ax3.yaxis.set_major_formatter(FormatStrFormatter("%.1e"))
     ax3.yaxis.label.set_size(6)
     ax3.set_ylim(0, 1.1 * ymax_lim)
-    ax3.set_title("Directionality plot", fontsize=14, y=1.05)
-
-    # print(f"Proportion of window cells kept: {np.mean(cells_to_keep)}")
-    ax4.axis("off")
-    heatmap = ax4.imshow(strengths, cmap="viridis", interpolation="nearest")
-
-    # adjust colorab height: make it smaller for wide images
-    cbar_size = 0.4 if image.shape[1] > 1.2 * image.shape[0] else 0.7
-    cbar = fig.colorbar(heatmap, ax=ax4, shrink=cbar_size, pad=0.04, fraction=0.07)
-    cbar.ax.tick_params(labelsize=8)
-    ax4.set_title("Signal heatmap, mask in grey", fontsize=14)
-
-    rgb_color = (0.7, 0.7, 0.7)  # light gray
-    cmap_gray = matplotlib.colors.ListedColormap([rgb_color])
-    masked_im = ax4.imshow(
-        np.ma.masked_where(cells_to_keep, strengths),
-        cmap=cmap_gray,
-        interpolation=None,
-        alpha=1,
-    )
-
-    rows, cols = strengths.shape
-    for i in range(rows):
-        for j in range(cols):
-            if not cells_to_keep[i, j]:
-                rect = Rectangle(
-                    (j - 0.5, i - 0.5),
-                    1,
-                    1,
-                    linewidth=0.2,
-                    edgecolor="black",
-                    facecolor="none",
-                )
-                ax4.add_patch(rect)
-
-    return fig
-
-
-def external_plot_hog_analysis(
-    image,
-    hog_image,
-    gradient_hist,
-    cells_to_keep,
-    strengths,
-):
-
-    gradient_hist_360 = np.tile(np.array(list(gradient_hist.values())), 2)
-
-    fig = plt.figure(figsize=(8, 10))
-    ax1 = fig.add_subplot(2, 2, 1)
-    ax2 = fig.add_subplot(2, 2, 2)
-    ax3 = fig.add_subplot(2, 2, 3, projection="polar")
-    ax4 = fig.add_subplot(2, 2, 4)
-
-    ax1.axis("off")
-    ax1.imshow(image)
-    ax1.set_title("Original input image", fontsize=14)
-
-    ax2.axis("off")
-    # hog_image_rescaled = exposure.rescale_intensity(hog_image, out_range=(0, 0.1))
-    hog_norm = exposure.rescale_intensity(
-        hog_image,
-        in_range="image",  # use the actual min/max of hog_image
-        # out_range=(0, 1),  # map into 0–1 for matplotlib
-    )
-    ax2.imshow(
-        hog_norm,
-        cmap="viridis",
-        vmin=0.0,
-        vmax=0.1,  # ensure full span is used
-    )
-    ax2.set_title("Histogram of Oriented Gradients", fontsize=14)
-
-    ROTATE_FOR_GRADIENT = 0
-    orientations_360_deg = np.linspace(0, 360, len(gradient_hist_360), endpoint=False)
-    orientations_polar_deg = np.mod(orientations_360_deg + ROTATE_FOR_GRADIENT, 360)
-    estim_ymax = np.array(list(gradient_hist.values())).max()
-
-    bars = plot_polar_histogram(
-        ax3, gradient_hist_360, orientations_polar_deg, plot_mean=False
-    )
-    ymax_lim = max(estim_ymax, 1e-3)
-    ax3.set_yticks(np.linspace(0, ymax_lim, num=4))
-    ax3.yaxis.set_major_formatter(FormatStrFormatter("%.1e"))
-    ax3.yaxis.label.set_size(6)
-    ax3.set_ylim(0, 1.1 * ymax_lim)
-    ax3.set_title("Directionality plot", fontsize=14, y=1.05)
+    ax3.set_title("Directionality plot", fontsize=14, y=1.07)
 
     # print(f"Proportion of window cells kept: {np.mean(cells_to_keep)}")
     ax4.axis("off")
@@ -546,7 +460,7 @@ def explanatory_plot_polar(
     ax3.yaxis.set_major_formatter(FormatStrFormatter("%.1e"))
     ax3.yaxis.label.set_size(6)
     ax3.set_ylim(0, 1.1 * ymax_lim)
-    ax3.set_title("Directionality plot", fontsize=14)
+    ax3.set_title("Directionality plot", fontsize=14, y=1.05)
 
     plt.tight_layout()
 

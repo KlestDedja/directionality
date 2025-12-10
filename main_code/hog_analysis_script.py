@@ -19,7 +19,7 @@ from main_code.pipeline_utils import (
 from main_code.utils_other import (
     clean_filename,
 )
-from main_code.plotting_utils import external_plot_hog_analysis, external_plot_analysis
+from main_code.plotting_utils import external_plot_analysis
 
 
 class HOGAnalysis:
@@ -315,10 +315,6 @@ class HOGAnalysis:
     def save_plot(
         self, image, hog_image, gradient_hist, cells_to_keep, strengths, filename
     ):
-        # fig = external_plot_hog_analysis(
-        #     image, hog_image, gradient_hist, cells_to_keep, strengths
-        # )
-        # fig.tight_layout()
 
         fig = external_plot_analysis(
             image,
