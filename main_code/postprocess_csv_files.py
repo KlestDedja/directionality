@@ -62,7 +62,7 @@ def extract_donor(filename):
 
 
 def postprocess_hog_csv(
-    csv_path, filename_extra_tail="_clean", verbose=True, missing_threshold=2
+    csv_path, filename_extra_tail="_clean", verbose: int = 1, missing_threshold=2
 ):
     """
     Postprocessign steps: add 'condition' and 'replicate' column.

@@ -7,6 +7,9 @@ images-lightsheet-20241115_BAM_fkt20-P3-fkt21-P3-PEMFS-12w,3,,64,0.10,0.90,
 confocal-20241022-fusion-bMyoB-BAMS,6,,,,,
 images-longitudinal,10,,,,,
 fotosalignement-tool3,10,,32,0.005,0.995,
-good-bad-validation,0.025,greyscale,32,0.05,0.995,
-synthetic-golden-standard,0.01,greyscale,32,0.1,0.9,"('none', 'none')"
-test-golden,0.01,greyscale,32,0.1,0.9,"('none', 'none')"
+good-bad-validation,30,greyscale,32,0.05,0.995,# threshod=100 WITH SOBEL and = 0.025 with HOG
+good-bad-validation,0.025,greyscale,32,0.05,0.995,# WITH OLD HOG
+good-bad-validation,700,greyscale,32,0.05,0.995,# WITH NEW SOBEL
+
+synthetic-golden-standard,0.01,greyscale,32,0.05,0.95,"('none', 'none')"
+test-golden,0.03,greyscale,32,0.05,0.95,"('none', 'none')"
