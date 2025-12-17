@@ -5,8 +5,10 @@ images-lightsheet*/
 images-confocal*/
 old_files/*
 testing/
-demo-data/output_analysis/*
 
+# output from demo-data
+demo-data/synthetic-golden-standard/output-analysis/*
+demo-data/test-image-subset/output-analysis/*
 # Manuscript files
 manuscript-related-figures/
 
