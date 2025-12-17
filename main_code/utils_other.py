@@ -48,7 +48,7 @@ def clean_filename(filename):
 #     return threshold
 
 
-def set_sample_condition(filename, suppress_warnings=False):
+def set_sample_condition(filename, verbose: int = 0):
     """
     Assuming the Image Fluorescence 2D images are given as an input, this function extracts the
     condition from the filename string. The checks are very manual due to inconsistent naming (different people)
@@ -102,13 +102,13 @@ def set_sample_condition(filename, suppress_warnings=False):
         condition = "90s-30s"
 
     if condition == "Unknown":  # if still Unknown, raise a warning
-        if suppress_warnings is False:
+        if verbose >= 1:
             warnings.warn(f"Condition unknown. Double check file:\n{filename}")
 
     return condition
 
 
-def set_sample_replicate(filename: str, suppress_warnings: bool = False):
+def set_sample_replicate(filename: str, verbose: int = 0):
     """
     Assuming the Image Fluorescence 2D images are given as an input, this function extracts the
     condition from the filename string. The checks are very manual due to inconsistent naming (different people)
@@ -136,7 +136,7 @@ def set_sample_replicate(filename: str, suppress_warnings: bool = False):
             replicate = m.group(1)
 
     if replicate == "Unknown":  # if still Unknown, raise a warning
-        if suppress_warnings is False:
+        if verbose >= 1:
             warnings.warn(f"Unknown replicate. Double check file:\n{filename}")
 
     return replicate

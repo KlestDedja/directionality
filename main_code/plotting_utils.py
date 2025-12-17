@@ -1,10 +1,10 @@
+import numpy as np
+
 import matplotlib
-import os
+import matplotlib.colors as mcolors
 from matplotlib.patches import Rectangle
 import matplotlib.pyplot as plt
 from matplotlib.ticker import FormatStrFormatter
-import numpy as np
-import pandas as pd
 from main_code.pipeline_utils import (
     HOGDescriptor,
     cell_signal_strengths,
@@ -14,15 +14,21 @@ from main_code.pipeline_utils import (
 from main_code.utils_other import calculate_and_print_percentiles
 
 
-def external_plot_hog_analysis(
+def external_plot_analysis(
     image,
     hog_image,
     gradient_hist,
+    gradient_hist_smooth,
     cells_to_keep,
     strengths,
+    method: str = "scharr",
 ):
 
+    # This function is a copy of `external_plot_hog_analysis` but will only
+    # set the polar-axis orientation for HOG visualizations. For non-HOG
+    # methods (e.g. 'scharr') it leaves the polar axes defaults.
     gradient_hist_360 = np.tile(np.array(list(gradient_hist.values())), 2)
+    gradient_hist_360_smooth = np.tile(np.array(list(gradient_hist_smooth.values())), 2)
 
     fig = plt.figure(figsize=(8, 10))
     ax1 = fig.add_subplot(2, 2, 1)
@@ -49,22 +55,38 @@ def external_plot_hog_analysis(
     )
     ax2.set_title("Histogram of Oriented Gradients", fontsize=14)
 
-    ROTATE_FOR_GRADIENT = 0
     orientations_360_deg = np.linspace(0, 360, len(gradient_hist_360), endpoint=False)
-    orientations_polar_deg = np.mod(orientations_360_deg + ROTATE_FOR_GRADIENT, 360)
+    orientations_polar_deg = np.mod(orientations_360_deg, 360)
     estim_ymax = np.array(list(gradient_hist.values())).max()
 
-    bars = plot_polar_histogram(
+    # firt plot the bin bars, on original values, without any smoothing
+    ax3 = plot_polar_histogram(
         ax3, gradient_hist_360, orientations_polar_deg, plot_mean=False
+    )
+    # Plot the smoothed curve as a line in polar coordinates
+    orientations = np.array(list(gradient_hist_smooth.keys()))
+    values_smooth = np.array(list(gradient_hist_smooth.values()))
+    # Extend orientations to [0, 360) with the same step as between original values
+    step = orientations[1] - orientations[0] if len(orientations) > 1 else 360
+    orientations_360 = np.arange(orientations[0], 360, step)
+
+    values_smooth_360 = np.tile(values_smooth, 2)
+    # To close the curve, append the first value and angle at the end
+    orientations_360_closed = np.append(orientations_360, orientations_360[0])
+    values_smooth_360_closed = np.append(values_smooth_360, values_smooth_360[0])
+    ax3.plot(
+        np.deg2rad(orientations_360_closed),
+        values_smooth_360_closed,
+        color="blue",
+        lw=2,
+        label="Smoothed",
     )
     ymax_lim = max(estim_ymax, 1e-3)
     ax3.set_yticks(np.linspace(0, ymax_lim, num=4))
     ax3.yaxis.set_major_formatter(FormatStrFormatter("%.1e"))
-    ax3.yaxis.label.set_size(6)
+    ax3.yaxis.label.set_fontsize(6)
     ax3.set_ylim(0, 1.1 * ymax_lim)
-    ax3.set_title("Directionality plot", fontsize=14, y=1.05)
-    ax3.set_theta_zero_location("N")
-    ax3.set_theta_direction(-1)
+    ax3.set_title("Directionality plot", fontsize=14, y=1.07)
 
     # print(f"Proportion of window cells kept: {np.mean(cells_to_keep)}")
     ax4.axis("off")
@@ -77,8 +99,8 @@ def external_plot_hog_analysis(
     ax4.set_title("Signal heatmap, mask in grey", fontsize=14)
 
     rgb_color = (0.7, 0.7, 0.7)  # light gray
-    cmap_gray = matplotlib.colors.ListedColormap([rgb_color])
-    masked_im = ax4.imshow(
+    cmap_gray = mcolors.ListedColormap([rgb_color])
+    ax4.imshow(
         np.ma.masked_where(cells_to_keep, strengths),
         cmap=cmap_gray,
         interpolation=None,
@@ -325,8 +347,8 @@ def explanatory_plot_filter(image):
     # Overlay cells below threshold in red
     # cmap_red = matplotlib.colors.ListedColormap(['red'])
     rgb_color = (0.7, 0.7, 0.7)  # light gray
-    cmap_gray = matplotlib.colors.ListedColormap([rgb_color])
-    masked_im = ax2.imshow(
+    cmap_gray = mcolors.ListedColormap([rgb_color])
+    ax2.imshow(
         np.ma.masked_where(cells_to_keep, strengths),
         cmap=cmap_gray,
         interpolation=None,
@@ -449,7 +471,7 @@ def explanatory_plot_polar(
     estim_ymax = np.array(list(gradient_hist.values())).max()
 
     # max_y_tick = ceil(estim_ymax/0.5)*0.5 # round up to nearest half-integer
-    bars = plot_polar_histogram(
+    plot_polar_histogram(
         ax3, gradient_hist_360, orientations_polar_deg, plot_mean=plot_mean
     )
     ymax_lim = max(estim_ymax, 1e-3)
@@ -457,11 +479,9 @@ def explanatory_plot_polar(
 
     ax3.set_yticks(np.linspace(0, ymax_lim, num=4))  # Adjust the number of ticks here
     ax3.yaxis.set_major_formatter(FormatStrFormatter("%.1e"))
-    ax3.yaxis.label.set_size(6)
+    ax3.yaxis.label.set_fontsize(6)
     ax3.set_ylim(0, 1.1 * ymax_lim)
-    ax3.set_title("Directionality plot", fontsize=14)
-    ax3.set_theta_zero_location("N")  # North,  West, or East?
-    ax3.set_theta_direction(-1)  # -1 for Clockwise
+    ax3.set_title("Directionality plot", fontsize=14, y=1.05)
 
     plt.tight_layout()
 

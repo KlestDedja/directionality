@@ -1,6 +1,12 @@
 # from typing import Dict, Tuple
+import os
+import warnings
 import numpy as np
+from skimage import io
+from skimage.color import rgb2gray
 from skimage.feature import hog
+from skimage.filters import scharr_h, scharr_v
+from scipy.ndimage import gaussian_filter1d
 
 
 def load_and_prepare_image(path, name, to_grayscale=False, channel=None):
@@ -112,7 +118,30 @@ def plot_polar_histogram(ax, global_histogram, orientations_deg, plot_mean=True)
                 color="green",
             )
 
-    return bars
+    return ax
+
+
+def correct_angles_gaussian(hist_dict, sigma: float = 1):
+    """
+    Smooths the histogram using a Gaussian filter, treating the bins as circular.
+    hist_dict: dict mapping angle bins to values.
+    sigma: standard deviation for Gaussian kernel.
+    Returns a new dict with smoothed values.
+    """
+    if sigma == 0:
+        return hist_dict  # no smoothing applied
+    elif sigma < 0:
+        raise ValueError(f"Sigma must be non-negative. Found sigma={sigma}")
+    else:
+        angles = np.array(list(hist_dict.keys()))
+        values = np.array(list(hist_dict.values()))
+        # Ensure angles are sorted
+        sort_idx = np.argsort(angles)
+        angles = angles[sort_idx]
+        values = values[sort_idx]
+        # Apply circular (wrapped) Gaussian smoothing
+        smoothed = gaussian_filter1d(values, sigma=sigma, mode="wrap")
+        return dict(zip(angles, smoothed))
 
 
 def correct_round_angles(histog_dict, corr90=True, corr45=False):
@@ -244,7 +273,13 @@ def compute_deviations(global_hist_vals, orientations_deg, reference_angle_deg):
         ),
         axis=0,
     )
-    assert np.all(angle_diffs_real <= 90), "Not all values are less than or equal to 90"
+
+    if np.any(np.isnan(global_hist_vals)):
+        warnings.warn("Global_hist_vals contains NaN values.")
+        return [np.nan] * global_hist_vals, [np.nan] * global_hist_vals
+
+    elif not np.all(angle_diffs_real <= 90 + 1e-6):
+        raise AssertionError("Not all values are less than or equal to 90")
 
     # Calculate the standard deviation (sqrt of the average squared residuals)
     std_dev_deg = np.sqrt(

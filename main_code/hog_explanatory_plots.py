@@ -148,6 +148,5 @@ def plot_explanatory_polar(image, threshold, correction_artifacts=True):
     ax = fig.add_subplot(1, 1, 1, projection="polar")
     plot_polar_histogram(ax, gradient_hist_360, orientations_polar_deg, plot_mean=False)
     ax.set_title("Explanatory Polar Histogram", fontsize=14)
-    ax.set_theta_zero_location("N")  # type: ignore
-    ax.set_theta_direction(-1)  # type: ignore
+
     return fig

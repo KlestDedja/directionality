@@ -1,0 +1,324 @@
+import os
+import numpy as np
+import pandas as pd
+from matplotlib import pyplot as plt
+
+from main_code.evaluation_utils import (
+    circular_wasserstein_1,
+    direction_gaussian_peak_mean,
+    parse_distribution_csv,
+    build_distribution_from_data,
+    directions_to_hist,
+)
+
+# ========= SETTINGS ==========
+# needed inof since at runtime we need to know num_bins, method and interpolation type
+N_BINS = 45
+CORRECT_EDGES = ("gaussian", "1")
+# CORRECT_EDGES = ("interpolate", "interpolate")
+# CORRECT_EDGES = ("none", "none")
+METHODS = ["hog", "scharr", "sobel"]
+
+DRAFT_MODE = False
+
+# ========== FOLDERS FOR  COMPARISON ==========
+
+ROOT_FOLDER = os.getcwd()
+# change accordingly if your structure differs from the demo
+DATA_FOLDER_NAME = os.path.join("data", "synthetic-golden-standard")
+# DATA_FOLDER_NAME = os.path.join("data", "test-golden")
+INPUT_FOLDER = "input-images"
+INPUT_METADATA = "input-metadata"
+
+OUTPUT_FOLDER = "output-analysis"
+
+FOLDERS = [
+    f"{method}_{N_BINS}bins_{CORRECT_EDGES[0][:5]}_{CORRECT_EDGES[1][:5]}"
+    for method in METHODS
+]
+
+
+# ======== FILE PATHS ==========
+
+edgehog_directories_results = [
+    os.path.join(ROOT_FOLDER, DATA_FOLDER_NAME, OUTPUT_FOLDER, folder)
+    for folder in FOLDERS
+]
+
+hog_file = os.path.join(
+    edgehog_directories_results[0], "distribution_stats_vertical_format.csv"
+)
+scharr_file = os.path.join(
+    edgehog_directories_results[1], "distribution_stats_vertical_format.csv"
+)
+sobel_file = os.path.join(
+    edgehog_directories_results[2], "distribution_stats_vertical_format.csv"
+)
+
+print(hog_file)
+
+fiji_default = os.path.join(
+    ROOT_FOLDER, DATA_FOLDER_NAME, OUTPUT_FOLDER, "fiji", "20251215_Fiji.csv"
+)
+print(fiji_default)
+
+
+# Load distributions from EDGEHOG and FIJI
+hog_distrib_dict = parse_distribution_csv(hog_file)
+scharr_distrib_dict = parse_distribution_csv(scharr_file)
+sobel_distrib_dict = parse_distribution_csv(sobel_file)
+
+fiji_distrib_dict = parse_distribution_csv(fiji_default)
+
+ground_truth_files = os.listdir(
+    os.path.join(ROOT_FOLDER, DATA_FOLDER_NAME, INPUT_METADATA)
+)
+
+ground_truth_files = [f for f in ground_truth_files if f.endswith(".csv")]
+
+
+perf_results = pd.DataFrame(
+    columns=[
+        "Filename",
+        "Main direction HOG (deg)",
+        "Main direction SCHARR (deg)",
+        "Main direction SOBEL (deg)",
+        "Main direction FIJI (deg)",
+        "Main direction Ground Truth (deg)",
+    ]
+)
+
+
+bin_column_to_read = "Smoothed value"
+
+file_list_run = list(hog_distrib_dict.keys())
+if DRAFT_MODE is True:
+    file_list_run = file_list_run[::5][:4]  # take every 5th, max 4 files
+
+# Plot HOG, FIJI, and Ground Truth histograms in the same loop for each image
+for fname in file_list_run:
+    # HOG, SCHARR and SOBEL (EDGEHOG) distribution
+    data_hog = hog_distrib_dict[fname]
+    bins_hog, values_hog = build_distribution_from_data(
+        data_hog, direction_colname="Direction (deg)", value_colname=bin_column_to_read
+    )
+
+    data_scharr = scharr_distrib_dict[fname]
+    bins_scharr, values_scharr = build_distribution_from_data(
+        data_scharr,
+        direction_colname="Direction (deg)",
+        value_colname=bin_column_to_read,
+    )
+
+    data_sobel = sobel_distrib_dict[fname]
+    bins_sobel, values_sobel = build_distribution_from_data(
+        data_sobel,
+        direction_colname="Direction (deg)",
+        value_colname=bin_column_to_read,
+    )
+
+    # FIJI distribution (if available)
+    data_fiji = fiji_distrib_dict.get(fname, None)
+
+    bins_fiji, values_fiji = build_distribution_from_data(
+        data_fiji,
+        direction_colname="Direction °",
+        value_colname="Fourier component",
+    )
+
+    # Fiji contains both endpoints, remove the last one after averaging out:
+    values_fiji[0] = 0.5 * (values_fiji[0] + values_fiji[-1])  # wrap-around
+    bins_fiji = bins_fiji[:-1]
+    values_fiji = values_fiji[:-1]
+
+    # Translate direction values by 90 degrees to map [-90, 90) -> [0, 180)
+    bins_fiji = bins_fiji % 180
+    # Sort bins and values for consistency
+    sort_idx = np.argsort(bins_fiji)
+    bins_fiji = bins_fiji[sort_idx]
+    values_fiji = values_fiji[sort_idx]
+
+    # Find corresponding ground truth file by matching fname (strip extension if needed)
+    # Assume ground truth file contains fname or its stem
+    fname_stem = os.path.splitext(fname)[0]
+    gt_file_match = None
+    for gt_file in ground_truth_files:
+        if fname_stem in gt_file:
+            gt_file_match = gt_file
+            break
+
+    if gt_file_match:
+        gt_file_path = os.path.join(
+            ROOT_FOLDER, DATA_FOLDER_NAME, INPUT_METADATA, gt_file_match
+        )
+        df_gt = pd.read_csv(gt_file_path)
+        bins_gt, values_gt = directions_to_hist(
+            df_gt,
+            direction_col="angle_deg",
+            frequency_col="visible_segment_length",
+            n_bins=44,
+        )
+    else:
+        raise ValueError(f"No matching ground truth file found for image {fname}")
+
+    # Make sure binning is consistent across methods
+    assert np.allclose(bins_hog, bins_scharr)
+    assert np.allclose(bins_scharr, bins_sobel)
+    assert np.allclose(bins_sobel, bins_fiji)
+    assert np.allclose(bins_fiji, bins_gt)
+
+    bins_common = bins_gt
+
+    wasser_hog_gt = circular_wasserstein_1(values_hog, values_gt, L=180)
+    wasser_scharr_gt = circular_wasserstein_1(values_scharr, values_gt, L=180)
+    wasser_sobel_gt = circular_wasserstein_1(values_sobel, values_gt, L=180)
+    wasser_fiji_gt = circular_wasserstein_1(values_fiji, values_gt, L=180)
+
+    main_dir_hog = direction_gaussian_peak_mean(
+        bins_hog, values_hog, period_deg=180.0, sigma_bins=0.1
+    )
+
+    main_dir_scharr = direction_gaussian_peak_mean(
+        bins_scharr, values_scharr, period_deg=180.0, sigma_bins=0.1
+    )
+
+    main_dir_sobel = direction_gaussian_peak_mean(
+        bins_sobel, values_sobel, period_deg=180.0, sigma_bins=0.1
+    )
+
+    main_dir_fiji = direction_gaussian_peak_mean(
+        bins_fiji, values_fiji, period_deg=180.0, sigma_bins=0.1
+    )
+    main_dir_truth = direction_gaussian_peak_mean(
+        bins_gt, values_gt, period_deg=180.0, sigma_bins=0.1
+    )
+
+    perf_results = pd.concat(
+        [
+            perf_results,
+            pd.DataFrame(
+                {
+                    "Filename": [fname],
+                    "Main direction HOG (deg)": [main_dir_hog],
+                    "Main direction SCHARR (deg)": [main_dir_scharr],
+                    "Main direction SOBEL (deg)": [main_dir_sobel],
+                    "Main direction FIJI (deg)": [main_dir_fiji],
+                    "Main direction Ground Truth (deg)": [main_dir_truth],
+                    "Wasserstein HOG vs Ground Truth": [wasser_hog_gt],
+                    "Wasserstein SCHARR vs Ground Truth": [wasser_scharr_gt],
+                    "Wasserstein SOBEL vs Ground Truth": [wasser_sobel_gt],
+                    "Wasserstein FIJI vs Ground Truth": [wasser_fiji_gt],
+                }
+            ),
+        ],
+        ignore_index=True,
+    )
+
+    if DRAFT_MODE is True:
+        # Plot HOG
+        plt.figure(figsize=(7, 4))
+        plt.bar(
+            bins_hog,
+            values_hog,
+            width=(bins_hog[1] - bins_hog[0]) if len(bins_hog) > 1 else 1,
+            align="center",
+            alpha=0.7,
+        )
+        plt.title(f"HOG Distribution for {fname}")
+        plt.xlabel("Direction (deg)")
+        plt.xticks(np.arange(0, 181, 15))
+        plt.ylabel("Binned value")
+        plt.tight_layout()
+        plt.show()
+
+        # Plot SCHARR
+        plt.figure(figsize=(7, 4))
+        plt.bar(
+            bins_scharr,
+            values_scharr,
+            width=(bins_scharr[1] - bins_scharr[0]) if len(bins_scharr) > 1 else 1,
+            align="center",
+            alpha=0.7,
+        )
+        plt.title(f"SCHARR Distribution for {fname}")
+        plt.xlabel("Direction (deg)")
+        plt.xticks(np.arange(0, 181, 15))
+        plt.ylabel("Binned value")
+        plt.tight_layout()
+        plt.show()
+
+        # Plot SOBEL
+        plt.figure(figsize=(7, 4))
+        plt.bar(
+            bins_sobel,
+            values_sobel,
+            width=(bins_sobel[1] - bins_sobel[0]) if len(bins_sobel) > 1 else 1,
+            align="center",
+            alpha=0.7,
+        )
+        plt.title(f"SOBEL Distribution for {fname}")
+        plt.xlabel("Direction (deg)")
+        plt.xticks(np.arange(0, 181, 15))
+        plt.ylabel("Binned value")
+        plt.tight_layout()
+        plt.show()
+
+        # Plot FIJI if available
+        plt.figure(figsize=(7, 4))
+        plt.bar(
+            bins_fiji,
+            values_fiji,
+            width=(bins_fiji[1] - bins_fiji[0]) if len(bins_fiji) > 1 else 1,
+            align="center",
+            alpha=0.7,
+        )
+        plt.title(f"FIJI Distribution for {fname}")
+        plt.xlabel("Direction (deg)")
+        plt.ylabel("Binned value")
+        plt.tight_layout()
+        plt.show()
+
+        # Plot Ground Truth if available
+        plt.figure(figsize=(7, 4))
+        plt.bar(
+            bins_gt,
+            values_gt,
+            width=(bins_gt[1] - bins_gt[0]) if len(bins_gt) > 1 else 1,
+            align="center",
+            alpha=0.7,
+        )
+        plt.title(f"GROUND TRUTH Distribution for {fname}")
+        plt.xlabel("Direction (deg)")
+        plt.ylabel("Binned value")
+        plt.tight_layout()
+        plt.show()
+
+
+# Append average row for Wasserstein columns
+wasser_cols = [
+    "Wasserstein HOG vs Ground Truth",
+    "Wasserstein SCHARR vs Ground Truth",
+    "Wasserstein SOBEL vs Ground Truth",
+    "Wasserstein FIJI vs Ground Truth",
+]
+avg_row = {col: perf_results[col].mean() for col in wasser_cols if col in perf_results}
+avg_row.update(
+    {
+        col: ""
+        for col in perf_results.columns
+        if col not in wasser_cols and col != "Filename"
+    }  # type: ignore
+)
+avg_row["Filename"] = "average"  # type: ignore
+perf_results.loc[len(perf_results)] = avg_row  # type: ignore
+
+# Save performance results to CSV
+output_dir = os.path.join(ROOT_FOLDER, DATA_FOLDER_NAME, OUTPUT_FOLDER)
+
+perf_filename = (
+    f"performance_comparison_{CORRECT_EDGES[0][:5]}_{CORRECT_EDGES[1]}.csv"
+    if DRAFT_MODE is False
+    else f"performance_comparison_draft_{CORRECT_EDGES[0][:5]}_{CORRECT_EDGES[1]}.csv"
+)
+
+perf_results.to_csv(os.path.join(output_dir, perf_filename), index=False)
