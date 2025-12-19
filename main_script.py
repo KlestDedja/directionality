@@ -32,8 +32,8 @@ CORRECT_EDGES = ("none", "none")
 CORRECT_EDGES = ("gaussian", "1")
 
 # Choose method: 'scharr' or 'hog'
-METHOD = "scharr"
-# METHOD = "hog"
+# METHOD = "scharr"
+METHOD = "hog"
 # METHOD = "sobel"
 
 SAVE_STATS = True  # save statistics to CSV
@@ -45,10 +45,23 @@ SHOW_PLOTS = False  # show plots interactively
 ROOT_FOLDER = os.getcwd()
 
 # change accordingly if your structure differs from the demo
-DATA_FOLDER_NAME = "demo-data"
-DATA_FOLDER_NAME = os.path.join("data", "synthetic-golden-standard")
-# DATA_FOLDER_NAME = os.path.join("data", "test-golden")
-DATA_FOLDER_NAME = os.path.join("data", "images-good-bad-validation")
+# DATA_FOLDER_NAME = os.path.join("data", "synthetic-golden-standard")
+DATA_FOLDER_NAME = os.path.join("data", "test-golden")
+
+# DATA_FOLDER_NAME = os.path.join("data", "images-good-bad-validation")
+# DATA_FOLDER_NAME = os.path.join(
+#     "data", "images-lightsheet-20241115_BAM_fkt20-P3-fkt21-P3-PEMFS-12w"
+# )
+# DATA_FOLDER_NAME = os.path.join(
+#     "data", "images-lightsheet-20240928_BAM_fkt20_P3_fkt21_P3_PEMFS"
+# )
+
+# DATA_FOLDER_NAME = os.path.join(
+#     "data", "images-confocal-20241022-fusion-bMyoB-BAMS-TM-6w"
+# )
+# DATA_FOLDER_NAME = os.path.join(
+#     "data", "images-confocal-20241116-fusion-bMyoB-PEMFS-TM-12w"
+# )
 
 INPUT_FOLDER = "input-images"
 # OUTPUT_FOLDER will be constructed at runtime to include num_bins, method and interpolation type
@@ -60,15 +73,15 @@ t0 = time.time()
 
 if __name__ == "__main__":
 
-    data_folder = os.path.join(ROOT_FOLDER, DATA_FOLDER_NAME)
+    data_folder_path = os.path.join(ROOT_FOLDER, DATA_FOLDER_NAME)
 
-    image_folder_path = os.path.join(data_folder, INPUT_FOLDER)
+    image_folder_path = os.path.join(data_folder_path, INPUT_FOLDER)
 
     # create a method-specific subfolder inside the base output folder
     INTERPOLATION_STR = f"{CORRECT_EDGES[0][:5]}_{str(CORRECT_EDGES[1])[:5]}"
     SUBFOLDER_NAME = f"{METHOD}_{N_BINS}bins_{INTERPOLATION_STR}"
 
-    output_folder_path = os.path.join(data_folder, OUTPUT_FOLDER, SUBFOLDER_NAME)
+    output_folder_path = os.path.join(data_folder_path, OUTPUT_FOLDER, SUBFOLDER_NAME)
 
     # fetch per-folder defaults
     THRESHOLD = get_folder_threshold(image_folder_path)

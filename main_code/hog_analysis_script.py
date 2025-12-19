@@ -231,6 +231,10 @@ class HOGAnalysis:
                 f"Method {self.method} is not recognized. Currently supported: 'hog', 'scharr', and 'sobel'."
             )
 
+        # exited model case, we now have fd_bg and related strength
+        # let's normalize strength to [0,100] before adjusting threshold
+        strengths = 100 * strengths / strengths.max()
+
         skip, threshold, cells_to_keep = self.adjust_threshold(
             strengths, threshold, background_range=self.background_range
         )

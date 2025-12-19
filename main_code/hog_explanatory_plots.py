@@ -83,8 +83,8 @@ def plot_background_filter_strengths(image):
 
     hog_descriptor = HOGDescriptor(
         orientations=45,
-        pixels_per_cell=(64, 64),
-        cells_per_block=(1, 1),
+        pixels_per_window=(64, 64),
+        windows_per_block=(1, 1),
         channel_axis=-1,
     )
     fd_raw, hog_image = hog_descriptor.compute_hog(
@@ -116,8 +116,8 @@ def plot_explanatory_polar(image, threshold, correction_artifacts=True):
     ]
     hog_descriptor = HOGDescriptor(
         orientations=45,
-        pixels_per_cell=(64, 64),
-        cells_per_block=(1, 1),
+        pixels_per_window=(64, 64),
+        windows_per_block=(1, 1),
         channel_axis=-1,
     )
     fd_raw, _ = hog_descriptor.compute_hog(

@@ -6,7 +6,7 @@ from math import ceil
 import re
 import warnings
 from skimage import exposure  # , filters, feature
-import matplotlib
+import matplotlib.colors as mcolors
 
 # import opencv # STILL NOT WORKING DAMNNN
 # print(opencv.__version__)
@@ -199,7 +199,7 @@ for group in group_folders:
         # Overlay cells below threshold in red
         # cmap_red = matplotlib.colors.ListedColormap(['red'])
         rgb_color = (0.7, 0.7, 0.7)  # light gray
-        cmap_gray = matplotlib.colors.ListedColormap([rgb_color])
+        cmap_gray = mcolors.ListedColormap([rgb_color])
         masked_im = ax4.imshow(
             np.ma.masked_where(cells_to_keep, strengths),
             cmap=cmap_gray,
