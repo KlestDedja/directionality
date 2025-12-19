@@ -1,10 +1,11 @@
 import numpy as np
 
-import matplotlib
 import matplotlib.colors as mcolors
 from matplotlib.patches import Rectangle
 import matplotlib.pyplot as plt
 from matplotlib.ticker import FormatStrFormatter
+from skimage import exposure  # , filters, feature
+
 from main_code.pipeline_utils import (
     HOGDescriptor,
     cell_signal_strengths,
@@ -21,14 +22,12 @@ def external_plot_analysis(
     gradient_hist_smooth,
     cells_to_keep,
     strengths,
-    method: str = "scharr",
 ):
 
-    # This function is a copy of `external_plot_hog_analysis` but will only
-    # set the polar-axis orientation for HOG visualizations. For non-HOG
-    # methods (e.g. 'scharr') it leaves the polar axes defaults.
+    # This function is replaces the old  `external_plot_hog_analysis` and
+    #  leaves the polar axes defaults regardless of the employed method.
     gradient_hist_360 = np.tile(np.array(list(gradient_hist.values())), 2)
-    gradient_hist_360_smooth = np.tile(np.array(list(gradient_hist_smooth.values())), 2)
+    # gradient_hist_360_smooth = np.tile(np.array(list(gradient_hist_smooth.values())), 2)
 
     fig = plt.figure(figsize=(8, 10))
     ax1 = fig.add_subplot(2, 2, 1)
@@ -81,7 +80,7 @@ def external_plot_analysis(
         lw=2,
         label="Smoothed",
     )
-    ymax_lim = max(estim_ymax, 1e-3)
+    ymax_lim = max(estim_ymax, 1e-5)
     ax3.set_yticks(np.linspace(0, ymax_lim, num=4))
     ax3.yaxis.set_major_formatter(FormatStrFormatter("%.1e"))
     ax3.yaxis.label.set_fontsize(6)
@@ -162,9 +161,6 @@ def explanatory_plot_intro(image):
     return fig
 
 
-from skimage import exposure  # , filters, feature
-
-
 def explanatory_plot_hog(image):
 
     height, width = image.shape[:2]
@@ -210,7 +206,7 @@ def explanatory_plot_hog(image):
 def explanatory_normalized_hog(image):
 
     height, width = image.shape[:2]
-    fig, (ax3, ax4) = plt.subplots(1, 2, figsize=(9, 4))
+    _, (ax3, ax4) = plt.subplots(1, 2, figsize=(9, 4))
 
     zoomed_image = image[: height // 3, int(0.8 * width / 3) : int(1.8 * width / 3)]
     zoomed_height, zoomed_width = zoomed_image.shape[:2]
@@ -363,6 +359,11 @@ def explanatory_plot_filter(image):
 def explanatory_plot_polar(
     image, threshold, plot_mean=False, correction_artifacts=True
 ):
+    """
+    This plotting function is used to generate explanatory plots for the manuscript
+    The main difference with the standard polar plotting function is that here
+    we show a zoomed-in version of the image, with more visible windows and grid lines.
+    """
 
     fig = plt.figure(figsize=(13, 4))
     ax1 = fig.add_subplot(1, 3, 1)
@@ -371,7 +372,7 @@ def explanatory_plot_polar(
 
     height, width = image.shape[:2]
     zoomed_image = image[: height // 3, int(0.8 * width / 3) : int(1.8 * width / 3)]
-    zoomed_height, zoomed_width = zoomed_image.shape[:2]
+    # zoomed_height, zoomed_width = zoomed_image.shape[:2]
 
     # if zoomed image, uncomment:
     image = zoomed_image
@@ -389,7 +390,7 @@ def explanatory_plot_polar(
     )
 
     fd_raw, hog_image = hog_descriptor.compute_hog(
-        image, block_norm=None, feature_vector=False
+        image, block_norm="None", feature_vector=False
     )
 
     orient_arr = np.arange(2 * hog_descriptor.orientations)
@@ -454,12 +455,9 @@ def explanatory_plot_polar(
         edgecolor="black",
         linewidth=0.2,
     )
-    # rest is the same…
     ax2.set_xticks(np.arange(min(angles) - 2, max(angles) + 3, 30))
     ax2.set_title("Histogram of Oriented Gradients", fontsize=14)
-    # ax2.set_xticks([])
     ax2.set_yticks([])
-    # ax2.set_xlabel("")
     ax2.set_ylabel("")
 
     gradient_hist_360 = np.tile(
@@ -474,7 +472,7 @@ def explanatory_plot_polar(
     plot_polar_histogram(
         ax3, gradient_hist_360, orientations_polar_deg, plot_mean=plot_mean
     )
-    ymax_lim = max(estim_ymax, 1e-3)
+    ymax_lim = max(estim_ymax, 1e-5)
     # Do not set the ax3.axis('off') !
 
     ax3.set_yticks(np.linspace(0, ymax_lim, num=4))  # Adjust the number of ticks here

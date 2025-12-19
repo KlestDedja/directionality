@@ -133,7 +133,7 @@ if __name__ == "__main__":
 
     # Save runtime to file
     runtime_file = os.path.join(output_folder_path, f"runtime_{METHOD}.txt")
-    with open(runtime_file, "w") as f:
+    with open(runtime_file, "w", encoding="utf-8") as f:
         f.write(runtime_message)
 
     # ========== POSTPROCESS RESULTS FILE ==========

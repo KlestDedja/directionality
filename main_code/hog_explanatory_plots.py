@@ -121,7 +121,7 @@ def plot_explanatory_polar(image, threshold, correction_artifacts=True):
         channel_axis=-1,
     )
     fd_raw, _ = hog_descriptor.compute_hog(
-        zoomed, block_norm=None, feature_vector=False
+        zoomed, block_norm="None", feature_vector=False
     )
     fd = np.squeeze(fd_raw)
     strengths = cell_signal_strengths(fd, norm_ord=1)
