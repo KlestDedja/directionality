@@ -1,15 +1,11 @@
 dataset_name,threshold,channel,window_size,background_min,background_max,correct_edges_tuple
 default,3,greyscale,64,0.1,0.9,"('interpolate', 'interpolate')"
-images-3D-lightsheet-20240928_BAM_fkt20_P3_fkt21_P3_PEMFS,3,,64,0.10,0.90,"('interpolate', 'none')"
-images-3D-lightsheet-20241115_BAM_fkt20-P3-fkt21-P3-PEMFS-12w,3,,64,0.10,0.90,
-images-lightsheet-20241115_BAM_fkt20-P3-fkt21-P3-PEMFS-12w,3,,64,0.10,0.90,
-20241116-fusion-bMyoB-PEMFS-TM-12w,6,,,,,
-confocal-20241022-fusion-bMyoB-BAMS,6,,,,,
+images-lightsheet-20240928_BAM_fkt20_P3_fkt21_P3_PEMFS,8,,64,0.10,0.90,"('interpolate', 'none')"
+images-lightsheet-20241115_BAM_fkt20-P3-fkt21-P3-PEMFS-12w,7,,64,0.10,0.90,
+confocal-20241116-fusion-bMyoB-PEMFS-TM-12w,8,,,,, # SOBEL
+confocal-20241022-fusion-bMyoB-BAMS,8,,,,, # SOBEL
 images-longitudinal,10,,,,,
 fotosalignement-tool3,10,,32,0.005,0.995,
-good-bad-validation,30,greyscale,32,0.05,0.995,# threshod=100 WITH SOBEL and = 0.025 with HOG
-good-bad-validation,0.025,greyscale,32,0.05,0.995,# WITH OLD HOG
-good-bad-validation,700,greyscale,32,0.05,0.995,# WITH NEW SOBEL
-
-synthetic-golden-standard,0.01,greyscale,32,0.05,0.95,"('none', 'none')"
-test-golden,0.03,greyscale,32,0.05,0.95,"('none', 'none')"
+good-bad-validation,20,greyscale,32,0.05,0.995,# SOBEL
+synthetic-golden-standard,6,greyscale,32,0.05,0.95,"('none', 'none')"
+test-golden,1,greyscale,32,0.05,0.95,"('none', 'none')"
