@@ -260,6 +260,11 @@ def compute_vector_mean(global_hist_vals, orientations_deg):
 
 def compute_deviations(global_hist_vals, orientations_deg, reference_angle_deg):
     """Compute standard deviation and absolute deviation w.r.t. a reference angle."""
+
+    if np.isnan(reference_angle_deg):
+        warnings.warn("Reference angle (mean or median) is NaN.")
+        return np.nan, np.nan
+
     # Calculate angle residuals (in degs). Remember we are only using the angles 0-180 (right side of the polar plot)
     angle_diffs = np.abs(orientations_deg - reference_angle_deg)
 
@@ -328,6 +333,7 @@ def compute_distribution_direction(
     std_dev_mean, abs_dev_mean = compute_deviations(
         global_hist_vals, orientations_deg, mean_angle_deg
     )
+    # output can be numeric or a bunch of np.nan-s
 
     # Grouped dictionary for mean-related metrics
     mean_stats = {

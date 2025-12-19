@@ -15,6 +15,75 @@ from main_code.pipeline_utils import (
 from main_code.utils_other import calculate_and_print_percentiles
 
 
+def create_empty_plot(image, hog_image, cells_to_keep, strengths):
+    """
+    Create a plot with ax1 (original image) and ax4 (heatmap),
+    but skip ax2 and ax3 when gradient histogram contains NaN values.
+    """
+    fig = plt.figure(figsize=(8, 10))
+    ax1 = fig.add_subplot(2, 2, 1)
+    ax2 = fig.add_subplot(2, 2, 2)
+    ax3 = fig.add_subplot(2, 2, 3)
+    ax4 = fig.add_subplot(2, 2, 4)
+
+    # Show the original image
+    ax1.axis("off")
+    ax1.imshow(image)
+    ax1.set_title("Original input image", fontsize=14)
+
+    # Empty plots with message for ax2 and ax3 only
+    for ax in [ax2, ax3]:
+        ax.axis("off")
+        ax.text(
+            0.5,
+            0.5,
+            "No valid data\n(NaN values detected)",
+            ha="center",
+            va="center",
+            fontsize=14,
+            color="red",
+            transform=ax.transAxes,
+        )
+
+    ax2.set_title("Histogram of Oriented Gradients", fontsize=14)
+    ax3.set_title("Directionality plot", fontsize=14)
+
+    # Show the heatmap in ax4 (same as normal plot)
+    ax4.axis("off")
+    heatmap = ax4.imshow(strengths, cmap="viridis", interpolation="nearest")
+
+    # adjust colorbar height: make it smaller for wide images
+    cbar_size = 0.4 if image.shape[1] > 1.2 * image.shape[0] else 0.7
+    cbar = fig.colorbar(heatmap, ax=ax4, shrink=cbar_size, pad=0.04, fraction=0.07)
+    cbar.ax.tick_params(labelsize=8)
+    ax4.set_title("Signal heatmap, mask in grey", fontsize=14)
+
+    rgb_color = (0.7, 0.7, 0.7)  # light gray
+    cmap_gray = mcolors.ListedColormap([rgb_color])
+    ax4.imshow(
+        np.ma.masked_where(cells_to_keep, strengths),
+        cmap=cmap_gray,
+        interpolation=None,
+        alpha=1,
+    )
+
+    rows, cols = strengths.shape
+    for i in range(rows):
+        for j in range(cols):
+            if not cells_to_keep[i, j]:
+                rect = Rectangle(
+                    (j - 0.5, i - 0.5),
+                    1,
+                    1,
+                    linewidth=0.2,
+                    edgecolor="black",
+                    facecolor="none",
+                )
+                ax4.add_patch(rect)
+
+    return fig
+
+
 def external_plot_analysis(
     image,
     hog_image,
@@ -40,18 +109,14 @@ def external_plot_analysis(
     ax1.set_title("Original input image", fontsize=14)
 
     ax2.axis("off")
-    # hog_image_rescaled = exposure.rescale_intensity(hog_image, out_range=(0, 0.1))
+    # Stretch contrast using the 99.5th percentile to enhance signal:
+    my_perc = np.percentile(hog_image, 99.5)
+    hi = max(my_perc, 1e-7)
     hog_norm = exposure.rescale_intensity(
         hog_image,
-        in_range="image",  # use the actual min/max of hog_image
-        # out_range=(0, 1),  # map into 0–1 for matplotlib
+        in_range=(0, hi),
     )
-    ax2.imshow(
-        hog_norm,
-        cmap="viridis",
-        vmin=0.0,
-        vmax=0.1,  # ensure full span is used
-    )
+    ax2.imshow(hog_norm, cmap="viridis")
     ax2.set_title("Histogram of Oriented Gradients", fontsize=14)
 
     orientations_360_deg = np.linspace(0, 360, len(gradient_hist_360), endpoint=False)
@@ -80,11 +145,13 @@ def external_plot_analysis(
         lw=2,
         label="Smoothed",
     )
-    ymax_lim = max(estim_ymax, 1e-5)
+    ymax_lim = 1.1 * max(estim_ymax, 1e-5)
+    if np.isnan(ymax_lim):
+        ymax_lim = 1e-5
     ax3.set_yticks(np.linspace(0, ymax_lim, num=4))
     ax3.yaxis.set_major_formatter(FormatStrFormatter("%.1e"))
     ax3.yaxis.label.set_fontsize(6)
-    ax3.set_ylim(0, 1.1 * ymax_lim)
+    ax3.set_ylim(0, ymax_lim)
     ax3.set_title("Directionality plot", fontsize=14, y=1.07)
 
     # print(f"Proportion of window cells kept: {np.mean(cells_to_keep)}")
@@ -308,7 +375,7 @@ def explanatory_plot_filter(image):
     )
 
     fd_raw, hog_image = hog_descriptor.compute_hog(
-        zoomed_image, block_norm=None, feature_vector=False
+        zoomed_image, block_norm="None", feature_vector=False
     )
     fd = np.squeeze(fd_raw)  # fd has now shape (N, M, n_orientations)
 

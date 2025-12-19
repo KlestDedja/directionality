@@ -16,7 +16,7 @@ from main_code.get_default_params import (
 )
 
 # ===== DEVELOPER SETTINGS ==========
-DRAFT_MODE = False
+DRAFT_MODE = True
 BLOCK_NORM = "None"  # or "L2-Hys"
 VERBOSE = 1  # higher value -> printing more debug messages
 
@@ -34,7 +34,7 @@ CORRECT_EDGES = ("gaussian", "1")
 # Choose method: 'scharr' or 'hog'
 # METHOD = "scharr"
 METHOD = "hog"
-# METHOD = "sobel"
+METHOD = "sobel"
 
 SAVE_STATS = True  # save statistics to CSV
 SAVE_PLOTS = True  # save ouctcomes of directionality analysis
@@ -52,9 +52,9 @@ DATA_FOLDER_NAME = os.path.join("data", "test-golden")
 # DATA_FOLDER_NAME = os.path.join(
 #     "data", "images-lightsheet-20241115_BAM_fkt20-P3-fkt21-P3-PEMFS-12w"
 # )
-# DATA_FOLDER_NAME = os.path.join(
-#     "data", "images-lightsheet-20240928_BAM_fkt20_P3_fkt21_P3_PEMFS"
-# )
+DATA_FOLDER_NAME = os.path.join(
+    "data", "images-lightsheet-20240928_BAM_fkt20_P3_fkt21_P3_PEMFS"
+)
 
 # DATA_FOLDER_NAME = os.path.join(
 #     "data", "images-confocal-20241022-fusion-bMyoB-BAMS-TM-6w"
@@ -91,6 +91,7 @@ if __name__ == "__main__":
 
     if VERBOSE > 0:
         print(f"Input folder:\n{image_folder_path}")
+        print(f"Method: {METHOD}")
         print(f"Threshold={THRESHOLD}")
         print(f"Window size={WINDOW_SIZE}")
         print(f"Channel={CHANNEL}")

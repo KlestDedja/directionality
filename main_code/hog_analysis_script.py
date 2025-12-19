@@ -8,7 +8,7 @@ from scipy.ndimage import convolve
 
 import pandas as pd
 import matplotlib.pyplot as plt
-from skimage import io, color
+from skimage import io, color, exposure
 from skimage.filters import scharr_h, scharr_v
 
 
@@ -22,7 +22,8 @@ from main_code.pipeline_utils import (
 from main_code.utils_other import (
     clean_filename,
 )
-from main_code.plotting_utils import external_plot_analysis
+
+from main_code.plotting_utils import external_plot_analysis, create_empty_plot
 
 
 class HOGAnalysis:
@@ -338,8 +339,15 @@ class HOGAnalysis:
             )
 
         mean_stats, mode_stats = compute_distribution_direction(gradient_hist)
-        # TODO should the stats be on original data or on smooth data? How about both?
-        self.save_stats(filename, image, threshold, mean_stats, mode_stats, t1)
+
+        has_valid_stats = not np.isnan(mean_stats["angle"]) and not np.isnan(
+            mode_stats["angle"]
+        )
+
+        if has_valid_stats:
+            self.save_stats(filename, image, threshold, mean_stats, mode_stats, t1)
+        else:
+            self.save_nan_stats(filename, image, threshold)
 
         # Save gradient_hist to CSV for each image
         self.distribution_stats_to_temp_csv(filename, gradient_hist)
@@ -348,6 +356,67 @@ class HOGAnalysis:
             filename, angle_bins, gradient_hist_180, gradient_hist_smooth.values()
         )
 
+        # Build a HOG-like per-cell visualization for Scharr/Sobel without calling skimage.hog
+        # For each window, draw line glyphs at bin orientations with intensity proportional to the bin value.
+        if self.method.lower() in ["scharr", "sobel"]:
+            py, px = self.pixels_per_window
+            h_cells, w_cells = strengths.shape
+            hh, ww = h_cells * py, w_cells * px
+
+            # Initialize empty visualization canvas
+            hog_vis = np.zeros((hh, ww), dtype=float)
+
+            # Bin center orientations in radians (0..pi)
+            bin_centers_deg = (np.arange(self.num_bins) + 0.5) * (180.0 / self.num_bins)
+            bin_centers_rad = np.deg2rad(bin_centers_deg)
+
+            # Normalize per-cell histograms to [0,1] to keep a comparable visual scale
+            # Use fd_norm which already reflects selected normalization and masking
+            cell_hists = fd_norm  # shape (h_cells, w_cells, num_bins)
+
+            # Half-length of glyph line inside a cell (in pixels)
+            half_len = 0.45 * min(py, px)
+
+            for iy in range(h_cells):
+                for ix in range(w_cells):
+                    if not cells_to_keep[iy, ix]:
+                        continue
+
+                    hist = cell_hists[iy, ix, :]
+                    if hist.size == 0 or np.all(hist == 0):
+                        continue
+
+                    cy = int(iy * py + py / 2.0)
+                    cx = int(ix * px + px / 2.0)
+
+                    # Draw simple anti-aliased lines by sampling points along each orientation
+                    brightness_scale = 50.0  # scale up glyph intensity for visibility
+                    for ang, wgt in zip(bin_centers_rad, hist):
+                        if wgt <= 0:
+                            continue
+
+                        # Sample points along the line through (cx,cy)
+                        n_steps = int(2 * half_len) + 1
+                        cos_a = np.cos(ang)
+                        sin_a = np.sin(ang)
+                        for t in np.linspace(-half_len, half_len, n_steps):
+                            x = int(round(cx + t * cos_a))
+                            y = int(round(cy + t * sin_a))
+                            if 0 <= x < ww and 0 <= y < hh:
+                                hog_vis[y, x] += brightness_scale * wgt
+
+            # Rescale intensity to [0, 1] using the actual data range for max contrast
+            if np.max(hog_vis) > 0:
+                hog_image = exposure.rescale_intensity(
+                    hog_vis, in_range=(0, np.max(hog_vis)), out_range=(0, 0.3)
+                )
+            else:
+                hog_image = hog_vis
+        else:
+            # keep the original visualization for HOG
+            hog_image = hog_image
+
+        # Save plots - use empty plot if statistics contain NaN values
         if save_plots:
             self.save_plot(
                 image,
@@ -370,7 +439,6 @@ class HOGAnalysis:
 
         temp_csv_path = os.path.join(self.output_folder, "distribution_statistics.temp")
         row = {"filename": filename}
-        # TODO: check if the bins are centered correctly
         for k, v in gradient_hist.items():
             row[str(k)] = v
 
@@ -457,15 +525,17 @@ class HOGAnalysis:
         filename,
     ):
 
-        fig = external_plot_analysis(
-            image,
-            hog_image,
-            gradient_hist,
-            gradient_hist_smooth,
-            cells_to_keep,
-            strengths,
-            method=self.method,
-        )
+        if np.any(np.isnan(list(gradient_hist.values()))):
+            fig = create_empty_plot(image, hog_image, cells_to_keep, strengths)
+        else:  # all the values are non-nans: safe to plot:
+            fig = external_plot_analysis(
+                image,
+                hog_image,
+                gradient_hist,
+                gradient_hist_smooth,
+                cells_to_keep,
+                strengths,
+            )
         fig.tight_layout()
 
         filename_info = (
@@ -527,12 +597,12 @@ class HOGAnalysis:
 
         stats = {
             "image size": str(image.shape),
-            "avg. direction": round(mean_stats["angle"], 3),
-            "std. deviation (mean)": round(mean_stats["std_dev"], 3),
-            "abs. deviation (mean)": round(mean_stats["abs_dev"], 3),
-            "mode direction": round(mode_stats["angle"], 3),
-            "std. deviation (mode)": round(mode_stats["std_dev"], 3),
-            "abs. deviation (mode)": round(mode_stats["abs_dev"], 3),
+            "avg. direction": mean_stats["angle"],
+            "std. deviation (mean)": mean_stats["std_dev"],
+            "abs. deviation (mean)": mean_stats["abs_dev"],
+            "mode direction": mode_stats["angle"],
+            "std. deviation (mode)": mode_stats["std_dev"],
+            "abs. deviation (mode)": mode_stats["abs_dev"],
             "signal_threshold": threshold,
             "elapsed time (mm:ss)": time_fmt,
         }
