@@ -16,7 +16,7 @@ from main_code.get_default_params import (
 )
 
 # ===== DEVELOPER SETTINGS ==========
-DRAFT_MODE = True
+DRAFT_MODE = False
 BLOCK_NORM = "None"  # or "L2-Hys"
 VERBOSE = 1  # higher value -> printing more debug messages
 
@@ -40,7 +40,6 @@ SAVE_STATS = True  # save statistics to CSV
 SAVE_PLOTS = True  # save ouctcomes of directionality analysis
 SHOW_PLOTS = False  # show plots interactively
 
-
 # ========== FOLDER STRUCTURE ==========
 ROOT_FOLDER = os.getcwd()
 
@@ -48,14 +47,15 @@ ROOT_FOLDER = os.getcwd()
 # DATA_FOLDER_NAME = os.path.join("data", "synthetic-golden-standard")
 DATA_FOLDER_NAME = os.path.join("data", "test-golden")
 
+DATA_FOLDER_NAME = os.path.join("data", "test-fibers")
 # DATA_FOLDER_NAME = os.path.join("data", "images-good-bad-validation")
+# DATA_FOLDER_NAME = os.path.join("data", "images-photoalignment-tool3")
 # DATA_FOLDER_NAME = os.path.join(
 #     "data", "images-lightsheet-20241115_BAM_fkt20-P3-fkt21-P3-PEMFS-12w"
 # )
 DATA_FOLDER_NAME = os.path.join(
     "data", "images-lightsheet-20240928_BAM_fkt20_P3_fkt21_P3_PEMFS"
 )
-
 # DATA_FOLDER_NAME = os.path.join(
 #     "data", "images-confocal-20241022-fusion-bMyoB-BAMS-TM-6w"
 # )

@@ -65,7 +65,7 @@ def plot_normalized_hog_zoom(image):
             norm_cells[i, :, j, :] = norm_block
 
     filtered_hog = norm_cells.reshape(hog_image.shape)
-    hog_image_norm = exposure.rescale_intensity(filtered_hog, in_range=(0, 0.2))
+    hog_image_norm = exposure.rescale_intensity(filtered_hog, in_range=(0, 1.5))
 
     fig, ax = plt.subplots(figsize=(5, 5))
     ax.imshow(hog_image_norm)

@@ -2,10 +2,10 @@ dataset_name,threshold,channel,window_size,background_min,background_max,correct
 default,3,greyscale,64,0.1,0.9,"('interpolate', 'interpolate')"
 images-lightsheet-20240928_BAM_fkt20_P3_fkt21_P3_PEMFS,8,,64,0.10,0.90,"('interpolate', 'none')"
 images-lightsheet-20241115_BAM_fkt20-P3-fkt21-P3-PEMFS-12w,7,,64,0.10,0.90,
-confocal-20241116-fusion-bMyoB-PEMFS-TM-12w,8,,,,, # SOBEL
-confocal-20241022-fusion-bMyoB-BAMS,8,,,,, # SOBEL
+confocal-20241116-fusion-bMyoB-PEMFS-TM-12w,8,,,,,
+confocal-20241022-fusion-bMyoB-BAMS,8,,,,,
 images-longitudinal,10,,,,,
-fotosalignement-tool3,10,,32,0.005,0.995,
-good-bad-validation,20,greyscale,32,0.05,0.995,# SOBEL
-synthetic-golden-standard,6,greyscale,32,0.05,0.95,"('none', 'none')"
+photoalignment-tool3,10,,32,0.005,0.995,
+good-bad-validation,15,greyscale,32,0.05,0.995,
+synthetic-golden-standard,6,1,32,0.05,0.95,"('none', 'none')"
 test-golden,1,greyscale,32,0.05,0.95,"('none', 'none')"

@@ -15,7 +15,7 @@ from main_code.pipeline_utils import (
 from main_code.utils_other import calculate_and_print_percentiles
 
 
-def create_empty_plot(image, hog_image, cells_to_keep, strengths):
+def create_empty_plot(image, cells_to_keep, strengths):
     """
     Create a plot with ax1 (original image) and ax4 (heatmap),
     but skip ax2 and ax3 when gradient histogram contains NaN values.
@@ -26,9 +26,14 @@ def create_empty_plot(image, hog_image, cells_to_keep, strengths):
     ax3 = fig.add_subplot(2, 2, 3)
     ax4 = fig.add_subplot(2, 2, 4)
 
-    # Show the original image
-    ax1.axis("off")
+    # Show the original image with a thin border and no ticks
     ax1.imshow(image)
+    ax1.set_xticks([])
+    ax1.set_yticks([])
+    ax1.tick_params(bottom=False, left=False, labelbottom=False, labelleft=False)
+    for spine in ax1.spines.values():
+        spine.set_visible(True)
+        spine.set_linewidth(0.5)
     ax1.set_title("Original input image", fontsize=14)
 
     # Empty plots with message for ax2 and ax3 only
@@ -104,8 +109,14 @@ def external_plot_analysis(
     ax3 = fig.add_subplot(2, 2, 3, projection="polar")
     ax4 = fig.add_subplot(2, 2, 4)
 
-    ax1.axis("off")
+    # Show the original image with a thin border and no ticks
     ax1.imshow(image)
+    ax1.set_xticks([])
+    ax1.set_yticks([])
+    ax1.tick_params(bottom=False, left=False, labelbottom=False, labelleft=False)
+    for spine in ax1.spines.values():
+        spine.set_visible(True)
+        spine.set_linewidth(0.5)
     ax1.set_title("Original input image", fontsize=14)
 
     ax2.axis("off")
@@ -194,8 +205,6 @@ def explanatory_plot_intro(image):
 
     height, width = image.shape[:2]
     fig, (ax2, ax3) = plt.subplots(1, 2, figsize=(9, 4))
-
-    # --- Left plot: original image ---
     # ax1.set_title("Original Image")
     # ax1.imshow(image)
     # ax1.axis("off")
@@ -347,7 +356,7 @@ def explanatory_normalized_hog(image):
     filtered_hog_vis = norm_cells.reshape(hog_image.shape)
 
     # rescale & plot just like before
-    hog_image_norm = exposure.rescale_intensity(filtered_hog_vis, in_range=(0, 0.2))
+    hog_image_norm = exposure.rescale_intensity(filtered_hog_vis, in_range=(0, 1.5))
 
     ax4.axis("off")
     ax4.imshow(hog_image_norm)

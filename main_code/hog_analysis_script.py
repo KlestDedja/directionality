@@ -32,8 +32,8 @@ class HOGAnalysis:
     loading images, to computing HOG or Scharr-based histograms, to normalizing,
     to excluding the background under a certain signal intensity, to plotting and storing.
 
-    Note that the name HOGAnalysis is kept for compatibility, even if the 'scharr' method
-    and it should be changed to something more generic in the future.
+    Note that the name HOGAnalysis is kept for compatibility, even if the 'scharr' or
+    'sobel' method are employed. TODO: Name should be changed to something more generic.
     """
 
     def __init__(
@@ -120,12 +120,14 @@ class HOGAnalysis:
 
             self.process_image(image_folder, image_file, threshold, save_plots)
 
+        # End of loop:
         if save_stats:
             self.saved_stats_path = self.save_results_to_file(
                 self.output_folder, output_filename
             )
             if verbose > 0:
                 print(f"Saving statistics to {self.saved_stats_path}")
+
         # Finalize distribution statistics CSV after all images are processed
         self.save_distribution_stats_to_csv()
 
@@ -158,9 +160,9 @@ class HOGAnalysis:
     def process_image(self, folder, filename, threshold, save_plots):
         t1 = time.time()
 
-        image = io.imread(os.path.join(folder, filename))
+        raw_image = io.imread(os.path.join(folder, filename))
 
-        image = self.clean_and_select_channel(image, self.channel_image)
+        image = self.clean_and_select_channel(raw_image, self.channel_image)
 
         # Choose computation method: 'hog', 'scharr', or 'sobel' (5x5)
         if self.method == "hog":
@@ -180,7 +182,7 @@ class HOGAnalysis:
                 grad_y = scharr_v(image_proc)
                 grad_x = scharr_h(image_proc)
             elif self.method == "sobel":
-                # 5x5 Sobel kernels (Fiji style) # TODO check if this is correct
+                # 5x5 Sobel kernels (Fiji style)
                 sobel5_x = np.array(
                     [
                         [2, 1, 0, -1, -2],
@@ -192,7 +194,7 @@ class HOGAnalysis:
                     dtype=float,
                 )
                 sobel5_y = sobel5_x.T
-                # for some reason, we need to flip the kernels to match the other outputs
+                # Swap for correct directionality in ax3 plot
                 grad_y = convolve(image_proc, sobel5_x, mode="reflect")
                 grad_x = convolve(image_proc, sobel5_y, mode="reflect")
 
@@ -370,17 +372,16 @@ class HOGAnalysis:
             bin_centers_deg = (np.arange(self.num_bins) + 0.5) * (180.0 / self.num_bins)
             bin_centers_rad = np.deg2rad(bin_centers_deg)
 
-            # Normalize per-cell histograms to [0,1] to keep a comparable visual scale
-            # Use fd_norm which already reflects selected normalization and masking
-            cell_hists = fd_norm  # shape (h_cells, w_cells, num_bins)
+            # For visualization: use fd_bg (unnormalized) to show all cells without threshold filtering
+            # This gives a better visual representation of the actual gradient directions in the image
+            cell_hists = fd_bg  # shape (h_cells, w_cells, num_bins)
 
             # Half-length of glyph line inside a cell (in pixels)
             half_len = 0.45 * min(py, px)
 
             for iy in range(h_cells):
                 for ix in range(w_cells):
-                    if not cells_to_keep[iy, ix]:
-                        continue
+                    # Show all cells in visualization (no threshold filtering)
 
                     hist = cell_hists[iy, ix, :]
                     if hist.size == 0 or np.all(hist == 0):
@@ -390,7 +391,7 @@ class HOGAnalysis:
                     cx = int(ix * px + px / 2.0)
 
                     # Draw simple anti-aliased lines by sampling points along each orientation
-                    brightness_scale = 50.0  # scale up glyph intensity for visibility
+                    brightness_scale = 100.0  # scale up glyph intensity for visibility
                     for ang, wgt in zip(bin_centers_rad, hist):
                         if wgt <= 0:
                             continue
@@ -401,25 +402,26 @@ class HOGAnalysis:
                         sin_a = np.sin(ang)
                         for t in np.linspace(-half_len, half_len, n_steps):
                             x = int(round(cx + t * cos_a))
-                            y = int(round(cy + t * sin_a))
+                            y = int(
+                                round(cy - t * sin_a)
+                            )  # Flip y to match image coordinates
                             if 0 <= x < ww and 0 <= y < hh:
                                 hog_vis[y, x] += brightness_scale * wgt
 
             # Rescale intensity to [0, 1] using the actual data range for max contrast
             if np.max(hog_vis) > 0:
                 hog_image = exposure.rescale_intensity(
-                    hog_vis, in_range=(0, np.max(hog_vis)), out_range=(0, 0.3)
+                    hog_vis, in_range=(0, np.max(hog_vis)), out_range=(0, 1.5)
                 )
             else:
                 hog_image = hog_vis
-        else:
-            # keep the original visualization for HOG
+        else:  # method is 'hog': keep original visualization
             hog_image = hog_image
 
         # Save plots - use empty plot if statistics contain NaN values
         if save_plots:
             self.save_plot(
-                image,
+                raw_image,
                 hog_image,
                 gradient_hist,
                 gradient_hist_smooth,
@@ -479,7 +481,7 @@ class HOGAnalysis:
         if os.path.exists(temp_csv_path):
             if os.path.exists(final_csv_path):
                 os.remove(final_csv_path)
-            os.rename(temp_csv_path, final_csv_path)
+            os.rename(temp_csv_path, final_csv_path)  # .temp files becomes .csv
 
     def export_distribution_stats_vertical_format(
         self, filename, direction_bins, binned_values, smoothed_values
@@ -516,7 +518,7 @@ class HOGAnalysis:
 
     def save_plot(
         self,
-        image,
+        raw_image,
         hog_image,
         gradient_hist,
         gradient_hist_smooth,
@@ -526,10 +528,10 @@ class HOGAnalysis:
     ):
 
         if np.any(np.isnan(list(gradient_hist.values()))):
-            fig = create_empty_plot(image, hog_image, cells_to_keep, strengths)
+            fig = create_empty_plot(raw_image, cells_to_keep, strengths)
         else:  # all the values are non-nans: safe to plot:
             fig = external_plot_analysis(
-                image,
+                raw_image,
                 hog_image,
                 gradient_hist,
                 gradient_hist_smooth,
