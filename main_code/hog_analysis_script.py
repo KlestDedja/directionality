@@ -93,7 +93,7 @@ class HOGAnalysis:
             if f.lower().endswith((".tif", ".png", ".jpg"))  # .endswith(".tif")
         ]
 
-        if "images-lightsheet" in image_folder:
+        if "images-lightsheet" in image_folder and "manuscript" not in image_folder:
             image_files = [
                 f
                 for f in os.listdir(image_folder)

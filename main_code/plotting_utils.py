@@ -308,16 +308,16 @@ def explanatory_normalized_hog(image):
     )
 
     _, hog_image = hog_descriptor.compute_hog(
-        zoomed_image, block_norm=None, feature_vector=False
+        zoomed_image, block_norm="None", feature_vector=False
     )
 
     ax3.axis("off")
-    hog_image_rescaled = exposure.rescale_intensity(hog_image, in_range=(0, 1.5))
+    hog_image_rescaled = exposure.rescale_intensity(hog_image, _range=(0, 1.5))
     ax3.imshow(hog_image_rescaled)
     ax3.set_title("Direction of the Oriented Gradients", fontsize=14)
 
     fd_raw_bg, hog_image = hog_descriptor.compute_hog(
-        zoomed_image, block_norm=None, feature_vector=False
+        zoomed_image, block_norm="None", feature_vector=False
     )
 
     fd_bg = np.squeeze(fd_raw_bg)
@@ -337,9 +337,11 @@ def explanatory_normalized_hog(image):
     py, px = hog_descriptor.pixels_per_window
     h_cells, w_cells = strengths.shape
 
-    # reshape the visualization into (n_cells_y, py, n_cells_x, px)
-    cell_imgs = hog_image.reshape(h_cells, py, w_cells, px)
-
+    if hog_image is not None:
+        # reshape the visualization into (n_cells_y, py, n_cells_x, px)
+        cell_imgs = hog_image.reshape(h_cells, py, w_cells, px)
+    else:
+        raise ValueError("hog_image is None, cannot proceed with normalization.")
     # normalize each cell by that same strengths map
     #    (so bright cells stay bright, weak cells get dimmed/masked)
     norm_cells = np.empty_like(cell_imgs)
@@ -478,7 +480,7 @@ def explanatory_plot_polar(
 
     fd = np.squeeze(fd_raw)  # fd has now shape (N, M, n_orientations)
 
-    # computes strenghts of signal for each cell. Assumes block_norm is None
+    # computes strenghts of signal for each cell. Assumes block_norm is "None"
     strengths = cell_signal_strengths(
         fd, norm_ord=1
     )  # output shape is shape (N, M), we normalize by L1 norm.

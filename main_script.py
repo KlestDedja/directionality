@@ -31,8 +31,7 @@ CORRECT_EDGES = ("none", "none")
 # CORRECT_EDGES = ("interpolate", "interpolate")
 CORRECT_EDGES = ("gaussian", "1")
 
-# Choose method: 'scharr' or 'hog'
-# METHOD = "scharr"
+# Choose method: 'sobel', 'scharr' or 'hog'
 METHOD = "hog"
 METHOD = "sobel"
 
@@ -46,16 +45,16 @@ ROOT_FOLDER = os.getcwd()
 # change accordingly if your structure differs from the demo
 # DATA_FOLDER_NAME = os.path.join("data", "synthetic-golden-standard")
 DATA_FOLDER_NAME = os.path.join("data", "test-golden")
-
 DATA_FOLDER_NAME = os.path.join("data", "test-fibers")
 # DATA_FOLDER_NAME = os.path.join("data", "images-good-bad-validation")
 # DATA_FOLDER_NAME = os.path.join("data", "images-photoalignment-tool3")
-# DATA_FOLDER_NAME = os.path.join(
-#     "data", "images-lightsheet-20241115_BAM_fkt20-P3-fkt21-P3-PEMFS-12w"
-# )
 DATA_FOLDER_NAME = os.path.join(
-    "data", "images-lightsheet-20240928_BAM_fkt20_P3_fkt21_P3_PEMFS"
+    "data", "images-lightsheet-20241115_BAM_fkt20-P3-fkt21-P3-PEMFS-12w"
 )
+DATA_FOLDER_NAME = os.path.join("data", "images-lightsheet-manuscript")
+# DATA_FOLDER_NAME = os.path.join(
+#     "data", "images-lightsheet-20240928_BAM_fkt20_P3_fkt21_P3_PEMFS"
+# )
 # DATA_FOLDER_NAME = os.path.join(
 #     "data", "images-confocal-20241022-fusion-bMyoB-BAMS-TM-6w"
 # )
