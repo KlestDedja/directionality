@@ -185,21 +185,23 @@ class HOGAnalysis:
                 # 5x5 Sobel kernels (Fiji style)
                 sobel5_x = np.array(
                     [
-                        [2, 1, 0, -1, -2],
-                        [3, 2, 0, -2, -3],
-                        [4, 3, 0, -3, -4],
-                        [3, 2, 0, -2, -3],
-                        [2, 1, 0, -1, -2],
+                        [-2, -1, 0, 1, 2],
+                        [-3, -2, 0, 2, 3],
+                        [-4, -3, 0, 3, 4],
+                        [-3, -2, 0, 2, 3],
+                        [-2, -1, 0, 1, 2],
                     ],
                     dtype=float,
                 )
                 sobel5_y = sobel5_x.T
-                # Swap for correct directionality in ax3 plot
+                # Orientation of direction is orthgonal to gradient,
+                # Swap therefore axes for correct directionality
                 grad_y = convolve(image_proc, sobel5_x, mode="reflect")
                 grad_x = convolve(image_proc, sobel5_y, mode="reflect")
 
             # given estimated gradients, compute magnitude and orientation:
             magnitude = np.hypot(grad_x, grad_y)
+            # swap X and Y axis
             orientation = np.rad2deg(np.arctan2(grad_y, grad_x))
             orientation = (
                 np.where(orientation < 0, orientation + 180, orientation) % 180

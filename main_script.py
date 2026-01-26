@@ -45,13 +45,13 @@ ROOT_FOLDER = os.getcwd()
 # change accordingly if your structure differs from the demo
 # DATA_FOLDER_NAME = os.path.join("data", "synthetic-golden-standard")
 DATA_FOLDER_NAME = os.path.join("data", "test-golden")
-DATA_FOLDER_NAME = os.path.join("data", "test-fibers")
+# DATA_FOLDER_NAME = os.path.join("data", "test-fibers")
 # DATA_FOLDER_NAME = os.path.join("data", "images-good-bad-validation")
 # DATA_FOLDER_NAME = os.path.join("data", "images-photoalignment-tool3")
-DATA_FOLDER_NAME = os.path.join(
-    "data", "images-lightsheet-20241115_BAM_fkt20-P3-fkt21-P3-PEMFS-12w"
-)
-DATA_FOLDER_NAME = os.path.join("data", "images-lightsheet-manuscript")
+# DATA_FOLDER_NAME = os.path.join(
+#     "data", "images-lightsheet-20241115_BAM_fkt20-P3-fkt21-P3-PEMFS-12w"
+# )
+# DATA_FOLDER_NAME = os.path.join("data", "images-lightsheet-manuscript")
 # DATA_FOLDER_NAME = os.path.join(
 #     "data", "images-lightsheet-20240928_BAM_fkt20_P3_fkt21_P3_PEMFS"
 # )
