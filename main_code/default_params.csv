@@ -7,5 +7,5 @@ confocal-20241022-fusion-bMyoB-BAMS,8,,,,,
 images-longitudinal,10,,,,,
 photoalignment-tool3,10,,32,0.005,0.995,
 good-bad-validation,15,greyscale,32,0.05,0.995,
-synthetic-golden-standard,6,1,32,0.05,0.95,"('none', 'none')"
+synthetic-golden-standard,6,greyscale,32,0.05,0.95,"('none', 'none')"
 test-golden,1,greyscale,32,0.05,0.95,"('none', 'none')"
