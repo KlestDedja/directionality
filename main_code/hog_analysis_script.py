@@ -195,7 +195,7 @@ class HOGAnalysis:
                 )
                 sobel5_y = sobel5_x.T
                 # Orientation of direction is orthgonal to gradient,
-                # Swap therefore axes for correct directionality
+                # Swap axes to get the directionality
                 grad_y = convolve(image_proc, sobel5_x, mode="reflect")
                 grad_x = convolve(image_proc, sobel5_y, mode="reflect")
 
