@@ -120,21 +120,25 @@ def external_plot_analysis(
     ax1.set_title("Original input image", fontsize=14)
 
     ax2.axis("off")
-    # Stretch contrast using the 99.5th percentile to enhance signal:
-    my_perc = np.percentile(hog_image, 99.5)
+    # Stretch contrast and brighten slightly for better visibility on low-signal images:
+    # use a slightly lower percentile and apply mild gamma correction (<1 brightens).
+    my_perc = np.percentile(hog_image, 92)
     hi = max(my_perc, 1e-7)
     hog_norm = exposure.rescale_intensity(
         hog_image,
         in_range=(0, hi),
+        out_range=(0, 1),
     )
-    ax2.imshow(hog_norm, cmap="viridis")
+    # if needed, brighten up the HOG image by adjusting gamma (power law distribution)
+    # hog_norm = exposure.adjust_gamma(hog_norm, gamma=0.6)  # type: ignore[arg-type], float is correct
+    ax2.imshow(hog_norm, cmap="viridis", vmin=0, vmax=1)
     ax2.set_title("Histogram of Oriented Gradients", fontsize=14)
 
     orientations_360_deg = np.linspace(0, 360, len(gradient_hist_360), endpoint=False)
     orientations_polar_deg = np.mod(orientations_360_deg, 360)
     estim_ymax = np.array(list(gradient_hist.values())).max()
 
-    # firt plot the bin bars, on original values, without any smoothing
+    # first plot the bin bars, on original values, without any smoothing
     ax3 = plot_polar_histogram(
         ax3, gradient_hist_360, orientations_polar_deg, plot_mean=False
     )
@@ -169,7 +173,7 @@ def external_plot_analysis(
     ax4.axis("off")
     heatmap = ax4.imshow(strengths, cmap="viridis", interpolation="nearest")
 
-    # adjust colorab height: make it smaller for wide images
+    # adjust colorbar height: make it smaller for wide images
     cbar_size = 0.4 if image.shape[1] > 1.2 * image.shape[0] else 0.7
     cbar = fig.colorbar(heatmap, ax=ax4, shrink=cbar_size, pad=0.04, fraction=0.07)
     cbar.ax.tick_params(labelsize=8)

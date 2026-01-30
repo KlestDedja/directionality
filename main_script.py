@@ -43,8 +43,8 @@ SHOW_PLOTS = False  # show plots interactively
 ROOT_FOLDER = os.getcwd()
 
 # change accordingly if your structure differs from the demo
-# DATA_FOLDER_NAME = os.path.join("data", "synthetic-golden-standard")
-DATA_FOLDER_NAME = os.path.join("data", "test-golden")
+DATA_FOLDER_NAME = os.path.join("data", "synthetic-golden-standard")
+# DATA_FOLDER_NAME = os.path.join("data", "test-golden")
 # DATA_FOLDER_NAME = os.path.join("data", "test-fibers")
 # DATA_FOLDER_NAME = os.path.join("data", "images-good-bad-validation")
 # DATA_FOLDER_NAME = os.path.join("data", "images-photoalignment-tool3")
