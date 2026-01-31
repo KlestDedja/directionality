@@ -25,14 +25,12 @@ VERBOSE = 1  # higher value -> printing more debug messages
 CHANNEL = 1  # channel color for HOG descriptor
 POST_NORMALIZATION = True  # normalize color brightness across windows
 N_BINS = 45
-# two entries, each 'interpolate' or 'None'
-# first for 90-degree correction, second for 45-degree correction, correction at 0 = correction at 90
-CORRECT_EDGES = ("none", "none")
-# CORRECT_EDGES = ("interpolate", "interpolate")
+# CORRECT_EDGES is a 2-tuple: (method, bandwidth)
 CORRECT_EDGES = ("gaussian", "1")
+# OLD, still compatible: 2-tuple for 90 and 45 degrees edge correction:
+# CORRECT_EDGES = ("interpolate", "interpolate") or ("none", "none")
 
 # Choose method: 'sobel', 'scharr' or 'hog'
-METHOD = "hog"
 METHOD = "sobel"
 
 SAVE_STATS = True  # save statistics to CSV
@@ -45,9 +43,7 @@ ROOT_FOLDER = os.getcwd()
 # change accordingly if your structure differs from the demo
 DATA_FOLDER_NAME = os.path.join("data", "synthetic-golden-standard")
 # DATA_FOLDER_NAME = os.path.join("data", "test-golden")
-# DATA_FOLDER_NAME = os.path.join("data", "test-fibers")
 # DATA_FOLDER_NAME = os.path.join("data", "images-good-bad-validation")
-# DATA_FOLDER_NAME = os.path.join("data", "images-photoalignment-tool3")
 # DATA_FOLDER_NAME = os.path.join(
 #     "data", "images-lightsheet-20241115_BAM_fkt20-P3-fkt21-P3-PEMFS-12w"
 # )
@@ -63,7 +59,8 @@ DATA_FOLDER_NAME = os.path.join("data", "synthetic-golden-standard")
 # )
 
 INPUT_FOLDER = "input-images"
-# OUTPUT_FOLDER will be constructed at runtime to include num_bins, method and interpolation type
+# OUTPUT_FOLDER is constructed at runtime and its subfolders will
+# include num_bins, method and interpolation parameters in their name
 OUTPUT_FOLDER = "output-analysis"
 
 # ========== RUN ANALYSIS ==========
@@ -77,7 +74,7 @@ if __name__ == "__main__":
     image_folder_path = os.path.join(data_folder_path, INPUT_FOLDER)
 
     # create a method-specific subfolder inside the base output folder
-    INTERPOLATION_STR = f"{CORRECT_EDGES[0][:5]}_{str(CORRECT_EDGES[1])[:5]}"
+    INTERPOLATION_STR = f"{CORRECT_EDGES[0]}_{str(CORRECT_EDGES[1])}"
     SUBFOLDER_NAME = f"{METHOD}_{N_BINS}bins_{INTERPOLATION_STR}"
 
     output_folder_path = os.path.join(data_folder_path, OUTPUT_FOLDER, SUBFOLDER_NAME)

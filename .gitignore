@@ -5,6 +5,7 @@ images-lightsheet*/
 images-confocal*/
 old_files/*
 testing/
+*_old_with_extras.csv
 
 # output from demo-data
 demo-data/synthetic-golden-standard/output-analysis/*
