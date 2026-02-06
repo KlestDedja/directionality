@@ -33,8 +33,7 @@ INPUT_METADATA = "input-metadata"
 OUTPUT_FOLDER = "output-analysis"
 
 FOLDERS = [
-    f"{method}_{N_BINS}bins_{CORRECT_EDGES[0][:5]}_{CORRECT_EDGES[1][:5]}"
-    for method in METHODS
+    f"{method}_{N_BINS}bins_{CORRECT_EDGES[0]}_{CORRECT_EDGES[1]}" for method in METHODS
 ]
 
 
@@ -316,9 +315,9 @@ perf_results.loc[len(perf_results)] = avg_row  # type: ignore
 output_dir = os.path.join(ROOT_FOLDER, DATA_FOLDER_NAME, OUTPUT_FOLDER)
 
 perf_filename = (
-    f"performance_comparison_{CORRECT_EDGES[0][:5]}_{CORRECT_EDGES[1]}.csv"
+    f"performance_comparison_{CORRECT_EDGES[0]}_{CORRECT_EDGES[1]}.csv"
     if DRAFT_MODE is False
-    else f"performance_comparison_draft_{CORRECT_EDGES[0][:5]}_{CORRECT_EDGES[1]}.csv"
+    else f"performance_comparison_draft_{CORRECT_EDGES[0]}_{CORRECT_EDGES[1]}.csv"
 )
 
 perf_results.to_csv(os.path.join(output_dir, perf_filename), index=False)
