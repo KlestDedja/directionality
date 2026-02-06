@@ -9,7 +9,6 @@ from skimage import exposure  # , filters, feature
 from main_code.pipeline_utils import (
     HOGDescriptor,
     cell_signal_strengths,
-    correct_round_angles,
     plot_polar_histogram,
 )
 from main_code.utils_other import calculate_and_print_percentiles
@@ -511,13 +510,8 @@ def explanatory_plot_polar(
     for key, hist in zip(orientations_180_deg, gradient_hist_180):
         gradient_hist[key] = hist
 
-    # correct strong signal at 0 and 90 degrees (happens a lot with constant black backgound)
-    if correction_artifacts:
-        gradient_hist = correct_round_angles(gradient_hist, corr90=True, corr45=True)
-
-    # mean_angle_deg, std_dev_deg, abs_dev_deg = compute_average_direction(
-    #     gradient_hist, orientations_180_deg
-    # )
+    # here Gaussian smoothing?
+    # if correction_artifacts:
 
     # prepare data and find argmax:
     angles = orientations_180_deg

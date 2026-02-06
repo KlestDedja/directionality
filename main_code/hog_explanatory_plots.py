@@ -6,7 +6,6 @@ from skimage import exposure
 from main_code.pipeline_utils import (
     HOGDescriptor,
     cell_signal_strengths,
-    correct_round_angles,
     plot_polar_histogram,
 )
 from main_code.utils_other import calculate_and_print_percentiles
@@ -138,8 +137,6 @@ def plot_explanatory_polar(image, threshold, correction_artifacts=True):
     orientations_180_deg = orientations_360_deg[: len(gradient_hist_180)]
 
     gradient_hist = dict(zip(orientations_180_deg, gradient_hist_180))
-    if correction_artifacts:
-        gradient_hist = correct_round_angles(gradient_hist, corr90=True, corr45=True)
 
     gradient_hist_360 = np.tile(np.array(list(gradient_hist.values())), 2)
     orientations_polar_deg = np.mod(orientations_360_deg, 360)
