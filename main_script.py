@@ -31,7 +31,7 @@ CORRECT_EDGES = ("gaussian", "1")
 # CORRECT_EDGES = ("interpolate", "interpolate") or ("none", "none")
 
 # Choose method: 'sobel', 'scharr' or 'hog'
-METHOD = "sobel"
+METHOD = "hog"
 
 SAVE_STATS = True  # save statistics to CSV
 SAVE_PLOTS = True  # save ouctcomes of directionality analysis
