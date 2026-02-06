@@ -41,9 +41,9 @@ SHOW_PLOTS = False  # show plots interactively
 ROOT_FOLDER = os.getcwd()
 
 # change accordingly if your structure differs from the demo
-# DATA_FOLDER_NAME = os.path.join("data", "synthetic-golden-standard")
+DATA_FOLDER_NAME = os.path.join("data", "synthetic-golden-standard")
 # DATA_FOLDER_NAME = os.path.join("data", "test-golden")
-DATA_FOLDER_NAME = os.path.join("data", "images-good-bad-validation")
+# DATA_FOLDER_NAME = os.path.join("data", "images-good-bad-validation")
 # DATA_FOLDER_NAME = os.path.join(
 #     "data", "images-lightsheet-20241115_BAM_fkt20-P3-fkt21-P3-PEMFS-12w"
 # )

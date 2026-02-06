@@ -15,7 +15,6 @@ from skimage.filters import scharr_h, scharr_v
 from main_code.pipeline_utils import (
     HOGDescriptor,
     compute_distribution_direction,
-    correct_round_angles,
     correct_angles_gaussian,
     cell_signal_strengths,
 )
@@ -118,6 +117,7 @@ class HOGAnalysis:
                 if idx % chunk20 == 0 or (idx % chunk05 == 0 and verbose > 0):
                     print(f"Processing image {idx + 1} out of {len(image_files)}")
 
+            print(f"Processing image: {image_file}")
             self.process_image(image_folder, image_file, threshold, save_plots)
 
         # End of loop:
@@ -325,14 +325,8 @@ class HOGAnalysis:
 
         gradient_hist = dict(zip(angle_bins, gradient_hist_180))
 
-        corr90_bool = self.correct_edge_angles[0].lower() == "interpolate"
-        corr45_bool = self.correct_edge_angles[1].lower() == "interpolate"
-
-        gradient_hist_smooth = correct_round_angles(
-            gradient_hist,
-            corr90=corr90_bool,
-            corr45=corr45_bool,
-        )
+        plt.plot(angle_bins, gradient_hist_180, label="Debugging histogram")
+        plt.show()
 
         if self.correct_edge_angles[0].lower() == "gaussian":
 

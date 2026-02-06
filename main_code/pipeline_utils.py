@@ -5,7 +5,6 @@ import numpy as np
 from skimage import io
 from skimage.color import rgb2gray
 from skimage.feature import hog
-from skimage.filters import scharr_h, scharr_v
 from scipy.ndimage import gaussian_filter1d
 
 
@@ -142,92 +141,6 @@ def correct_angles_gaussian(hist_dict, sigma: float = 1):
         # Apply circular (wrapped) Gaussian smoothing
         smoothed = gaussian_filter1d(values, sigma=sigma, mode="wrap")
         return dict(zip(angles, smoothed))
-
-
-def correct_round_angles(histog_dict, corr90=True, corr45=False):
-
-    keys_sorted = np.array(sorted(histog_dict.keys()))
-    n = len(keys_sorted)
-
-    # For a single minimal index: interpolate 5 indices (anchors set two indeces apart from minimal index)
-    def linear_interpolate_neighbors(histog_dict, keys_sorted, idx):
-        im2 = (idx - 2) % n
-        im1 = (idx - 1) % n
-        ip1 = (idx + 1) % n
-        ip2 = (idx + 2) % n
-
-        # Use the values at positions im2 and ip2 as anchors
-        a = histog_dict[keys_sorted[im2]]
-        b = histog_dict[keys_sorted[ip2]]
-        # Interpolate at positions -1, 0, +1 (using positions 1/4, 2/4, 3/4 between anchors)
-        new_im1 = a + (1 / 4) * (b - a)
-        new_i = a + (2 / 4) * (b - a)
-        new_ip1 = a + (3 / 4) * (b - a)
-
-        histog_dict[keys_sorted[im1]] = new_im1
-        histog_dict[keys_sorted[idx]] = new_i
-        histog_dict[keys_sorted[ip1]] = new_ip1
-
-    # For exactly two contiguous minimal indices: interpolate using 6 indices.
-    # Let L be the left minimal and R the right minimal (with R == (L+1) mod n).
-    # We define:
-    #   left_anchor1 = index at L-2, left_anchor2 = L-1,
-    #   right_anchor1 = index at R+1, right_anchor2 = R+2.
-    # Then we linearly interpolate the inner four positions (positions 1,2,3,4 in a 0–5 scale)
-    # between the anchors at positions 0 and 5.
-    def linear_interpolate_neighbors_double(histog_dict, keys_sorted, L, R):
-
-        assert R == (L + 1) % n
-
-        left_anchor1 = (L - 2) % n
-        left_anchor2 = (L - 1) % n
-        right_anchor1 = (R + 1) % n  # note: since R = L+1 (mod n)
-        right_anchor2 = (R + 2) % n
-
-        v0 = histog_dict[keys_sorted[left_anchor1]]
-        v5 = histog_dict[keys_sorted[right_anchor2]]
-
-        # Positions in a 0-to-5 scale; we update positions 1, 2, 3, 4.
-        new_val_1 = v0 + (1 / 5) * (v5 - v0)  # for left_anchor2 (position 1)
-        new_val_2 = v0 + (2 / 5) * (v5 - v0)  # for left minimal (position 2)
-        new_val_3 = v0 + (3 / 5) * (v5 - v0)  # for right minimal (position 3)
-        new_val_4 = v0 + (4 / 5) * (v5 - v0)  # for right_anchor1 (position 4)
-
-        histog_dict[keys_sorted[left_anchor2]] = new_val_1
-        histog_dict[keys_sorted[L]] = new_val_2
-        histog_dict[keys_sorted[R]] = new_val_3
-        histog_dict[keys_sorted[right_anchor1]] = new_val_4
-
-    # Process interpolation for a given target angle.
-    def process_interpolation(target_angle):
-        d_target = np.abs(keys_sorted - target_angle)
-        indices = np.where(d_target == d_target.min())[0]
-        if len(indices) > 2:
-            raise ValueError(
-                f"More than two minimal indices found for angle {target_angle}: {indices}."
-            )
-        elif len(indices) == 1:
-            linear_interpolate_neighbors(histog_dict, keys_sorted, indices[0])
-        elif len(indices) == 2:
-            i1, i2 = sorted(indices)
-            if not ((i2 - i1 == 1) or (i1 == 0 and i2 == n - 1)):
-                raise ValueError(
-                    f"Tied minimal indices for angle {target_angle} are not contiguous: {indices}."
-                )
-            linear_interpolate_neighbors_double(histog_dict, keys_sorted, i1, i2)
-
-    # Correction at 0 degrees (always needed) used to be here, separately:
-    # process_interpolation(0)
-
-    if corr90 is True:
-        process_interpolation(90)
-        process_interpolation(0)
-
-    if corr45 is True:
-        process_interpolation(45)
-        process_interpolation(135)
-
-    return histog_dict
 
 
 def cell_signal_strengths(fd_data, norm_ord=1):
