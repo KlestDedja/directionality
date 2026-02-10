@@ -18,6 +18,7 @@ CORRECT_EDGES = ("gaussian", "1")
 # CORRECT_EDGES = ("interpolate", "interpolate")
 # CORRECT_EDGES = ("none", "none")
 METHODS = ["hog", "scharr", "sobel"]
+bin_column_to_read = "Smoothed value"  # or "Value" depending on which column you want to use for the distribution values
 
 DRAFT_MODE = False
 
@@ -54,8 +55,6 @@ sobel_file = os.path.join(
     edgehog_directories_results[2], "distribution_stats_vertical_format.csv"
 )
 
-print(hog_file)
-
 fiji_default = os.path.join(
     ROOT_FOLDER, DATA_FOLDER_NAME, OUTPUT_FOLDER, "fiji", "20251215_Fiji.csv"
 )
@@ -86,9 +85,6 @@ perf_results = pd.DataFrame(
         "Main direction Ground Truth (deg)",
     ]
 )
-
-
-bin_column_to_read = "Smoothed value"
 
 file_list_run = list(hog_distrib_dict.keys())
 if DRAFT_MODE is True:
