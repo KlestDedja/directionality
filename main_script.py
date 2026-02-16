@@ -31,7 +31,7 @@ CORRECT_EDGES = ("gaussian", "1")
 # CORRECT_EDGES = ("interpolate", "interpolate") or ("none", "none")
 
 # Choose method: 'sobel', 'scharr' or 'hog'
-METHOD = "sobel"
+METHOD = "hog"
 
 SAVE_STATS = True  # save statistics to CSV
 SAVE_PLOTS = True  # save ouctcomes of directionality analysis
@@ -47,7 +47,6 @@ DATA_FOLDER_NAME = os.path.join("data", "synthetic-golden-standard")
 # DATA_FOLDER_NAME = os.path.join(
 #     "data", "images-lightsheet-20241115_BAM_fkt20-P3-fkt21-P3-PEMFS-12w"
 # )
-# DATA_FOLDER_NAME = os.path.join("data", "images-lightsheet-manuscript")
 # DATA_FOLDER_NAME = os.path.join(
 #     "data", "images-lightsheet-20240928_BAM_fkt20_P3_fkt21_P3_PEMFS"
 # )

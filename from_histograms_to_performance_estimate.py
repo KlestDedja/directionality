@@ -15,11 +15,12 @@ from main_code.evaluation_utils import (
 # needed inof since at runtime we need to know num_bins, method and interpolation type
 N_BINS = 45
 CORRECT_EDGES = ("gaussian", "1")
-# CORRECT_EDGES = ("interpolate", "interpolate")
 # CORRECT_EDGES = ("none", "none")
 METHODS = ["hog", "scharr", "sobel"]
-bin_column_to_read = "Smoothed value"  # or "Value" depending on which column you want to use for the distribution values
 
+SMOOTH_MODE = False
+
+suffix_filename = "smooth" if SMOOTH_MODE else "raw"
 DRAFT_MODE = False
 
 # ========== FOLDERS FOR  COMPARISON ==========
@@ -55,10 +56,13 @@ sobel_file = os.path.join(
     edgehog_directories_results[2], "distribution_stats_vertical_format.csv"
 )
 
-fiji_default = os.path.join(
+fiji_fft = os.path.join(
     ROOT_FOLDER, DATA_FOLDER_NAME, OUTPUT_FOLDER, "fiji", "20251215_Fiji.csv"
 )
-print(fiji_default)
+
+fiji_gradient = os.path.join(
+    ROOT_FOLDER, DATA_FOLDER_NAME, OUTPUT_FOLDER, "fiji", "20251215_FijiGradient.csv"
+)
 
 
 # Load distributions from EDGEHOG and FIJI
@@ -66,7 +70,8 @@ hog_distrib_dict = parse_distribution_csv(hog_file)
 scharr_distrib_dict = parse_distribution_csv(scharr_file)
 sobel_distrib_dict = parse_distribution_csv(sobel_file)
 
-fiji_distrib_dict = parse_distribution_csv(fiji_default)
+fiji_fft_distrib_dict = parse_distribution_csv(fiji_fft)
+fiji_gradient_distrib_dict = parse_distribution_csv(fiji_gradient)
 
 ground_truth_files = os.listdir(
     os.path.join(ROOT_FOLDER, DATA_FOLDER_NAME, INPUT_METADATA)
@@ -81,7 +86,8 @@ perf_results = pd.DataFrame(
         "Main direction HOG (deg)",
         "Main direction SCHARR (deg)",
         "Main direction SOBEL (deg)",
-        "Main direction FIJI (deg)",
+        "Main direction FIJI FFT (deg)",
+        "Main direction FIJI Gradient (deg)",
         "Main direction Ground Truth (deg)",
     ]
 )
@@ -89,6 +95,10 @@ perf_results = pd.DataFrame(
 file_list_run = list(hog_distrib_dict.keys())
 if DRAFT_MODE is True:
     file_list_run = file_list_run[::5][:4]  # take every 5th, max 4 files
+
+
+bin_column_to_read = "Smoothed value" if SMOOTH_MODE else "Binned value"
+# depending on which column you want to use for the distribution values
 
 # Plot HOG, FIJI, and Ground Truth histograms in the same loop for each image
 for fname in file_list_run:
@@ -113,25 +123,50 @@ for fname in file_list_run:
     )
 
     # FIJI distribution (if available)
-    data_fiji = fiji_distrib_dict.get(fname, None)
+    data_fiji_fft = fiji_fft_distrib_dict.get(fname, None)
+    data_fiji_gradient = fiji_gradient_distrib_dict.get(fname, None)
 
-    bins_fiji, values_fiji = build_distribution_from_data(
-        data_fiji,
+    fiji_fft_colname = "Fourier component" if SMOOTH_MODE else "Fourier fit"
+    fiji_gradient_colname = (
+        "Gradient" if SMOOTH_MODE else "Gradient fit"
+    )  # same name in both cases
+
+    bins_fiji_fft, values_fiji_fft = build_distribution_from_data(
+        data_fiji_fft,
         direction_colname="Direction °",
-        value_colname="Fourier component",
+        value_colname=fiji_fft_colname,
+    )
+
+    # despite the naming, the column of interest has the same name
+    # in both FIJI files,
+    bins_fiji_gradient, values_fiji_gradient = build_distribution_from_data(
+        data_fiji_gradient,
+        direction_colname="Direction °",
+        value_colname=fiji_gradient_colname,
     )
 
     # Fiji contains both endpoints, remove the last one after averaging out:
-    values_fiji[0] = 0.5 * (values_fiji[0] + values_fiji[-1])  # wrap-around
-    bins_fiji = bins_fiji[:-1]
-    values_fiji = values_fiji[:-1]
+    values_fiji_fft[0] = 0.5 * (values_fiji_fft[0] + values_fiji_fft[-1])  # wrap-around
+    bins_fiji_fft = bins_fiji_fft[:-1]
+    values_fiji_fft = values_fiji_fft[:-1]
+
+    values_fiji_gradient[0] = 0.5 * (
+        values_fiji_gradient[0] + values_fiji_gradient[-1]
+    )  # wrap-around
+    bins_fiji_gradient = bins_fiji_gradient[:-1]
+    values_fiji_gradient = values_fiji_gradient[:-1]
 
     # Translate direction values by 90 degrees to map [-90, 90) -> [0, 180)
-    bins_fiji = bins_fiji % 180
+    bins_fiji_fft = bins_fiji_fft % 180
+    bins_fiji_gradient = bins_fiji_gradient % 180
     # Sort bins and values for consistency
-    sort_idx = np.argsort(bins_fiji)
-    bins_fiji = bins_fiji[sort_idx]
-    values_fiji = values_fiji[sort_idx]
+    sort_idx_fft = np.argsort(bins_fiji_fft)
+    bins_fiji_fft = bins_fiji_fft[sort_idx_fft]
+    values_fiji_fft = values_fiji_fft[sort_idx_fft]
+
+    sort_idx_gradient = np.argsort(bins_fiji_gradient)
+    bins_fiji_gradient = bins_fiji_gradient[sort_idx_gradient]
+    values_fiji_gradient = values_fiji_gradient[sort_idx_gradient]
 
     # Find corresponding ground truth file by matching fname (strip extension if needed)
     # Assume ground truth file contains fname or its stem
@@ -159,15 +194,36 @@ for fname in file_list_run:
     # Make sure binning is consistent across methods
     assert np.allclose(bins_hog, bins_scharr)
     assert np.allclose(bins_scharr, bins_sobel)
-    assert np.allclose(bins_sobel, bins_fiji)
-    assert np.allclose(bins_fiji, bins_gt)
+    assert np.allclose(bins_sobel, bins_fiji_fft)
+    assert np.allclose(bins_fiji_fft, bins_fiji_gradient)
+    assert np.allclose(bins_fiji_gradient, bins_gt)
 
     bins_common = bins_gt
 
     wasser_hog_gt = circular_wasserstein_1(values_hog, values_gt, L=180)
     wasser_scharr_gt = circular_wasserstein_1(values_scharr, values_gt, L=180)
     wasser_sobel_gt = circular_wasserstein_1(values_sobel, values_gt, L=180)
-    wasser_fiji_gt = circular_wasserstein_1(values_fiji, values_gt, L=180)
+
+    if np.any(values_fiji_fft < 0):
+        print(
+            f"Warning: Negative values detected in FIJI FFT distribution for image {fname}."
+        )
+        print("Clipping negative values to zero for Wasserstein distance calculation.")
+        values_fiji_fft = np.clip(values_fiji_fft, a_min=0, a_max=None)
+
+    values_fiji_fft = np.clip(values_fiji_fft, a_min=0, a_max=None)
+
+    if np.any(values_fiji_gradient < 0):
+        print(
+            f"Warning: Negative values detected in FIJI Gradient distribution for image {fname}."
+        )
+        print("Clipping negative values to zero for Wasserstein distance calculation.")
+        values_fiji_gradient = np.clip(values_fiji_gradient, a_min=0, a_max=None)
+
+    wasser_fiji_fft_gt = circular_wasserstein_1(values_fiji_fft, values_gt, L=180)
+    wasser_fiji_gradient_gt = circular_wasserstein_1(
+        values_fiji_gradient, values_gt, L=180
+    )
 
     main_dir_hog = direction_gaussian_peak_mean(
         bins_hog, values_hog, period_deg=180.0, sigma_bins=0.1
@@ -181,8 +237,11 @@ for fname in file_list_run:
         bins_sobel, values_sobel, period_deg=180.0, sigma_bins=0.1
     )
 
-    main_dir_fiji = direction_gaussian_peak_mean(
-        bins_fiji, values_fiji, period_deg=180.0, sigma_bins=0.1
+    main_dir_fiji_fft = direction_gaussian_peak_mean(
+        bins_fiji_fft, values_fiji_fft, period_deg=180.0, sigma_bins=0.1
+    )
+    main_dir_fiji_gradient = direction_gaussian_peak_mean(
+        bins_fiji_gradient, values_fiji_gradient, period_deg=180.0, sigma_bins=0.1
     )
     main_dir_truth = direction_gaussian_peak_mean(
         bins_gt, values_gt, period_deg=180.0, sigma_bins=0.1
@@ -197,12 +256,16 @@ for fname in file_list_run:
                     "Main direction HOG (deg)": [main_dir_hog],
                     "Main direction SCHARR (deg)": [main_dir_scharr],
                     "Main direction SOBEL (deg)": [main_dir_sobel],
-                    "Main direction FIJI (deg)": [main_dir_fiji],
+                    "Main direction FIJI FFT (deg)": [main_dir_fiji_fft],
+                    "Main direction FIJI Gradient (deg)": [main_dir_fiji_gradient],
                     "Main direction Ground Truth (deg)": [main_dir_truth],
                     "Wasserstein HOG vs Ground Truth": [wasser_hog_gt],
                     "Wasserstein SCHARR vs Ground Truth": [wasser_scharr_gt],
                     "Wasserstein SOBEL vs Ground Truth": [wasser_sobel_gt],
-                    "Wasserstein FIJI vs Ground Truth": [wasser_fiji_gt],
+                    "Wasserstein FIJI FFT vs Ground Truth": [wasser_fiji_fft_gt],
+                    "Wasserstein FIJI Gradient vs Ground Truth": [
+                        wasser_fiji_gradient_gt
+                    ],
                 }
             ),
         ],
@@ -258,31 +321,37 @@ for fname in file_list_run:
         plt.tight_layout()
         plt.show()
 
-        # Plot FIJI if available
+        # Plot FIJI FFT if available
         plt.figure(figsize=(7, 4))
         plt.bar(
-            bins_fiji,
-            values_fiji,
-            width=(bins_fiji[1] - bins_fiji[0]) if len(bins_fiji) > 1 else 1,
+            bins_fiji_fft,
+            values_fiji_fft,
+            width=(
+                (bins_fiji_fft[1] - bins_fiji_fft[0]) if len(bins_fiji_fft) > 1 else 1
+            ),
             align="center",
             alpha=0.7,
         )
-        plt.title(f"FIJI Distribution for {fname}")
+        plt.title(f"FIJI FFT Distribution for {fname}")
         plt.xlabel("Direction (deg)")
         plt.ylabel("Binned value")
         plt.tight_layout()
         plt.show()
 
-        # Plot Ground Truth if available
+        # Plot FIJI Gradient if available
         plt.figure(figsize=(7, 4))
         plt.bar(
-            bins_gt,
-            values_gt,
-            width=(bins_gt[1] - bins_gt[0]) if len(bins_gt) > 1 else 1,
+            bins_fiji_gradient,
+            values_fiji_gradient,
+            width=(
+                (bins_fiji_gradient[1] - bins_fiji_gradient[0])
+                if len(bins_fiji_gradient) > 1
+                else 1
+            ),
             align="center",
             alpha=0.7,
         )
-        plt.title(f"GROUND TRUTH Distribution for {fname}")
+        plt.title(f"FIJI Gradient Distribution for {fname}")
         plt.xlabel("Direction (deg)")
         plt.ylabel("Binned value")
         plt.tight_layout()
@@ -294,7 +363,8 @@ wasser_cols = [
     "Wasserstein HOG vs Ground Truth",
     "Wasserstein SCHARR vs Ground Truth",
     "Wasserstein SOBEL vs Ground Truth",
-    "Wasserstein FIJI vs Ground Truth",
+    "Wasserstein FIJI FFT vs Ground Truth",
+    "Wasserstein FIJI Gradient vs Ground Truth",
 ]
 avg_row = {col: perf_results[col].mean() for col in wasser_cols if col in perf_results}
 avg_row.update(
@@ -311,9 +381,9 @@ perf_results.loc[len(perf_results)] = avg_row  # type: ignore
 output_dir = os.path.join(ROOT_FOLDER, DATA_FOLDER_NAME, OUTPUT_FOLDER)
 
 perf_filename = (
-    f"performance_comparison_{CORRECT_EDGES[0]}_{CORRECT_EDGES[1]}.csv"
+    f"performance_comparison_{suffix_filename}_{CORRECT_EDGES[0]}_{CORRECT_EDGES[1]}.csv"
     if DRAFT_MODE is False
-    else f"performance_comparison_draft_{CORRECT_EDGES[0]}_{CORRECT_EDGES[1]}.csv"
+    else f"performance_comparison_draft_{suffix_filename}_{CORRECT_EDGES[0]}_{CORRECT_EDGES[1]}.csv"
 )
 
 perf_results.to_csv(os.path.join(output_dir, perf_filename), index=False)

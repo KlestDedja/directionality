@@ -97,8 +97,13 @@ def external_plot_analysis(
     strengths,
 ):
 
-    # This function is replaces the old  `external_plot_hog_analysis` and
-    #  leaves the polar axes defaults regardless of the employed method.
+    # This function leaves the polar axes as defaults regardless
+    #  of the employed gradient calculation method.
+
+    # TODO: design a lightweight version of this function that only plots the background
+    # filtering heatmap and the directionality plot.
+    # Useful for quick runs where users don't need to see all the detials such as
+    # the star plot or the original image.
     gradient_hist_360 = np.tile(np.array(list(gradient_hist.values())), 2)
     # gradient_hist_360_smooth = np.tile(np.array(list(gradient_hist_smooth.values())), 2)
 

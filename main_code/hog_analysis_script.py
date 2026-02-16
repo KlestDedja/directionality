@@ -325,8 +325,9 @@ class HOGAnalysis:
 
         gradient_hist = dict(zip(angle_bins, gradient_hist_180))
 
-        plt.plot(angle_bins, gradient_hist_180, label="Debugging histogram")
-        plt.show()
+        # plt.title(f"Debugging histogram for image {filename}")
+        # plt.plot(angle_bins, gradient_hist_180)
+        # plt.show()
 
         if self.correct_edge_angles[0].lower() == "gaussian":
 
