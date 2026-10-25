@@ -1,28 +1,26 @@
-import os
-import warnings
-import re
 import csv
+import os
+import re
 import time
-import numpy as np
-from scipy.ndimage import convolve
+import warnings
 
-import pandas as pd
 import matplotlib.pyplot as plt
-from skimage import io, color, exposure
+import numpy as np
+import pandas as pd
+from scipy.ndimage import convolve
+from skimage import color, exposure, io
 from skimage.filters import scharr_h, scharr_v
-
 
 from main_code.pipeline_utils import (
     HOGDescriptor,
+    cell_signal_strengths,
     compute_distribution_direction,
     correct_angles_gaussian,
-    cell_signal_strengths,
 )
+from main_code.plotting_utils import create_empty_plot, external_plot_analysis
 from main_code.utils_other import (
     clean_filename,
 )
-
-from main_code.plotting_utils import external_plot_analysis, create_empty_plot
 
 
 class HOGAnalysis:
@@ -84,7 +82,10 @@ class HOGAnalysis:
         save_stats: bool = True,
         save_plots: bool = True,
         verbose: int = 0,
-    ):
+    ) -> None:
+
+        image_folder = os.fsdecode(image_folder)
+        output_filename = os.fsdecode(output_filename)
 
         image_files = [
             f
@@ -93,18 +94,22 @@ class HOGAnalysis:
         ]
 
         if "images-lightsheet" in image_folder and "manuscript" not in image_folder:
-            image_files = [
-                f
-                for f in os.listdir(image_folder)
-                if not "z" in f or int(re.search(r"z(\d+)", f).group(1)) % 10 == 0
-            ]
+            selected_files = []
+            for filename in os.listdir(image_folder):
+                if "z" not in filename:
+                    selected_files.append(filename)
+                    continue
+                match = re.search(r"z(\d+)", filename)
+                if match is None:
+                    raise ValueError(f"Missing z slice number in lightsheet image {filename}.")
+                if int(match.group(1)) % 10 == 0:
+                    selected_files.append(filename)
+            image_files = selected_files
 
         if self.draft and len(image_files) > 15:
             step = max(1, len(image_files) // 10)
             image_files = image_files[::step][:10]
-            print(
-                f"Draft mode: processing {len(image_files)} images, picked one every {step}."
-            )
+            print(f"Draft mode: processing {len(image_files)} images, picked one every {step}.")
 
         chunk20 = max(len(image_files) // 5, 2)
         chunk05 = max(len(image_files) // 20, 1)
@@ -122,9 +127,7 @@ class HOGAnalysis:
 
         # End of loop:
         if save_stats:
-            self.saved_stats_path = self.save_results_to_file(
-                self.output_folder, output_filename
-            )
+            self.saved_stats_path = self.save_results_to_file(self.output_folder, output_filename)
             if verbose > 0:
                 print(f"Saving statistics to {self.saved_stats_path}")
 
@@ -203,9 +206,7 @@ class HOGAnalysis:
             magnitude = np.hypot(grad_x, grad_y)
             # swap X and Y axis
             orientation = np.rad2deg(np.arctan2(grad_y, grad_x))
-            orientation = (
-                np.where(orientation < 0, orientation + 180, orientation) % 180
-            )
+            orientation = np.where(orientation < 0, orientation + 180, orientation) % 180
 
             win_h, win_w = self.pixels_per_window
             h, w = image_proc.shape[:2]
@@ -251,97 +252,41 @@ class HOGAnalysis:
             self.save_nan_stats(filename, image, threshold)
             return None  # skip rest of the process_image function
 
-        # Normalization: if using original 'hog' method, defer to HOGDescriptor
-        # behavior; otherwise apply per-cell normalization for Scharr histograms.
-        if self.method.lower() == "hog":
-            if self.block_norm != "None":
-                fd_norm, hog_image = self.hog_descriptor.compute_hog(
-                    image, block_norm=self.block_norm, feature_vector=False
-                )
-                fd_norm = np.squeeze(fd_norm)
-            else:
-                hog_image = hog_image_bg
-                if self.post_normalization is True:
-                    fd_norm = fd_bg / (1e-7 + strengths[:, :, np.newaxis])
-                else:
-                    fd_norm = fd_bg
-
-        elif self.method.lower() in ["scharr", "sobel"]:
-            # per-cell normalization for Scharr descriptor
-            # using same normalization schemes as HOG for consistency
-            if self.block_norm != "None":
-                fd_norm = np.copy(fd_bg)
-                # simple per-cell normalization
-                for iy in range(fd_norm.shape[0]):
-                    for ix in range(fd_norm.shape[1]):
-                        cell = fd_norm[iy, ix, :]
-                        if self.block_norm == "L1":
-                            nrm = np.sum(np.abs(cell)) + 1e-7
-                            fd_norm[iy, ix, :] = cell / nrm
-                        elif self.block_norm == "L2":
-                            nrm = np.sqrt(np.sum(cell**2)) + 1e-7
-                            fd_norm[iy, ix, :] = cell / nrm
-                        elif self.block_norm == "L2-Hys":
-                            nrm = np.sqrt(np.sum(cell**2)) + 1e-7
-                            celln = cell / nrm
-                            celln = np.minimum(celln, 0.2)
-                            nrm2 = np.sqrt(np.sum(celln**2)) + 1e-7
-                            fd_norm[iy, ix, :] = celln / nrm2
-                        else:
-                            fd_norm[iy, ix, :] = cell
-                hog_image = hog_image_bg
-            else:
-                # if normalize is None, skip fd_norm computation completely
-                hog_image = hog_image_bg
+        # Keep the HOG visualization and descriptor state for compatibility.
+        # Statistics below always use fd_bg and the post_normalization setting.
+        hog_image = hog_image_bg
+        if self.method == "hog" and self.block_norm != "None":
+            _, hog_image = self.hog_descriptor.compute_hog(
+                image, block_norm=self.block_norm, feature_vector=False
+            )
 
         if self.post_normalization is True:
             fd_norm = fd_bg / (1e-7 + strengths[:, :, np.newaxis])
         else:
             fd_norm = fd_bg
 
-        if self.method not in ["hog", "scharr", "sobel"]:
-            raise ValueError(
-                f"Method {self.method} is not recognized. Currently only 'hog', 'scharr' and 'sobel' are supported."
-            )
-
         # Drop cells below threshold, the rest is normalised if self.block_norm
         # is "None", so that all cells have equal weight in the histogram
         fd_norm[~cells_to_keep] = 0
 
         gradient_hist_180 = fd_norm[cells_to_keep].mean(axis=0)
-        INCLUDE_ENDPOINT = True  # set=True to be consistent with Fiji's implementation
-        angle_bins = np.linspace(
-            0, 180, len(gradient_hist_180), endpoint=INCLUDE_ENDPOINT
-        )
-
+        # Fiji includes both endpoints; merge the duplicate 0/180 direction.
+        angle_bins = np.linspace(0, 180, len(gradient_hist_180), endpoint=True)
         assert self.num_bins == len(angle_bins)
-
-        if (
-            INCLUDE_ENDPOINT
-        ):  # we have a duplicate direction at 0 and 180, merge the bins:
-            gradient_hist_180[0] = (gradient_hist_180[0] + gradient_hist_180[-1]) / 2
-            gradient_hist_180 = gradient_hist_180[:-1]
-            angle_bins = angle_bins[:-1]
+        gradient_hist_180[0] = (gradient_hist_180[0] + gradient_hist_180[-1]) / 2
+        gradient_hist_180 = gradient_hist_180[:-1]
+        angle_bins = angle_bins[:-1]
 
         gradient_hist = dict(zip(angle_bins, gradient_hist_180))
 
-        # plt.title(f"Debugging histogram for image {filename}")
-        # plt.plot(angle_bins, gradient_hist_180)
-        # plt.show()
-
         if self.correct_edge_angles[0].lower() == "gaussian":
-
             kernel_sigma = float(self.correct_edge_angles[1])
 
-            gradient_hist_smooth = correct_angles_gaussian(
-                gradient_hist, sigma=kernel_sigma
-            )
+            gradient_hist_smooth = correct_angles_gaussian(gradient_hist, sigma=kernel_sigma)
 
         mean_stats, mode_stats = compute_distribution_direction(gradient_hist)
 
-        has_valid_stats = not np.isnan(mean_stats["angle"]) and not np.isnan(
-            mode_stats["angle"]
-        )
+        has_valid_stats = not np.isnan(mean_stats["angle"]) and not np.isnan(mode_stats["angle"])
 
         if has_valid_stats:
             self.save_stats(filename, image, threshold, mean_stats, mode_stats, t1)
@@ -357,7 +302,7 @@ class HOGAnalysis:
 
         # Build a HOG-like per-cell visualization for Scharr/Sobel without calling skimage.hog
         # For each window, draw line glyphs at bin orientations with intensity proportional to the bin value.
-        if self.method.lower() in ["scharr", "sobel"]:
+        if self.method in ("scharr", "sobel"):
             py, px = self.pixels_per_window
             h_cells, w_cells = strengths.shape
             hh, ww = h_cells * py, w_cells * px
@@ -399,9 +344,7 @@ class HOGAnalysis:
                         sin_a = np.sin(ang)
                         for t in np.linspace(-half_len, half_len, n_steps):
                             x = int(round(cx + t * cos_a))
-                            y = int(
-                                round(cy - t * sin_a)
-                            )  # Flip y to match image coordinates
+                            y = int(round(cy - t * sin_a))  # Flip y to match image coordinates
                             if 0 <= x < ww and 0 <= y < hh:
                                 hog_vis[y, x] += brightness_scale * wgt
 
@@ -412,8 +355,6 @@ class HOGAnalysis:
                 )
             else:
                 hog_image = hog_vis
-        else:  # method is 'hog': keep original visualization
-            hog_image = hog_image
 
         # Save plots - use empty plot if statistics contain NaN values
         if save_plots:
@@ -429,56 +370,41 @@ class HOGAnalysis:
 
         return None  # for clarity, this is the end of process_image
 
-    def distribution_stats_to_temp_csv(self, filename, gradient_hist):
-        """
-        Save or append the gradient_hist values for each image to a CSV file.
-        The first image creates the file with columns: filename, bin centers.
-        Subsequent images check columns and append.
-        """
-
+    def distribution_stats_to_temp_csv(
+        self, filename: str, gradient_hist: dict[float, float]
+    ) -> None:
+        """Append an image histogram after validating the existing CSV header."""
         temp_csv_path = os.path.join(self.output_folder, "distribution_statistics.temp")
-        row = {"filename": filename}
-        for k, v in gradient_hist.items():
-            row[str(k)] = v
+        row = {"filename": filename, **{str(k): v for k, v in gradient_hist.items()}}
+        columns = list(row)
+        file_exists = os.path.exists(temp_csv_path)
 
-        if not os.path.exists(temp_csv_path):
-            # First image: create file with columns, and directory if necessary:
-            os.makedirs(self.output_folder, exist_ok=True)
-
-            columns = ["filename"] + [str(k) for k in gradient_hist.keys()]
-            df = pd.DataFrame([row], columns=columns)
-            df.to_csv(temp_csv_path, index=False)
-        else:
-            # Subsequent images: check columns and append
-            df_existing = pd.read_csv(temp_csv_path)
-            expected_columns = ["filename"] + [str(k) for k in gradient_hist.keys()]
-            existing_cols = list(df_existing.columns)
-            if existing_cols != expected_columns:
+        if file_exists:
+            existing_cols = list(pd.read_csv(temp_csv_path, nrows=0).columns)
+            if existing_cols != columns:
                 missing_in_existing = next(
-                    (col for col in existing_cols if col not in expected_columns), None
+                    (col for col in existing_cols if col not in columns), None
                 )
                 missing_in_expected = next(
-                    (col for col in expected_columns if col not in existing_cols), None
+                    (col for col in columns if col not in existing_cols), None
                 )
                 raise ValueError(
                     f"Bin columns for image {filename} do not match previous images in {temp_csv_path}. "
                     f"First missing in previous CSV: {missing_in_existing}. "
                     f"First missing in current image: {missing_in_expected}."
                 )
-            df_new = pd.DataFrame([row], columns=expected_columns)
-            df_new.to_csv(temp_csv_path, mode="a", header=False, index=False)
 
-    def save_distribution_stats_to_csv(self):
-        """
-        Replace the main CSV with the temp file after all images are processed.
-        """
+        os.makedirs(self.output_folder, exist_ok=True)
+        pd.DataFrame([row], columns=columns).to_csv(
+            temp_csv_path, mode="a" if file_exists else "w", header=not file_exists, index=False
+        )
 
+    def save_distribution_stats_to_csv(self) -> None:
+        """Replace the final CSV with the completed temporary histogram file."""
         temp_csv_path = os.path.join(self.output_folder, "distribution_statistics.temp")
         final_csv_path = os.path.join(self.output_folder, "distribution_statistics.csv")
         if os.path.exists(temp_csv_path):
-            if os.path.exists(final_csv_path):
-                os.remove(final_csv_path)
-            os.rename(temp_csv_path, final_csv_path)  # .temp files becomes .csv
+            os.replace(temp_csv_path, final_csv_path)
 
     def export_distribution_stats_vertical_format(
         self, filename, direction_bins, binned_values, smoothed_values
@@ -489,9 +415,7 @@ class HOGAnalysis:
         Columns: Name ,Direction (deg),Binned value,Smoothed value
         """
 
-        out_csv_path = os.path.join(
-            self.output_folder, "distribution_stats_vertical_format.csv"
-        )
+        out_csv_path = os.path.join(self.output_folder, "distribution_stats_vertical_format.csv")
         header = ["Name ", "Direction (deg)", "Binned value", "Smoothed value"]
 
         # Prepare rows for this image
@@ -510,8 +434,7 @@ class HOGAnalysis:
             writer = csv.writer(csvfile)
             if not file_exists:
                 writer.writerow(header)
-            for row in rows:
-                writer.writerow(row)
+            writer.writerows(rows)
 
     def save_plot(
         self,
@@ -537,9 +460,7 @@ class HOGAnalysis:
             )
         fig.tight_layout()
 
-        filename_info = (
-            f"_{self.block_norm}_{self.hog_descriptor.pixels_per_window[0]}p"
-        )
+        filename_info = f"_{self.block_norm}_{self.hog_descriptor.pixels_per_window[0]}p"
         filename_png = clean_filename(filename).replace(".tif", filename_info + ".png")
 
         os.makedirs(self.output_folder, exist_ok=True)
@@ -565,9 +486,7 @@ class HOGAnalysis:
             return threshold <= skip_tol, threshold, cells_to_keep
 
         if cells_to_keep.mean() >= background_range[1]:
-            while (
-                cells_to_keep.mean() >= background_range[1] and threshold < 1 / skip_tol
-            ):
+            while cells_to_keep.mean() >= background_range[1] and threshold < 1 / skip_tol:
                 threshold *= 1.25
                 cells_to_keep = strengths > threshold
             return threshold > 1 / skip_tol, threshold, cells_to_keep
@@ -586,9 +505,7 @@ class HOGAnalysis:
             "signal_threshold": threshold,
             "elapsed time (mm:ss)": "nan",
         }
-        self.df_statistics = pd.concat(
-            [self.df_statistics, pd.DataFrame(stats, index=[filename])]
-        )
+        self.df_statistics = pd.concat([self.df_statistics, pd.DataFrame(stats, index=[filename])])
 
     def save_stats(self, filename, image, threshold, mean_stats, mode_stats, t_start):
         elapsed = round(time.time() - t_start)
