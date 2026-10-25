@@ -7,6 +7,8 @@ from skimage.color import rgb2gray
 from skimage.feature import hog
 from scipy.ndimage import gaussian_filter1d
 
+from main_code._raw_hog import hog_without_normalization
+
 
 def load_and_prepare_image(path, name, to_grayscale=False, channel=None):
     """Load an image and proivde option to convert it to grayscale."""
@@ -56,7 +58,23 @@ class HOGDescriptor:
         # for this reason we set channel_axis=None
 
         ## BEWARE: what we call "window" is called "cell" in skimage library
-        # TODO: fork skimage for block_norm = None support
+        # Raw magnitudes are needed for signal/background selection. Standard
+        # normalization modes still use the public scikit-image implementation.
+        if block_norm is None or block_norm == "None":
+            result = hog_without_normalization(
+                image,
+                orientations=self.orientations,
+                pixels_per_cell=self.pixels_per_window,
+                cells_per_block=self.windows_per_block,
+                visualize=visualize,
+                feature_vector=feature_vector,
+            )
+            if visualize:
+                self.fd, self.hog_image = result
+            else:
+                self.fd, self.hog_image = result, None
+            return self.fd, self.hog_image
+
         if visualize:
             self.fd, self.hog_image = hog(
                 image,

@@ -1,0 +1,2 @@
+include main_script.py requirements.txt environment.yaml THIRD_PARTY_NOTICES.txt
+recursive-include tests *.py *.md *.npz

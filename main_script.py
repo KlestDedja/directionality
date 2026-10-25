@@ -38,10 +38,10 @@ SAVE_PLOTS = True  # save ouctcomes of directionality analysis
 SHOW_PLOTS = False  # show plots interactively
 
 # ========== FOLDER STRUCTURE ==========
-ROOT_FOLDER = os.getcwd()
+ROOT_FOLDER = os.path.dirname(os.path.abspath(__file__))
 
 # change accordingly if your structure differs from the demo
-DATA_FOLDER_NAME = os.path.join("data", "synthetic-golden-standard")
+DATA_FOLDER_NAME = os.path.join("demo-data", "synthetic-golden-standard")
 # DATA_FOLDER_NAME = os.path.join("data", "test-golden")
 # DATA_FOLDER_NAME = os.path.join("data", "images-good-bad-validation")
 # DATA_FOLDER_NAME = os.path.join(
@@ -57,10 +57,10 @@ DATA_FOLDER_NAME = os.path.join("data", "synthetic-golden-standard")
 #     "data", "images-confocal-20241116-fusion-bMyoB-PEMFS-TM-12w"
 # )
 
-INPUT_FOLDER = "input-images"
+INPUT_FOLDER = "input_images"
 # OUTPUT_FOLDER is constructed at runtime and its subfolders will
 # include num_bins, method and interpolation parameters in their name
-OUTPUT_FOLDER = "output-analysis"
+OUTPUT_FOLDER = "output_analysis"
 
 # ========== RUN ANALYSIS ==========
 

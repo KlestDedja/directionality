@@ -30,6 +30,14 @@ ENV/
 env.bak/
 venv.bak/
 
+# Python packaging and verification
+build/
+dist/
+*.egg-info/
+.pytest_cache/
+.ruff_cache/
+.venv-*/
+
 # Ignore Jupyter Notebook files
 *.ipynb
 # except for
