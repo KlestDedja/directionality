@@ -1,14 +1,8 @@
 name: directionality
 channels:
-  - defaults
   - conda-forge
 dependencies:
-  - numpy
-  - pandas
-  - scikit-image>=0.23,<0.26
-  - matplotlib
-  - ipykernel
-  - imagecodecs
-#  - pip  # ensure pip is available for pip installs
-#  - pip:
-#      - scikit-image @ git+https://github.com/KlestDedja/scikit-image-fork.git
+  - python=3.12
+  - pip
+  - pip:
+      - .

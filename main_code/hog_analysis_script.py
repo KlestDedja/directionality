@@ -169,7 +169,7 @@ class HOGAnalysis:
             fd_raw_bg, hog_image_bg = self.hog_descriptor.compute_hog(
                 image, block_norm="None", feature_vector=False
             )
-            fd_bg = np.squeeze(fd_raw_bg)
+            fd_bg = np.squeeze(fd_raw_bg, axis=(2, 3))
             strengths = cell_signal_strengths(fd_bg, norm_ord=1)
         elif self.method == "scharr" or self.method == "sobel":
             # Compute gradients with Scharr or Sobel filters and build orientation histograms per window
@@ -258,7 +258,7 @@ class HOGAnalysis:
                 fd_norm, hog_image = self.hog_descriptor.compute_hog(
                     image, block_norm=self.block_norm, feature_vector=False
                 )
-                fd_norm = np.squeeze(fd_norm)
+                fd_norm = np.squeeze(fd_norm, axis=(2, 3))
             else:
                 hog_image = hog_image_bg
                 if self.post_normalization is True:

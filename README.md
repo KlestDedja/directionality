@@ -5,121 +5,123 @@
 
 # Directionality with EDGEHOG
 
-**EDGEHOG** provides a reproducible framework to analyze images using Histograms of Oriented Gradients (HOGs) to derive orientation statistics.
-This tool automates the extraction of directions and their distirbutions, by producing both visual and statistical outputs for images. A paper is underway explaining how EDGEHOG works and how it can be employed in a several biomedical applications.
+**EDGEHOG** analyzes fiber directionality in images using Histograms of Oriented
+Gradients (HOG), Scharr or Sobel gradients. It produces orientation distributions,
+mean and modal directions, dispersion statistics, CSV exports and optional plots.
+A manuscript describing the method and biomedical applications is in preparation.
 
-## 🚀 Installation
+## Installation
 
-The repository includes a self-contained demo dataset, making it easy to get started. Please ensure you have [Git](https://git-scm.com/) (or [GitHub Desktop](https://docs.github.com/en/desktop/installing-and-authenticating-to-github-desktop/installing-github-desktop)) and [Python 3.10+](https://www.python.org/downloads/) installed on your system
-> *In the future, we want to provide a fully fledged package, installable via `pip`.*
+Use Python 3.10 or newer. Python 3.12 is recommended for reproducing the demo.
+Create and activate a virtual environment:
 
----
-
-### 🔁 1. Clone the repository
-
-Clone the repository to the desired local path either with Git:
 ```bash
-git clone https://github.com/KlestDedja/directionality.git ~/your/local/path/directionality-test
-```
-where `directionality-test` is the name of the new repository.
-
-Or, you can clone with GitHub Desktop: click on `Add -> Clone repository -> url -> https://github.com/KlestDedja/directionality.git` Name the repo as e.g. `directionality-test` in your local path.
-
-### 🐍 2. Set up the environment
-
-#### Option A: Python virtual environment.
-
-Navigate to the new folder with your favourite terminal (**Powershell**, **GitBash**, **Command Prompt**,...) and create a Python environment:
-```
-cd ~/your/local/path/directionality-test
 python -m venv .venv
 ```
-This creates a virtual environment `.venv` in `directionality-test/.venv/`.
-Activate the virtual environment, if you are using **Windows**
-```
-.venv\Scripts\activate
+
+On Windows PowerShell:
+
+```powershell
+.venv\Scripts\Activate.ps1
 ```
 
-if you are using **macOS / Linux / WSL**:
-```
+On macOS or Linux:
+
+```bash
 source .venv/bin/activate
 ```
 
-And install the required packages
-```
-pip install -r requirements.txt
-```
+Install directly from GitHub (requires Git):
 
-⚠️ These instructions have been tested with Python 3.12. All version above `3.10` should work, but compatibility is not guaranteed.
-
-#### Option B: if you are familiar with `conda`
-
-Assuming you have `anaconda` installed, then:
-```
-conda create -n directionality-test python=3.12
-conda activate directionality-test
-```
-`cd` your way to the repository location (e.g. `cd ~/your/local/path/directionality-test`) and install required packages:
-```
-pip install -r requirements.txt
-```
-### 🐛 3. Fix scikit-image code (temporary)
-
-As we haven't managed to make build the scikit-image fork correctly, best current workaround is to navigate to the installation of `scikit-image` within the `directionality-test` environment, search for the `_hog_normalize_block` function under `skimage/feature/_hog.py` and replace the lines:
-```
-def _hog_normalize_block(block, method, eps=1e-5):
-    if method == 'L1':
-        out = block / (np.sum(np.abs(block)) + eps)
-    elif method == 'L1-sqrt':
-        out = np.sqrt(block / (np.sum(np.abs(block)) + eps))
-    elif method == 'L2':
-        out = block / np.sqrt(np.sum(block**2) + eps**2)
-    elif method == 'L2-Hys':
-        out = block / np.sqrt(np.sum(block**2) + eps**2)
-        out = np.minimum(out, 0.2)
-        out = out / np.sqrt(np.sum(out**2) + eps**2)
+```bash
+python -m pip install "git+https://github.com/KlestDedja/directionality.git"
 ```
 
-with the following ones:
+Or clone the repository to get the demo images, then install from its root:
 
+```bash
+git clone https://github.com/KlestDedja/directionality.git
+cd directionality
+python -m pip install .
 ```
-def _hog_normalize_block(block, method, eps=1e-5):
-    if method == 'L1':
-        out = block / (np.sum(np.abs(block)) + eps)
-    elif method == 'L1-sqrt':
-        out = np.sqrt(block / (np.sum(np.abs(block)) + eps))
-    elif method == 'L2':
-        out = block / np.sqrt(np.sum(block**2) + eps**2)
-    elif method == 'L2-Hys':
-        out = block / np.sqrt(np.sum(block**2) + eps**2)
-        out = np.minimum(out, 0.2)
-        out = out / np.sqrt(np.sum(out**2) + eps**2)
-    elif method == 'None':
-        out = block
+
+The package installs standard PyPI dependencies, including scikit-image
+0.23–0.25. **No custom fork, compiler, or manual changes to scikit-image are
+required.** The distribution name is `edgehog-directionality`; the Python
+import and command are `edgehog`. It is not currently published on PyPI.
+
+Existing `python -m pip install -r requirements.txt` also installs the package.
+For conda, run `conda env create -f environment.yaml` from the repository root,
+then `conda activate directionality`. Notebook users can add
+`python -m pip install ".[notebook]"`.
+
+## Run the demo
+
+From the cloned repository:
+
+```bash
+edgehog --input-dir demo-data/synthetic-golden-standard/input_images --output-dir results/demo-hog --method hog --draft
 ```
-In practice, we added an extra case to the normalization options, namely *no* normalization.
 
-⚠️ If you skip this step, you can still run the script as long as the `block_norm` is one of the cases handled by `_hog_normalize_block`.
+`--draft` samples up to 10 images when the input folder has more than 15.
+Omit it to process all images. Use `--no-plots` for CSV output only.
+Choose a new or empty output folder for each run: distribution exports append
+rows, so reusing a populated folder could mix results.
 
-You should be good to go!
+The installed command works from any directory. Pass full paths for your own data:
 
-## 🚀 Try It Out: Run the example demo
-To see the Directionality tool in action, you can use the example dataset in the `demo-data` folder.
+```bash
+edgehog --input-dir /path/to/images --output-dir /path/to/new-results --method hog --channel grayscale --window-size 32
+```
 
-You simply have to run  `main_script.py` (in the `main_code` folder) from your favorite IDE or through a bash command. Make sure you are pointing to the location of this repository.
+Use `--channel 0`, `1`, or `2` for an RGB channel; the default uses grayscale
+unless a dataset override applies. Supported images are `.tif`, `.png`, and
+`.jpg`. Folder-specific defaults are bundled in `main_code/default_params.csv`.
+Run `edgehog --help` for threshold, bin, normalization, and smoothing options.
 
-## 📂 What happens when you run it?
+`python -m edgehog` provides the same interface. The editable
+`python main_script.py` example also runs the bundled synthetic dataset.
+The legacy wrapper accepts `--data-dir` / `--data_dir` for a dataset containing
+`input_images/`, writing to `output_analysis/`.
 
-The demo script:
+Outputs include raw and cleaned `HOG_stats_*.csv` summary statistics,
+`distribution_statistics.csv`, a vertical distribution CSV, and optional
+per-image plots. Images without sufficient signal retain NaN statistics in the
+raw CSV and are excluded from the cleaned summary.
 
-- Loads `.tif`, `.png` and `.jpg` images from `demo-data/input_images/`,
+## Python API and raw HOG
 
--  runs the directionality estimator EDGEOG with default or user provided parameters, computes signal directionality statistics.
+```python
+from edgehog import HOGAnalysis, HOGDescriptor
 
-- saves results into `demo-data/output_analysis/`, including:
+descriptor = HOGDescriptor(
+    orientations=45,
+    pixels_per_window=(32, 32),
+    windows_per_block=(1, 1),
+)
+# image is a 2D NumPy array after selecting a channel.
+raw_histograms, visualization = descriptor.compute_hog(image, block_norm="None")
+```
 
-    - 📊 Cleaned CSV file: `HOG_stats_<params>_clean.csv` summary of average and modal signal directions, with deviations (filtered and enriched with metadata)
+Existing imports from `main_code` remain supported. Both Python `None` and
+the legacy string `"None"` request raw magnitudes. EDGEHOG computes these locally
+using NumPy and public scikit-image APIs, preserving the fork's histogram and
+visualization conventions. `L1`, `L1-sqrt`, `L2`, and `L2-Hys` continue to use
+upstream scikit-image. No installed dependency is modified or monkey-patched.
 
-    - 🖼️ Optionally, a PNG plot per image, containing:original image, HOG visualization, signal strength map, and a histogram of the distribution of directioanlity, in poalr coordinates.
+## Development
+
+```bash
+python -m pip install -e ".[dev]"
+python -m pytest -q
+python -m build
+```
+
+Tests compare raw descriptors and visualizations with fixed outputs from the
+original fork, exercise standard normalization modes, and run the installed CLI
+on synthetic data. CI builds and installs a wheel on Windows and Linux, including
+its default-parameter CSV, and checks supported scikit-image versions.
+See `tests/data/README.md` for reference provenance and
+`THIRD_PARTY_NOTICES.txt` for attribution.
 
 
