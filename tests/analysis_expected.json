@@ -1,0 +1,134 @@
+{
+  "scharr_True": {
+    "statistics": {
+      "image size": "(32, 32)",
+      "avg. direction": 80.30678536698026,
+      "std. deviation (mean)": 50.94999061422836,
+      "abs. deviation (mean)": 44.40643171790608,
+      "mode direction": 45.0,
+      "std. deviation (mode)": 52.59356688213533,
+      "abs. deviation (mode)": 44.32083846951356,
+      "signal_threshold": 78.125
+    },
+    "histogram": [
+      0.02474905148449426,
+      0.02802098936602717,
+      0.03327410700291767,
+      0.03069650479072954,
+      0.028766211284590615,
+      0.026773928482451803,
+      0.03009145121198529,
+      0.031256794798371186
+    ]
+  },
+  "scharr_False": {
+    "statistics": {
+      "image size": "(32, 32)",
+      "avg. direction": 80.17047881799202,
+      "std. deviation (mean)": 50.938324641203536,
+      "abs. deviation (mean)": 44.39428863188624,
+      "mode direction": 45.0,
+      "std. deviation (mode)": 52.53664642837457,
+      "abs. deviation (mode)": 44.25319358380064,
+      "signal_threshold": 78.125
+    },
+    "histogram": [
+      2.2307782536096745,
+      2.532207295778697,
+      3.00282044570816,
+      2.783245969713839,
+      2.578201013732159,
+      2.4074174277525726,
+      2.702987275246932,
+      2.8091299113402237
+    ]
+  },
+  "sobel_True": {
+    "statistics": {
+      "image size": "(32, 32)",
+      "avg. direction": 78.43333889747753,
+      "std. deviation (mean)": 51.33492809648036,
+      "abs. deviation (mean)": 45.06640884349062,
+      "mode direction": 112.5,
+      "std. deviation (mode)": 52.200222332066296,
+      "abs. deviation (mode)": 43.70045761965493,
+      "signal_threshold": 62.5
+    },
+    "histogram": [
+      0.4464014068285903,
+      0.4023965680615143,
+      0.38750238404749165,
+      0.3857671382449757,
+      0.3753546643418898,
+      0.5117452061127544,
+      0.42940472573113475,
+      0.34330601906727254
+    ]
+  },
+  "sobel_False": {
+    "statistics": {
+      "image size": "(32, 32)",
+      "avg. direction": 78.20008598960278,
+      "std. deviation (mean)": 51.388648508318944,
+      "abs. deviation (mean)": 45.14799736867844,
+      "mode direction": 112.5,
+      "std. deviation (mode)": 52.35275208483575,
+      "abs. deviation (mode)": 43.857071401816526,
+      "signal_threshold": 62.5
+    },
+    "histogram": [
+      34.67815487463935,
+      31.68408437233366,
+      30.19502102565989,
+      29.618955526693814,
+      29.035780783417707,
+      39.414082179649974,
+      33.30668829390659,
+      26.59669197959762
+    ]
+  },
+  "hog_True": {
+    "statistics": {
+      "image size": "(32, 32)",
+      "avg. direction": 79.71198495989083,
+      "std. deviation (mean)": 51.71313857226833,
+      "abs. deviation (mean)": 45.14772177077686,
+      "mode direction": 157.5,
+      "std. deviation (mode)": 52.53708039944002,
+      "abs. deviation (mode)": 44.676930891963,
+      "signal_threshold": 50
+    },
+    "histogram": [
+      1.399999998123806,
+      1.3597958425108585,
+      1.3731972277151743,
+      1.3865986129194903,
+      1.399999998123806,
+      1.413401383328122,
+      1.4268027685324378,
+      1.440204153736754
+    ]
+  },
+  "hog_False": {
+    "statistics": {
+      "image size": "(32, 32)",
+      "avg. direction": 79.6761172178506,
+      "std. deviation (mean)": 51.707412181999196,
+      "abs. deviation (mean)": 45.1427264900758,
+      "mode direction": 157.5,
+      "std. deviation (mode)": 52.54565164609192,
+      "abs. deviation (mode)": 44.6889400921659,
+      "signal_threshold": 50
+    },
+    "histogram": [
+      108.5,
+      105.5,
+      106.5,
+      107.5,
+      108.5,
+      109.5,
+      110.5,
+      111.5
+    ]
+  }
+}

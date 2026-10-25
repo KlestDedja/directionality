@@ -1,11 +1,10 @@
-import numpy as np
-import warnings
-import os
-import pandas as pd
 import re
+import warnings
+
+import numpy as np
 
 
-def clean_filename(filename):
+def clean_filename(filename: str) -> str:
     """Shorten the filename by removing initial date"""
     pattern = r"(\d{6,10} {1,2})"  # match for 6-10 consecutive digits followed by one or two spaces
     match = re.search(pattern, filename[:12])  # search only among the first 12 chars
@@ -16,39 +15,7 @@ def clean_filename(filename):
     return filename
 
 
-# def get_folder_threshold(image_folder) -> float:
-
-#     if "images-3D-lightsheet-20240928_BAM_fkt20_P3_fkt21_P3_PEMFS" in image_folder:
-#         threshold = 1.5  # approved
-#     if "images-3D-lighsheet-20241115_BAM_fkt20-P3-fkt21-P3-PEMFS-12w" in image_folder:
-#         threshold = 4  # seems good. Directionality is very pronounced as the signal is mostly near the walls
-
-#     # elif "confocal-20241022-fusion" in image_folder:
-#     #     threshold = 2  # probably doesnt work anyway
-#     # elif "confocal-20241116-fusion":
-#     #     threshold = 2
-#     elif "20241116-fusion-bMyoB-PEMFS-TM-12w" in image_folder:
-#         threshold = 6  # Some images have no signal to show, but no worries: We drop them later in the pipeline.
-#     elif "confocal-20241022-fusion-bMyoB-BAMS" in image_folder:
-#         threshold = 6  # doesn't really work anyway, contrast needs to be enhanced
-#         warnings.warn(
-#             "As of now, the method does not work with this folder. Consider enhancing contrast."
-#         )
-#     elif (
-#         "images-longitudinal" in image_folder or "fotosalignement-tool3" in image_folder
-#     ):
-#         threshold = 10
-
-#     elif "good-bad-validation" in image_folder:
-#         threshold = 0.025
-
-#     else:
-#         threshold = 3  # random value, in between
-
-#     return threshold
-
-
-def set_sample_condition(filename, verbose: int = 0):
+def set_sample_condition(filename: str, verbose: int = 0) -> str:
     """
     Assuming the Image Fluorescence 2D images are given as an input, this function extracts the
     condition from the filename string. The checks are very manual due to inconsistent naming (different people)
@@ -101,14 +68,13 @@ def set_sample_condition(filename, verbose: int = 0):
     ):
         condition = "90s-30s"
 
-    if condition == "Unknown":  # if still Unknown, raise a warning
-        if verbose >= 1:
-            warnings.warn(f"Condition unknown. Double check file:\n{filename}")
+    if condition == "Unknown" and verbose >= 1:
+        warnings.warn(f"Condition unknown. Double check file:\n{filename}")
 
     return condition
 
 
-def set_sample_replicate(filename: str, verbose: int = 0):
+def set_sample_replicate(filename: str, verbose: int = 0) -> str:
     """
     Assuming the Image Fluorescence 2D images are given as an input, this function extracts the
     condition from the filename string. The checks are very manual due to inconsistent naming (different people)
@@ -135,21 +101,18 @@ def set_sample_replicate(filename: str, verbose: int = 0):
         if m:
             replicate = m.group(1)
 
-    if replicate == "Unknown":  # if still Unknown, raise a warning
-        if verbose >= 1:
-            warnings.warn(f"Unknown replicate. Double check file:\n{filename}")
+    if replicate == "Unknown" and verbose >= 1:
+        warnings.warn(f"Unknown replicate. Double check file:\n{filename}")
 
     return replicate
 
 
-def calculate_and_print_percentiles(
-    arr, percentiles=[0, 25, 50, 75, 100], format_str="{:.2f}"
-):
+def calculate_and_print_percentiles(arr, percentiles=(0, 25, 50, 75, 100), format_str="{:.2f}"):
     # Calculate the percentiles
     percentile_values = np.percentile(arr, percentiles)
 
     # Create a dictionary with percentiles as keys and their values
-    percentile_dict = {p: v for p, v in zip(percentiles, percentile_values)}
+    percentile_dict = dict(zip(percentiles, percentile_values))
 
     # Print the dictionary in a nice format
     print("Percentile Values:")
@@ -172,6 +135,4 @@ if __name__ == "__main__":
     arr = np.array([1, 2.11, 3.141, 4.43333, 5, 6.81, 7, 8, 9, 120 / 13])
     percentiles = [0, 25, 50, 75, 100]
 
-    percentile_dict = calculate_and_print_percentiles(
-        arr, percentiles, format_str="{:.3f}"
-    )
+    percentile_dict = calculate_and_print_percentiles(arr, percentiles, format_str="{:.3f}")
